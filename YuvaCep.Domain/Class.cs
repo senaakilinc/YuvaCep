@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 
 namespace YuvaCep.Domain
 {
-    public class Teacher : User
+    public class Class
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
-        public string Surname { get; set; }
-        public string TCIDNumber { get; set; }
-        public string phoneNumber { get; set; }
+        public int MaxCapacity { get; set; }
 
+        public ICollection<Child> Children { get; set; }
         public ICollection<TeacherClass> teacherClasses { get; set; }
-        public Teacher()
-        {
+
+        public Class() { 
+          Id = Guid.NewGuid();
+            Children = new HashSet<Child>();
             teacherClasses = new HashSet<TeacherClass>();
         }
     }

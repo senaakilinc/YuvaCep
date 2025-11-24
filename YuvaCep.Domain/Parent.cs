@@ -13,11 +13,11 @@ namespace YuvaCep.Domain
         public string TCIDNumber { get; set; }
         public string PhoneNumber { get; set; }
 
-       /* public ICollection <ParentChild> parentChildren { get; set; }
+        public ICollection <ParentChild> parentChildren { get; set; }
 
         public Parent()
         {
             parentChildren = new HashSet<ParentChild>();
-        }*/
+        }
     }
 }
