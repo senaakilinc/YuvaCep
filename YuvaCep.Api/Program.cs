@@ -1,4 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+// --- VERÝTABANI BAÐLANTISI ---
+builder.Services.AddDbContext<YuvaCep.Persistence.Contexts.YuvaCepDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 
