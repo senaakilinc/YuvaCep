@@ -1,25 +1,32 @@
-// 1. GEREKLİ USING YÖNERGELERİ
+
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL; // PostgreSQL sürücüsü için gerekli
-using YuvaCep.Persistence; // DbContext sınıfı için
+using Npgsql.EntityFrameworkCore.PostgreSQL; // PostgreSQL sÃ¼rÃ¼cÃ¼sÃ¼ iÃ§in gerekli
+using YuvaCep.Persistence; // DbContext sÃ½nÃ½fÃ½ iÃ§in
 
 var builder = WebApplication.CreateBuilder(args);
+
+// PostgreSQL'in eski tarih formatÃ½nÃ½ kabul etmesini saÃ°layan ayar
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+// --- VERÃTABANI BAÃLANTISI ---
+builder.Services.AddDbContext<YuvaCep.Persistence.Contexts.YuvaCepDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Controller ve Swagger Servisleri
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// --- 2.1. JWT (GİZLİ ANAHTAR VE DOĞRULAMA) ---
+// --- 2.1. JWT (GÃZLÃ ANAHTAR VE DOÃRULAMA) ---
 
 // JWT Secret Key'i appsettings.json'dan okur
 var jwtSecret = builder.Configuration.GetSection("JwtSettings:Secret").Value ?? throw new Exception("JWT Secret key not found.");
 var key = Encoding.ASCII.GetBytes(jwtSecret);
 
-// Kimlik Doğrulama (Authentication) servisi
+// Kimlik DoÃ°rulama (Authentication) servisi
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -27,15 +34,15 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // Geliştirme ortamı için izin verir
+    options.RequireHttpsMetadata = false; // GeliÃ¾tirme ortamÃ½ iÃ§in izin verir
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        // Token'ı imzalayan gizli anahtarı doğrula
+        // Token'Ã½ imzalayan gizli anahtarÃ½ doÃ°rula
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
 
-        // Issuer ve Audience kontrolü
+        // Issuer ve Audience kontrolÃ¼
         ValidateIssuer = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidateAudience = true,
@@ -52,17 +59,17 @@ builder.Services.AddAuthorization();
 // --- 2.2. DB Context ve PostgreSQL ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-//BUNU YORUM SATIRINDAN ÇIKAR YuvaCepDbContext SINIFI ELENDİKTEN SONRA
+//BUNU YORUM SATIRINDAN Ã‡IKAR YuvaCepDbContext SINIFI ELENDÃKTEN SONRA
 
 /*builder.Services.AddDbContext<YuvaCepDbContext>(options =>
 {
-    // Npgsql (PostgreSQL) sürücüsünü kullanarak bağlan
+    // Npgsql (PostgreSQL) sÃ¼rÃ¼cÃ¼sÃ¼nÃ¼ kullanarak baÃ°lan
     options.UseNpgsql(connectionString);
 });*/
 // 3. MIDDLEWARE PIPELINE (Use App)
 var app = builder.Build();
 
-// Development ortamında Swagger'ı etkinleştir
+// Development ortamÃ½nda Swagger'Ã½ etkinleÃ¾tir
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
