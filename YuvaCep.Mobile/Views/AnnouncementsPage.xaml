@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
+             x:Class="YuvaCep.Mobile.Views.AnnouncementsPage"
+             Title="Duyurular"
+             BackgroundColor="White">
+
+    <ContentPage.BindingContext>
+        <vm:AnnouncementsViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto, *">
+
+        <VerticalStackLayout Grid.Row="0" Padding="20" Spacing="15" BackgroundColor="#F3F4F6">
+
+            <Label Text="Yeni Duyuru Oluştur" FontAttributes="Bold" FontSize="18" TextColor="#1F2937"/>
+
+            <Frame BorderColor="Gray" Padding="0" CornerRadius="8" BackgroundColor="White">
+                <Entry Placeholder="Duyuru Başlığı (Örn: Gezi)" 
+                       Text="{Binding Title}" 
+                       TextColor="Black"
+                       PlaceholderColor="Gray"/>
+            </Frame>
+
+            <Frame BorderColor="Gray" Padding="10" CornerRadius="8" BackgroundColor="White">
+                <Editor Placeholder="Duyuru içeriğini buraya yazınız..." 
+                        Text="{Binding Content}" 
+                        TextColor="Black"
+                        PlaceholderColor="Gray"
+                        HeightRequest="100" 
+                        AutoSize="TextChanges"/>
+            </Frame>
+
+            <Button Text="YAYINLA" 
+                    Command="{Binding SendAnnouncementCommand}" 
+                    BackgroundColor="#EC4899" 
+                    TextColor="White" 
+                    FontAttributes="Bold" 
+                    CornerRadius="8"
+                    HeightRequest="45"/>
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding History}" Margin="0,10,0,0">
+            <CollectionView.Header>
+                <Label Text="Geçmiş Duyurular" FontAttributes="Bold" Margin="20,10" TextColor="Gray"/>
+            </CollectionView.Header>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="20,5" Padding="15" CornerRadius="10" HasShadow="True" BorderColor="LightGray">
+                        <VerticalStackLayout Spacing="5">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="{Binding Title}" FontAttributes="Bold" TextColor="Black" FontSize="16"/>
+                                <Label Grid.Column="1" Text="{Binding Date}" TextColor="Gray" FontSize="12"/>
+                            </Grid>
+                            <Label Text="{Binding Content}" TextColor="#374151" FontSize="14"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>
