@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using YuvaCep.Persistence.Contexts;
@@ -11,9 +12,11 @@ using YuvaCep.Persistence.Contexts;
 namespace YuvaCep.Persistence.Migrations
 {
     [DbContext(typeof(YuvaCepDbContext))]
-    partial class YuvaCepDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251129135232_AddReportAndAnnouncement")]
+    partial class AddReportAndAnnouncement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

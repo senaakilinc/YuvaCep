@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
+// PostgreSQL'in eski tarih formatýný kabul etmesini saðlayan ayar
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 // --- VERÝTABANI BAÐLANTISI ---
 builder.Services.AddDbContext<YuvaCep.Persistence.Contexts.YuvaCepDbContext>(options =>

@@ -17,6 +17,8 @@ namespace YuvaCep.Persistence.Contexts
         public DbSet<Parent> Parents { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<Child> Children { get; set; }
+        public DbSet<DailyReport> DailyReports { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
 
         // Ara Tablolar
         public DbSet<TeacherClass> TeacherClasses { get; set; }
