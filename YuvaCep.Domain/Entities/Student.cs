@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace YuvaCep.Domain.Entities
 {
-    public class Child
+    public class Student
     {
         public Guid Id { get; set; }
 
@@ -13,6 +14,6 @@ namespace YuvaCep.Domain.Entities
 
         // Bu çocuk Hangi Sınıfta?
         public Guid ClassId { get; set; }
-        public Class Class { get; set; }
+        public Class? Class { get; set; }
     }
 }

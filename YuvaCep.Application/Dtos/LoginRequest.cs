@@ -9,7 +9,7 @@ namespace YuvaCep.Application.Dtos
     public class LoginRequest
     {
         //sisteme tc ve şifre ile girer veli
-        public string TCIDNumber { get; set; }
-        public string Password { get; set; }
+        public required string TCIDNumber { get; set; } 
+        public required string Password { get; set; }
     }
 }
