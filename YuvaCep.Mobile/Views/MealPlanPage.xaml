@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
+             x:Class="YuvaCep.Mobile.Views.MealPlanPage"
+             Title="Yemek Listesi"
+             BackgroundColor="#F3F4F6">
+
+    <ContentPage.BindingContext>
+        <vm:MealPlanViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto, *">
+
+        <Frame Grid.Row="0" BackgroundColor="#10B981" CornerRadius="0" Padding="20" HasShadow="False">
+            <Label Text="Yemek Listesi Yükle" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+        </Frame>
+
+        <ScrollView Grid.Row="1" Padding="20">
+            <VerticalStackLayout Spacing="25" VerticalOptions="Center">
+
+                <Frame BackgroundColor="White" CornerRadius="10" Padding="15" BorderColor="Transparent">
+                    <Label Text="Lütfen haftalık veya aylık yemek listesinin fotoğrafını çekip yükleyiniz. Veliler bu fotoğrafı görecektir."
+                           TextColor="Gray" HorizontalTextAlignment="Center"/>
+                </Frame>
+
+                <Frame BorderColor="#10B981" 
+                       BackgroundColor="#ECFDF5" 
+                       CornerRadius="15" 
+                       Padding="30" 
+                       HasShadow="False">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PickImageCommand}"/>
+                    </Frame.GestureRecognizers>
+
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label Text="📸" FontSize="40" HorizontalOptions="Center"/>
+                        <Label Text="Fotoğraf Seçmek İçin Tıklayın" TextColor="#047857" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame IsVisible="{Binding IsImageSelected}" 
+                       Padding="0" 
+                       CornerRadius="10" 
+                       BorderColor="LightGray"
+                       BackgroundColor="White"
+                       HeightRequest="300">
+                    <Image Source="{Binding MenuImage}" 
+                           Aspect="AspectFit"
+                           HorizontalOptions="Fill" 
+                           VerticalOptions="Fill"/>
+                </Frame>
+
+                <Button Text="LİSTEYİ YAYINLA" 
+                        Command="{Binding SaveMenuCommand}" 
+                        BackgroundColor="#10B981" 
+                        TextColor="White" 
+                        FontAttributes="Bold" 
+                        HeightRequest="50" 
+                        CornerRadius="10"
+                        Margin="0,0,0,20"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

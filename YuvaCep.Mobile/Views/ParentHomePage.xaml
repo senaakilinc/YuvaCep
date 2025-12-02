@@ -4,45 +4,70 @@
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.ParentHomePage"
              Title="Çocuklarım"
-             BackgroundColor="#F3F4F6">
+             BackgroundColor="#F3F4F6"
+             Shell.NavBarIsVisible="False">
+
     <ContentPage.BindingContext>
         <vm:ParentHomeViewModel />
     </ContentPage.BindingContext>
+    
+    <Grid RowDefinitions="Auto, *, Auto">
 
-    <Grid RowDefinitions="*, Auto">
+        <Frame Grid.Row="0" BackgroundColor="#2563EB" CornerRadius="0" Padding="20,40,20,20" HasShadow="False">
+            <Grid ColumnDefinitions="*, Auto">
 
-        <CollectionView Grid.Row="0" ItemsSource="{Binding MyChildren}" Margin="20">
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="Hoşgeldiniz," TextColor="#BFDBFE" FontSize="14"/>
+                    <Label Text="Çocuklarım" TextColor="White" FontSize="24" FontAttributes="Bold"/>
+                </VerticalStackLayout>
+
+                <ImageButton Grid.Column="1"
+                             Source="{FontImage Glyph='🚪', Color='White', Size=30}"
+                             Command="{Binding LogoutCommand}"
+                             VerticalOptions="Center"
+                             HorizontalOptions="End"
+                             BackgroundColor="Transparent"
+                             HeightRequest="40"
+                             WidthRequest="40"/>
+            </Grid>
+        </Frame>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding MyChild}" Margin="20">
+
             <CollectionView.EmptyView>
                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                    <Label Text="🚸" FontSize="50" HorizontalOptions="Center"/>
+                    <Frame BackgroundColor="#FBBF24" CornerRadius="30" HeightRequest="60" WidthRequest="60" Padding="0" HasShadow="False">
+                        <Label Text="🚸" FontSize="30" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Frame>
                     <Label Text="Henüz kayıtlı çocuğunuz yok." TextColor="Gray" HorizontalOptions="Center"/>
-                    <Label Text="Referans kodu ile ekleme yapın." TextColor="Gray" FontSize="12" HorizontalOptions="Center"/>
+                    <Label Text="Referans kodu ile ekleme yapın." TextColor="LightGray" FontSize="12" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="0,10" Padding="0" CornerRadius="15" HasShadow="True" BorderColor="Transparent">
-                        <Grid ColumnDefinitions="100, *" BackgroundColor="White">
+                    <Frame Margin="0,0,0,15" Padding="0" CornerRadius="15" HasShadow="True" BorderColor="Transparent" BackgroundColor="White">
+                        <Grid ColumnDefinitions="80, *" HeightRequest="80">
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ParentHomeViewModel}}, Path=OpenChildReportCommand}" CommandParameter="{Binding .}"/>
                             </Grid.GestureRecognizers>
 
                             <BoxView Grid.Column="0" Color="#E0F2FE"/>
-                            <Label Grid.Column="0" Text="👶" FontSize="40" VerticalOptions="Center" HorizontalOptions="Center"/>
+                            <Label Grid.Column="0" Text="👶" FontSize="30" VerticalOptions="Center" HorizontalOptions="Center" TextColor="Black"/>
 
                             <VerticalStackLayout Grid.Column="1" Padding="15" Spacing="5" VerticalOptions="Center">
                                 <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" TextColor="#1F2937"/>
                                 <Label Text="{Binding ClassName}" FontSize="14" TextColor="Gray"/>
-                                <Label Text="Raporu Görüntüle >" FontSize="12" TextColor="#2563EB" Margin="0,5,0,0"/>
                             </VerticalStackLayout>
+
+                            <Label Grid.Column="1" Text=">" FontSize="20" TextColor="#2563EB" HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,15,0"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="1"
+        <Button Grid.Row="2"
                 Text="+ ÇOCUK EKLE"
                 Command="{Binding AddChildByCodeCommand}"
                 BackgroundColor="#2563EB"

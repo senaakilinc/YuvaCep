@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.RegisterPage"
-             Title="Öğretmen Kaydı">
+             Title="Yeni Kullanıcı Kaydı">
 
     <ContentPage.BindingContext>
         <vm:RegisterViewModel />
@@ -12,10 +12,11 @@
     <ScrollView>
         <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
 
-            <Label Text="Yeni Hesap Oluştur" 
+            <Label Text="{Binding PageTitle}" 
                    FontSize="24" 
                    FontAttributes="Bold" 
-                   HorizontalOptions="Center" />
+                   HorizontalOptions="Center"
+                   TextColor="#1F2937"/>
 
             <Entry Placeholder="Ad" Text="{Binding Name}" />
             <Entry Placeholder="Soyad" Text="{Binding Surname}" />
