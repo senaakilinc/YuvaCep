@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YuvaCep.Mobile.Views.RoleSelectionPage"
+             Title="Giriş Seçimi"
+             BackgroundColor="White"
+             Shell.NavBarIsVisible="False">
+
+    <VerticalStackLayout Spacing="30" VerticalOptions="Center" Padding="30">
+
+        <Image Source="school_logo.png" HeightRequest="150" HorizontalOptions="Center" Margin="0,0,0,20"/>
+
+        <Label Text="Hoşgeldiniz" FontSize="28" FontAttributes="Bold" TextColor="#1F2937" HorizontalOptions="Center"/>
+        <Label Text="Lütfen giriş türünü seçiniz" TextColor="Gray" FontSize="16" HorizontalOptions="Center"/>
+
+        <Frame BackgroundColor="#EFF6FF" BorderColor="#2563EB" CornerRadius="15" Padding="20" HasShadow="True">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnParentTapped"/>
+            </Frame.GestureRecognizers>
+            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                <Label Text="👨‍👩‍👧‍👦" FontSize="30" VerticalOptions="Center"/>
+                <VerticalStackLayout VerticalOptions="Center">
+                    <Label Text="Veli Girişi" FontSize="18" FontAttributes="Bold" TextColor="#2563EB"/>
+                    <Label Text="Çocuğumun durumunu görmek istiyorum" FontSize="12" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Frame>
+
+        <Frame BackgroundColor="#FDF2F8" BorderColor="#DB2777" CornerRadius="15" Padding="20" HasShadow="True">
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnTeacherTapped"/>
+            </Frame.GestureRecognizers>
+            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                <Label Text="👩‍🏫" FontSize="30" VerticalOptions="Center"/>
+                <VerticalStackLayout VerticalOptions="Center">
+                    <Label Text="Öğretmen Girişi" FontSize="18" FontAttributes="Bold" TextColor="#DB2777"/>
+                    <Label Text="Sınıfımı ve öğrencilerimi yönetmek istiyorum" FontSize="12" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Frame>
+
+    </VerticalStackLayout>
+</ContentPage>
