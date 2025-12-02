@@ -11,6 +11,6 @@ namespace YuvaCep.Domain.Entities
         public int MaxCapacity { get; set; } // Kontenjan 20
 
         // Bu sınıfta kimler var? (Sonra bağlayacağız)
-        // public ICollection<Child> Students { get; set; }
+        // public ICollection<Student> Students { get; set; }
     }
 }

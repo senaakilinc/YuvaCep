@@ -8,8 +8,8 @@ namespace YuvaCep.Application.Dtos
 {
     public class LoginResponse
     {
-        public string Token { get; set; }//başarılı giriş sonrası appe verilecek anahtar (jwt)
-        public string UserRole { get; set; }//user rolü
-        public string Message { get; set; }//kullanıcıya karşılama mesajı
+        public required string Token { get; set; }//başarılı giriş sonrası appe verilecek anahtar (jwt)
+        public required string UserRole { get; set; }//user rolü
+        public required string Message { get; set; } //kullanıcıya karşılama mesajı
     }
 }

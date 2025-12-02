@@ -69,6 +69,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // 3. MIDDLEWARE PIPELINE (Use App)
 var app = builder.Build();
 
+// --- RESİM DOSYALARINI DIŞARI AÇ ---
+app.UseStaticFiles();
+// Bu komut "wwwroot" klasöründeki dosyaların tarayıcıdan açılmasını sağlar.
+
 // Development ortamýnda Swagger'ý etkinleþtir
 if (app.Environment.IsDevelopment())
 {

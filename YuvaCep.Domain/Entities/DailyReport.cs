@@ -9,10 +9,10 @@ namespace YuvaCep.Domain.Entities
         public string NutritionNotes { get; set; } = string.Empty;
         public int BehaviorScore { get; set; }
 
-        public Guid ChildId { get; set; }
-        public Child Child { get; set; }
+        public Guid StudentId { get; set; }
+        public Student Student { get; set; } = null!;
 
         public Guid TeacherId { get; set; }
-        public Teacher Teacher { get; set; }
+        public Teacher Teacher { get; set; } = null!;
     }
 }

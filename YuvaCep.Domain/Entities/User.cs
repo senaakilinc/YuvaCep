@@ -6,8 +6,8 @@ namespace YuvaCep.Domain.Entities
     public class User
     {
         public Guid Id { get; set; } // Kimlik No
-        public string Email { get; set; }
-        public string PasswordHash { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
         public UserRole Role { get; set; } // Admin mi, Öğretmen mi?
 
         // Bu kullanıcı bir Öğretmen ise onun profilini tutar

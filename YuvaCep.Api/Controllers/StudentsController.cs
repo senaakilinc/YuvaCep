@@ -7,37 +7,37 @@ namespace YuvaCep.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ChildrenController : ControllerBase
+    public class StudentsController : ControllerBase
     {
         private readonly YuvaCepDbContext _context;
 
-        public ChildrenController(YuvaCepDbContext context)
+        public StudentsController(YuvaCepDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Children
+        // GET: api/Students
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Child>>> GetChildren()
+        public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
             // Sınıf bilgisiyle beraber getir (Include)
-            return await _context.Children
+            return await _context.Students
                                  .Include(c => c.Class)
                                  .ToListAsync();
         }
 
-        // POST: api/Children
+        // POST: api/Students
         [HttpPost]
-        public async Task<ActionResult<Child>> PostChild(Child child)
+        public async Task<ActionResult<Student>> PostStudent(Student student)
         {
-            // Burada Child nesnesi gelir.
+            // Burada student nesnesi gelir.
             // ClassId ZORUNLUDUR (Veritabanı kuralı).
             // Class nesnesi ise [JsonIgnore] olduğu için API istemez.
 
-            _context.Children.Add(child);
+            _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetChildren), new { id = child.Id }, child);
+            return CreatedAtAction(nameof(GetStudents), new { id = student.Id }, student);
         }
     }
 }
