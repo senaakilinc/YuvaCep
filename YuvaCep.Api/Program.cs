@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL; // PostgreSQL sürücüsü için gerekli
-using YuvaCep.Persistence; // DbContext sýnýfý için
+using YuvaCep.Persistence;
+using YuvaCep.Persistence.Contexts; 
+using YuvaCep.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +21,8 @@ builder.Services.AddDbContext<YuvaCep.Persistence.Contexts.YuvaCepDbContext>(opt
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
-// --- 2.1. JWT (GÝZLÝ ANAHTAR VE DOÐRULAMA) ---
-
-// JWT Secret Key'i appsettings.json'dan okur
 var jwtSecret = builder.Configuration.GetSection("JwtSettings:Secret").Value ?? throw new Exception("JWT Secret key not found.");
 var key = Encoding.ASCII.GetBytes(jwtSecret);
 
@@ -61,11 +61,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 //BUNU YORUM SATIRINDAN ÇIKAR YuvaCepDbContext SINIFI ELENDÝKTEN SONRA
 
-/*builder.Services.AddDbContext<YuvaCepDbContext>(options =>
+builder.Services.AddDbContext<YuvaCepDbContext>(options =>
 {
     // Npgsql (PostgreSQL) sürücüsünü kullanarak baðlan
     options.UseNpgsql(connectionString);
-});*/
+});
 // 3. MIDDLEWARE PIPELINE (Use App)
 var app = builder.Build();
 
