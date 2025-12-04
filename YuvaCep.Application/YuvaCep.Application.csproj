@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\YuvaCep.Domain\YuvaCep.Domain.csproj" />
+    <ProjectReference Include="..\YuvaCep.Persistence\YuvaCep.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>
