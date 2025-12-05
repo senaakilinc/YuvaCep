@@ -10,7 +10,7 @@ namespace YuvaCep.Application.Dtos
     {
         public string ReferenceCode { get; set; } = string.Empty;
 
-        public string Email { get; set; } = string.Empty;
+        public string TCNumber { get; set; } = string.Empty;
 
         public string Password { get; set; } = string.Empty;
     }

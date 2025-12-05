@@ -11,6 +11,6 @@ namespace YuvaCep.Application.Services
     {
         Task<LoginResponse> LoginAsync(LoginRequest request);
 
-        Task<LoginResponse> FirstRegisterAsync(RegisterRequest request);
+        Task<LoginResponse> FirstRegisterAsync(FirstRegisterRequest request);
     }
 }
