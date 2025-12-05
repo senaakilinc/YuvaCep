@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using YuvaCep.Persistence.Contexts;
 using YuvaCep.Application.Dtos;
 using YuvaCep.Application.Helpers;
 using YuvaCep.Domain.Entities;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
 
 namespace YuvaCep.Application.Services
 {
@@ -33,7 +33,11 @@ namespace YuvaCep.Application.Services
 
             if (user == null)
             {
-                return new LoginResponse { Message = "Kullanıcı adı ve şifre hatalı." };
+                return new LoginResponse {
+                    Token = string.Empty,
+                    UserRole = string.Empty,
+                    Message = "Kullanıcı adı ve şifre hatalı."
+                };
             }
 
             if (!HashingHelper.VerifyPasswordHash(
@@ -41,7 +45,11 @@ namespace YuvaCep.Application.Services
                 Convert.FromBase64String(user.PasswordHash),
                 Convert.FromBase64String(user.PasswordSalt)))
             {
-                return new LoginResponse { Message = "Kullanıcı adı ve şifre hatalı." };
+                return new LoginResponse {
+                    Token = string.Empty,
+                    UserRole = string.Empty,
+                    Message = "Kullanıcı adı ve şifre hatalı." 
+                };
             }
 
             var token = CreateToken(user);
