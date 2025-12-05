@@ -17,5 +17,7 @@ namespace YuvaCep.Domain.Entities
         // Bu kullanıcı bir Veli ise onun profilini tutar
         public Parent? ParentProfile { get; set; }
         public string PasswordSalt { get; set; }
+        public string ReferenceCode { get; set; }
+        public bool IsActive { get; set; }
     }
 }

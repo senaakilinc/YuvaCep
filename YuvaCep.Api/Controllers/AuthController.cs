@@ -27,13 +27,27 @@ namespace YuvaCep.Api.Controllers
 
             if (response.Token != null)
             {
-                // Başarılı giriş: Token ve rolü döndür
                 return Ok(response);
             }
-            // Başarısız giriş (Hata mesajını döndür)
             return Unauthorized(new { message = response.Message });
         }
 
-        // TODO: FirstRegister (İlk Kayıt) Endpoint'i de buraya eklenecek
+        [HttpPost("first-register")]
+        public async Task<IActionResult> FirstRegister([FromBody] FirstRegisterRequest request)
+        {
+            if (ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await _authService.FirstRegisterAsync(request);
+
+           if (!string.IsNullOrEmpty(response.Token))
+            {
+                return Ok(response);
+            }
+
+
+            return BadRequest(new { message = response.Message });
+        }
     }
 }
