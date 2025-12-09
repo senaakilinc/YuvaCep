@@ -21,6 +21,8 @@ namespace YuvaCep.Persistence.Contexts
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<NutritionProgram> NutritionPrograms { get; set; }
         public DbSet<LessonProgram> LessonPrograms { get; set; }
+        public DbSet<MonthlyPlan> MonthlyPlans { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
 
         // Ara Tablolar
         public DbSet<TeacherClass> TeacherClasses { get; set; }
