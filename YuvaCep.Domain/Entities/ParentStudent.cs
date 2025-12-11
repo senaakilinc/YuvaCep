@@ -1,6 +1,8 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace YuvaCep.Domain.Entities
+    
 {
     public class ParentStudent
     {
