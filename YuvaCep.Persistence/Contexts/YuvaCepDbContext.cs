@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Security.Claims;
 using YuvaCep.Domain.Entities;
 
@@ -21,6 +22,11 @@ namespace YuvaCep.Persistence.Contexts
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<NutritionProgram> NutritionPrograms { get; set; }
         public DbSet<LessonProgram> LessonPrograms { get; set; }
+        // Rozet Sistemi Tabloları
+        public DbSet<Badge> Badges { get; set; }
+        public DbSet<StudentBadge> StudentBadges { get; set; }
+        public DbSet<StudentMood> StudentMoods { get; set; }
+        // Badges
 
         // Ara Tablolar
         public DbSet<TeacherClass> TeacherClasses { get; set; }
