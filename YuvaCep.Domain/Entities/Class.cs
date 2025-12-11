@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace YuvaCep.Domain.Entities
 {
@@ -6,11 +6,16 @@ namespace YuvaCep.Domain.Entities
     {
         public Guid Id { get; set; }
 
-        public string Name { get; set; } = string.Empty; // Papatyalar
-        public int YearLevel { get; set; } // 4 yaş
-        public int MaxCapacity { get; set; } // Kontenjan 20
+        [Required]
+        public string Name { get; set; } = string.Empty;
 
-        // Bu sınıfta kimler var? (Sonra bağlayacağız)
-        // public ICollection<Student> Students { get; set; }
+        public int YearLevel { get; set; }
+        public int MaxCapacity { get; set; }
+
+        // Öğrenciler
+        public ICollection<Student> Students { get; set; } = new List<Student>();
+
+        // Öğretmenler (İsim Düzeltildi: TeacherClass -> TeacherClasses)
+        public ICollection<TeacherClass> TeacherClasses { get; set; } = new List<TeacherClass>();
     }
 }

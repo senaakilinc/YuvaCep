@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using YuvaCep.Persistence.Contexts;
@@ -11,9 +12,11 @@ using YuvaCep.Persistence.Contexts;
 namespace YuvaCep.Persistence.Migrations
 {
     [DbContext(typeof(YuvaCepDbContext))]
-    partial class YuvaCepDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251211095219_AddGamificationSystem")]
+    partial class AddGamificationSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,6 +212,42 @@ namespace YuvaCep.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Parents");
+                });
+
+            modelBuilder.Entity("YuvaCep.Domain.Entities.ParentMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ReceiverTeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SenderParentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverTeacherId");
+
+                    b.HasIndex("SenderParentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ParentMessages");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.ParentStudent", b =>
@@ -439,6 +478,33 @@ namespace YuvaCep.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YuvaCep.Domain.Entities.ParentMessage", b =>
+                {
+                    b.HasOne("YuvaCep.Domain.Entities.Teacher", "ReceiverTeacher")
+                        .WithMany()
+                        .HasForeignKey("ReceiverTeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YuvaCep.Domain.Entities.Parent", "SenderParent")
+                        .WithMany()
+                        .HasForeignKey("SenderParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YuvaCep.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReceiverTeacher");
+
+                    b.Navigation("SenderParent");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.ParentStudent", b =>

@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Text.Json.Serialization;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace YuvaCep.Domain.Entities
 {
@@ -7,13 +8,23 @@ namespace YuvaCep.Domain.Entities
     {
         public Guid Id { get; set; }
 
+        [Required]
         public string Name { get; set; } = string.Empty;
-        public DateTime DateOfBirth { get; set; }
-        public string ReferenceCode { get; set; } = string.Empty; // O meşhur 6 haneli kod
-        public string HealthNotes { get; set; } = string.Empty;
 
-        // Bu çocuk Hangi Sınıfta?
+        [Required]
+        public string Surname { get; set; } = string.Empty;
+
+        [Required]
+        public string ReferenceCode { get; set; } = string.Empty;
+
+        public DateTime DateOfBirth { get; set; }
+        public string? HealthNotes { get; set; }
+
+        // SINIF
         public Guid ClassId { get; set; }
         public Class? Class { get; set; }
+
+        // VELİLER (İşte burası! Listeyi burada başlatıyoruz, aşağıda Constructor YOK)
+        public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
     }
 }
