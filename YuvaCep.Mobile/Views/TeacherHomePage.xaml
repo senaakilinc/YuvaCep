@@ -13,17 +13,29 @@
     <Grid RowDefinitions="Auto, *">
 
         <Frame Grid.Row="0" BackgroundColor="#2563EB" CornerRadius="0" Padding="20,40,20,20" HasShadow="False">
-            <VerticalStackLayout Spacing="5">
-                <Label Text="{Binding TeacherName, StringFormat='Merhaba, {0}'}" 
-                       TextColor="White" Opacity="0.8" FontSize="14"/>
-                <Label Text="{Binding ClassName}" 
-                       TextColor="White" FontAttributes="Bold" FontSize="24"/>
-                <Label Text="Bugün harika bir gün! ☀️" 
-                       TextColor="White" FontSize="12" Margin="0,10,0,0"/>
-            </VerticalStackLayout>
+            <Grid ColumnDefinitions="*, Auto">
+
+                <VerticalStackLayout Grid.Column="0" Spacing="5">
+                    <Label Text="{Binding TeacherName, StringFormat='Merhaba, {0}'}" 
+                   TextColor="White" Opacity="0.8" FontSize="14"/>
+                    <Label Text="{Binding ClassName}" 
+                   TextColor="White" FontAttributes="Bold" FontSize="24"/>
+                    <Label Text="Bugün harika bir gün! ☀️" 
+                   TextColor="White" FontSize="12" Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+
+                <ImageButton Grid.Column="1"
+                     Source="{FontImage Glyph='🚪', Color='White', Size=30}"
+                     Command="{Binding LogoutCommand}"
+                     VerticalOptions="Start"
+                     HorizontalOptions="End"
+                     BackgroundColor="Transparent"
+                     HeightRequest="40"
+                     WidthRequest="40"/>
+            </Grid>
         </Frame>
 
-        <ScrollView Grid.Row="1" Padding="20">
+            <ScrollView Grid.Row="1" Padding="20">
             <CollectionView ItemsSource="{Binding MenuItems}">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="15" VerticalItemSpacing="15"/>

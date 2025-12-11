@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
+             x:Class="YuvaCep.Mobile.Views.StudentListPage"
+             Title="Sınıf Listesi"
+             BackgroundColor="#F3F4F6">
+    <ContentPage.BindingContext>
+        <vm:StudentListViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto, *">
+
+        <Frame Grid.Row="0" BackgroundColor="#8B5CF6" CornerRadius="0" Padding="20" HasShadow="False">
+            <Label Text="Öğrenci Listesi &amp; Kodlar" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+        </Frame>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding ClassRoster}" Margin="10">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="10,6" 
+                           Padding="12" 
+                           BorderColor="#E5E7EB" 
+                           CornerRadius="12" 
+                           HasShadow="True"
+                           BackgroundColor="White">
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+
+                            <Frame Grid.Column="0" HeightRequest="45" WidthRequest="45" CornerRadius="22" Padding="0" BackgroundColor="#F3F4F6" HasShadow="False" BorderColor="Transparent">
+                                <Label Text="👤" HorizontalOptions="Center" VerticalOptions="Center" FontSize="22" TextColor="Black"/>
+                            </Frame>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0,0,0">
+                                <Label Text="{Binding Name}" FontAttributes="Bold" TextColor="#1F2937" FontSize="16"/>
+                                <Label Text="{Binding ParentName, StringFormat='Veli: {0}'}" TextColor="#6B7280" FontSize="13"/>
+                            </VerticalStackLayout>
+
+                            <Frame Grid.Column="2" 
+                                   BackgroundColor="#FFF7ED" 
+                                   BorderColor="#F97316" 
+                                   Padding="12,6" 
+                                   CornerRadius="8"
+                                   VerticalOptions="Center"
+                                   HasShadow="False">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="KOD" FontSize="9" TextColor="#EA580C" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                    <Label Text="{Binding ReferenceCode}" 
+                                           FontSize="15" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#C2410C" 
+                                           HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Frame>
+
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

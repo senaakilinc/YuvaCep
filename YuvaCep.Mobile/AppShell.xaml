@@ -10,8 +10,8 @@
 
     <ShellContent
         Title="Giriş"
-        ContentTemplate="{DataTemplate views:LoginPage}"
-        Route="LoginPage" />
+        ContentTemplate="{DataTemplate views:RoleSelectionPage}"
+        Route="RoleSelectionPage" />
     
     <ShellContent ContentTemplate="{DataTemplate views:TeacherHomePage}" Route="TeacherHomePage" />
 

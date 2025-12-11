@@ -27,6 +27,8 @@ namespace YuvaCep.Persistence.Contexts
         public DbSet<StudentBadge> StudentBadges { get; set; }
         public DbSet<StudentMood> StudentMoods { get; set; }
         // Badges
+        public DbSet<MonthlyPlan> MonthlyPlans { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
 
         // Ara Tablolar
         public DbSet<TeacherClass> TeacherClasses { get; set; }

@@ -53,6 +53,21 @@ namespace YuvaCep.Mobile.ViewModels
 
             await Shell.Current.GoToAsync(route);
         }
+
+        [RelayCommand]
+        private async Task LogoutAsync()
+        {
+            bool answer = await Shell.Current.DisplayAlert("Çıkış", "Hesabınızdan çıkış yapmak istiyor musunuz?", "Evet", "Hayır");
+
+            if (answer)
+            {
+                // 1. Kayıtlı bilgileri sil (Beni Hatırla'yı iptal et)
+                Preferences.Clear();
+
+                // 2. En başa (Rol Seçimi) yönlendir
+                await Shell.Current.GoToAsync("//RoleSelectionPage");
+            }
+        }
     }
 
 }
