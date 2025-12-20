@@ -25,6 +25,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDailyReportService, DailyReportService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IMonthlyPlanService, MonthlyPlanService>();
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+builder.Services.AddScoped<IPushNotificationService, MockPushNotificationService>();
 
 
 var jwtSecret = builder.Configuration.GetSection("JwtSettings:Secret").Value ?? throw new Exception("JWT Secret key not found.");
