@@ -192,7 +192,7 @@ namespace YuvaCep.Application.Services
         public async Task<List<AnnouncementResponseDto>> GetForParentAsync(Guid parentId, int pageNumber = 1, int pageSize = 10)
         {
             // Velinin çocuklarını ParentStudent ara tablosu üzerinden bul
-            var studentIds = await _context.ParentStudents
+            var studentIds = await _context.ParentStudent
                 .Where(ps => ps.ParentId == parentId)
                 .Select(ps => ps.StudentId)
                 .ToListAsync();
