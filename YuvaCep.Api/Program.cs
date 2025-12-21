@@ -18,7 +18,11 @@ builder.Services.AddDbContext<YuvaCep.Persistence.Contexts.YuvaCepDbContext>(opt
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Controller ve Swagger Servisleri
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAuthService, AuthService>();
