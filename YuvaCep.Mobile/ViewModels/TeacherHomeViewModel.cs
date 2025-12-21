@@ -1,11 +1,12 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Controls;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace YuvaCep.Mobile.ViewModels
 {
@@ -38,6 +39,7 @@ namespace YuvaCep.Mobile.ViewModels
             MenuItems.Add(new dashboardItem { Title = "Yemek Listesi", Icon = "🍎", ColorHex = "#34D399", Route = "MealPlanPage" });
             MenuItems.Add(new dashboardItem { Title = "Ders Programı", Icon = "📅", ColorHex = "#FBBF24", Route = "CurriculumPage" });
             MenuItems.Add(new dashboardItem { Title = "Öğrenci Listesi", Icon = "👶", ColorHex = "#A78BFA", Route = "StudentListPage" });
+            MenuItems.Add(new dashboardItem { Title = "Rozet Takibi", Icon = "🏆", ColorHex = "#F59E0B", Route = "BadgeTrackingPage" });
         }
 
         [RelayCommand]

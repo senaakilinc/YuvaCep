@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="YuvaCep.Mobile.Views.BadgeDetailPage"
+             Title="Rozet Detayları"
+             BackgroundColor="#F3F4F6"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto, *">
+        <Frame BackgroundColor="#2563EB" CornerRadius="0" Padding="20,40,20,20">
+            <Grid ColumnDefinitions="Auto, *">
+                <Label Grid.Column="1" Text="Rozetlerim" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+            </Grid>
+        </Frame>
+
+        <ScrollView Grid.Row="1" Padding="20">
+            <VerticalStackLayout Spacing="20">
+
+                <Frame CornerRadius="15" BorderColor="Transparent" BackgroundColor="White">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Nasıl Rozet Kazanırım?" FontAttributes="Bold" FontSize="18" TextColor="#1F2937"/>
+
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="🥉" FontSize="24"/>
+                            <Label Text="Bronz: Haftalık 3 gün etkileşim." VerticalOptions="Center" TextColor="Gray"/>
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="🥈" FontSize="24"/>
+                            <Label Text="Gümüş: Aylık 15 gün etkileşim." VerticalOptions="Center" TextColor="Gray"/>
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="🥇" FontSize="24"/>
+                            <Label Text="Altın: Ayın her günü etkileşim!" VerticalOptions="Center" TextColor="Gray"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Geçmiş Rozetler" FontAttributes="Bold" Margin="5,10,0,0" TextColor="#1F2937"/>
+                <FlexLayout Wrap="Wrap" JustifyContent="Start">
+                    <Frame WidthRequest="100" 
+                           HeightRequest="120" 
+                           Margin="5"    
+                           Padding="10" 
+                           BackgroundColor="White" 
+                           HasShadow="False" 
+                           BorderColor="#E5E7EB">
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                            <Label Text="🥇" FontSize="40" HorizontalOptions="Center"/>
+                            <Label Text="Kasım" FontSize="12" HorizontalOptions="Center" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame WidthRequest="100" 
+                           HeightRequest="120" 
+                           Margin="5" 
+                           Padding="10" 
+                           BackgroundColor="White" 
+                           HasShadow="False" 
+                           BorderColor="#E5E7EB">
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                            <Label Text="🥈" FontSize="40" HorizontalOptions="Center"/>
+                            <Label Text="Ekim" FontSize="12" HorizontalOptions="Center" TextColor="#4B5563"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                </FlexLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

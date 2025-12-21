@@ -9,11 +9,12 @@ using CommunityToolkit.Mvvm.Input;
 namespace YuvaCep.Mobile.ViewModels
 {
     //Sayfaya parametre olarak gelen öğrenci bilgisini alacağız
-    [QueryProperty(nameof(studentName), "name")]
+    [QueryProperty(nameof(StudentName), "name")]
+    [QueryProperty(nameof(ClassName), "className")]
     public partial class StudentDetailViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string studentName;
+        private string studentName = "Yükleniyor...";
 
         [ObservableProperty]
         private string className = "Papatyalar Sınıfı"; //Örnek sınıf
@@ -40,6 +41,13 @@ namespace YuvaCep.Mobile.ViewModels
         {
             await Shell.Current.DisplayAlert("Bilgi", "Duyurular Sayfası Hazırlanıyor...", "Tamam");
             // İleride: await Shell.Current.GoToAsync("ParentAnnouncementsPage");
+        }
+
+        //4.Rozet Detaylarını Gör
+        [RelayCommand]
+        private async Task GoToBadgeDetailsAsync()
+        {
+            await Shell.Current.GoToAsync("BadgeDetailPage");
         }
 
         [RelayCommand]

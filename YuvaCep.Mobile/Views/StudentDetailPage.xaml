@@ -3,24 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.StudentDetailPage"
+             x:DataType="vm:StudentDetailViewModel"
              Title="Öğrenci Detayı"
-             BackgroundColor="White"
+             BackgroundColor="#F3F4F6"
              Shell.NavBarIsVisible="False">
-    <ContentPage.BindingContext>
-        <vm:StudentDetailViewModel />
-    </ContentPage.BindingContext>
-
+    
     <Grid RowDefinitions="Auto, *">
 
         <Frame Grid.Row="0" BackgroundColor="#2563EB" CornerRadius="0" Padding="20,40,20,30" HasShadow="False">
             <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-
-                <Button Text="Geri" 
-                        Command="{Binding GoBackCommand}" 
-                        HorizontalOptions="Start" 
-                        TextColor="White" 
-                        BackgroundColor="Transparent"
-                        Margin="-380,-30,0,0"/>
 
                 <Frame HeightRequest="80" WidthRequest="80" CornerRadius="40" Padding="0" BackgroundColor="White" HasShadow="False">
                     <Label Text="👶" FontSize="40" HorizontalOptions="Center" VerticalOptions="Center"/>
@@ -28,13 +19,67 @@
 
                 <Label Text="{Binding StudentName}" TextColor="White" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center"/>
                 <Label Text="{Binding ClassName}" TextColor="#BFDBFE" FontSize="14" HorizontalOptions="Center"/>
+                
             </VerticalStackLayout>
         </Frame>
 
         <ScrollView Grid.Row="1" Padding="20">
             <VerticalStackLayout Spacing="15">
 
-                <Frame BackgroundColor="#EFF6FF" BorderColor="#2563EB" CornerRadius="15" Padding="15" HeightRequest="80">
+                <Frame BackgroundColor="White" 
+                       BorderColor="#E5E7EB" 
+                       CornerRadius="15" 
+                       Padding="15" 
+                       HasShadow="False">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="Aylık Başarı Rozetleri" FontAttributes="Bold" TextColor="#374151" FontSize="14"/>
+                            <Label Grid.Column="1" 
+                                   Text="Detay >" 
+                                   TextColor="#2563EB" 
+                                   FontSize="12" 
+                                   VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToBadgeDetailsCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+
+                        <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+
+                            <VerticalStackLayout Spacing="5">
+                                <Frame HeightRequest="60" WidthRequest="60" CornerRadius="30" Padding="0" BackgroundColor="#FFF7ED" BorderColor="#FB923C" HasShadow="False">
+                                    <Label Text="🥉" FontSize="30" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Frame>
+                                <Label Text="Haftalık" FontSize="10" HorizontalOptions="Center" TextColor="#9A3412" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="5" Opacity="0.4">
+                                <Frame HeightRequest="60" WidthRequest="60" CornerRadius="30" Padding="0" BackgroundColor="#F3F4F6" BorderColor="Gray" HasShadow="False">
+                                    <Label Text="🥈" FontSize="30" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Frame>
+                                <Label Text="15 Gün" FontSize="10" HorizontalOptions="Center" TextColor="Gray"/>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="5" Opacity="0.4">
+                                <Frame HeightRequest="60" WidthRequest="60" CornerRadius="30" Padding="0" BackgroundColor="#F3F4F6" BorderColor="Gray" HasShadow="False">
+                                    <Label Text="🥇" FontSize="30" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Frame>
+                                <Label Text="Aylık Tam" FontSize="10" HorizontalOptions="Center" TextColor="Gray"/>
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <VerticalStackLayout Spacing="5" Margin="0,5,0,0">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Text="Gümüş Rozet Hedefi" FontSize="11" TextColor="Gray"/>
+                                <Label Grid.Column="1" Text="12 / 15 Gün" FontSize="11" TextColor="#2563EB" FontAttributes="Bold"/>
+                            </Grid>
+                            <ProgressBar Progress="0.8" ProgressColor="#2563EB" HeightRequest="8"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame BackgroundColor="#EFF6FF" BorderColor="#2563EB" CornerRadius="15" Padding="15" HeightRequest="80" HasShadow="False">
                     <Frame.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToReportCommand}"/>
                     </Frame.GestureRecognizers>
@@ -48,7 +93,7 @@
                     </Grid>
                 </Frame>
 
-                <Frame BackgroundColor="#ECFDF5" BorderColor="#10B981" CornerRadius="15" Padding="15" HeightRequest="80">
+                <Frame BackgroundColor="#ECFDF5" BorderColor="#10B981" CornerRadius="15" Padding="15" HeightRequest="80" HasShadow="False">
                     <Frame.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToMealPlanCommand}"/>
                     </Frame.GestureRecognizers>
@@ -62,7 +107,7 @@
                     </Grid>
                 </Frame>
 
-                <Frame BackgroundColor="#FDF2F8" BorderColor="#DB2777" CornerRadius="15" Padding="15" HeightRequest="80">
+                <Frame BackgroundColor="#FDF2F8" BorderColor="#DB2777" CornerRadius="15" Padding="15" HeightRequest="80" HasShadow="False">
                     <Frame.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToAnnouncementsCommand}"/>
                     </Frame.GestureRecognizers>
@@ -78,6 +123,5 @@
 
             </VerticalStackLayout>
         </ScrollView>
-
     </Grid>
 </ContentPage>

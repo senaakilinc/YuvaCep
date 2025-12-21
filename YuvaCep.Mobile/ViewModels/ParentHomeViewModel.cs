@@ -63,7 +63,7 @@ namespace YuvaCep.Mobile.ViewModels
         {
             if(child == null) return;
             // İleride çocuğun detayına/günlük raporuna gitmek için
-            await Shell.Current.GoToAsync($"StudentDetailPage?name = {child.Name}");
+            await Shell.Current.GoToAsync($"StudentDetailPage?name = {child.Name}&className={child.ClassName}");
         }
 
 
