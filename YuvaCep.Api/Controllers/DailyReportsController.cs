@@ -1,43 +1,149 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using YuvaCep.Domain.Entities;
-using YuvaCep.Persistence.Contexts;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using YuvaCep.Application.Dtos;
+using YuvaCep.Application.Services;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace YuvaCep.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DailyReportsController : ControllerBase
     {
-        private readonly YuvaCepDbContext _context;
+        private readonly IDailyReportService _dailyReportService;
 
-        public DailyReportsController(YuvaCepDbContext context)
+        public DailyReportsController(IDailyReportService dailyReportService)
         {
-            _context = context;
+            _dailyReportService = dailyReportService;
         }
 
         // GET: api/DailyReports
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DailyReport>>> GetReports()
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetAllReports(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            return await _context.DailyReports.ToListAsync();
+            var reports = await _dailyReportService.GetAllAsync(pageNumber, pageSize);
+            return Ok(reports);
+        }
+
+        // GET: api/DailyReports/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetReport(Guid id)
+        {
+            var report = await _dailyReportService.GetByIdAsync(id);
+
+            if (report == null)
+            {
+                return NotFound(new { message = "Rapor bulunamadı." });
+            }
+
+            return Ok(report);
+        }
+
+        // GET: api/DailyReports/student/{studentId}
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetReportsByStudent(
+            Guid studentId,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var reports = await _dailyReportService.GetByStudentIdAsync(studentId, pageNumber, pageSize);
+            return Ok(reports);
+        }
+
+        // GET: api/DailyReports/student/{studentId}/date-range
+        [HttpGet("student/{studentId}/date-range")]
+        public async Task<IActionResult> GetReportsByDateRange(
+            Guid studentId,
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate)
+        {
+            var reports = await _dailyReportService.GetByDateRangeAsync(studentId, startDate, endDate);
+            return Ok(reports);
+        }
+
+        // GET: api/DailyReports/today
+        [HttpGet("today")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetTodayReports()
+        {
+            var reports = await _dailyReportService.GetTodayReportsAsync();
+            return Ok(reports);
         }
 
         // POST: api/DailyReports
         [HttpPost]
-        public async Task<ActionResult<DailyReport>> PostReport(DailyReport report)
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> CreateReport([FromBody] CreateDailyReportDto dto)
         {
             // 1. KURAL: Tarih o anın tarihi olsun (Elle girilmesin)
             report.CreatedAt = DateTime.UtcNow;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            // 2. KURAL: StudentId ve TeacherId dolu gelmek ZORUNDA.
-            // (Zaten Entity yapımızda Guid olduğu için boş gelemez, 
-            // boş gelirse "0000..." gelir ve veritabanı "Böyle kayıt yok" der).
+            var teacherId = GetCurrentUserId();
 
-            _context.DailyReports.Add(report);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var response = await _dailyReportService.CreateAsync(dto, teacherId);
+                return CreatedAtAction(nameof(GetReport), new { id = response.Id }, response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
-            return CreatedAtAction(nameof(GetReports), new { id = report.Id }, report);
+        // PUT: api/DailyReports/{id}
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> UpdateReport(Guid id, [FromBody] UpdateDailyReportDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _dailyReportService.UpdateAsync(id, dto);
+
+            if (response == null)
+            {
+                return NotFound(new { message = "Rapor bulunamadı." });
+            }
+
+            return Ok(response);
+        }
+
+        // DELETE: api/DailyReports/{id}
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> DeleteReport(Guid id)
+        {
+            var result = await _dailyReportService.DeleteAsync(id);
+
+            if (!result)
+            {
+                return NotFound(new { message = "Rapor bulunamadı." });
+            }
+
+            return NoContent();
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("Geçersiz kullanıcı.");
+            }
+            return userId;
         }
     }
 }

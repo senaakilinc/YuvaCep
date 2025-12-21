@@ -39,7 +39,7 @@ namespace YuvaCep.Domain.Entities
         [StringLength(2000)]
         public string TeacherResponse { get; set; }
 
-        public int? RespondedByTeacherId { get; set; }
+        public Guid? RespondedByTeacherId { get; set; }
 
         public Teacher Teacher { get; set; }
 
