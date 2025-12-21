@@ -28,7 +28,7 @@ namespace YuvaCep.Api.Controllers
         public async Task<ActionResult<DailyReport>> PostReport(DailyReport report)
         {
             // 1. KURAL: Tarih o anın tarihi olsun (Elle girilmesin)
-            report.Date = DateTime.UtcNow;
+            report.CreatedAt = DateTime.UtcNow;
 
             // 2. KURAL: StudentId ve TeacherId dolu gelmek ZORUNDA.
             // (Zaten Entity yapımızda Guid olduğu için boş gelemez, 

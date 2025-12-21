@@ -46,6 +46,73 @@ namespace YuvaCep.Persistence.Contexts
             modelBuilder.Entity<ParentStudent>()
                 .HasKey(pc => new { pc.ParentId, pc.StudentId });
 
+            // ==========================================
+            //       BAŞLANGIÇ VERİLERİ (SEED DATA)
+            // ==========================================
+
+            // 1. ADIM: SABİT ID'LER
+            var classId = Guid.Parse("11111111-1111-1111-1111-111111111111"); // Sınıf ID
+            var studentId1 = Guid.Parse("22222222-2222-2222-2222-222222222222"); // Öğrenci Ali
+            var studentId2 = Guid.Parse("33333333-3333-3333-3333-333333333333"); // Öğrenci Ayşe
+
+            var badgeGoldId = Guid.Parse("88888888-8888-8888-8888-888888888888");
+            var badgeSilverId = Guid.Parse("99999999-9999-9999-9999-999999999999");
+            var badgeWeeklyId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+
+            // 2. ADIM: SINIFLARI EKLE (Önce bu gelmeli!)
+            modelBuilder.Entity<Class>().HasData(
+                new Class
+                {
+                    Id = classId,
+                    Name = "Papatyalar Sınıfı",
+                    YearLevel = "4-5 Yaş Grubu"
+                }
+            );
+
+            // 3. ADIM: ÖĞRENCİLER
+            modelBuilder.Entity<Student>().HasData(
+                new Student
+                {
+                    Id = studentId1,
+                    Name = "Ali Yılmaz",
+                    TCIDNumber = "11111111111",
+                    ClassId = classId
+                },
+                new Student
+                {
+                    Id = studentId2,
+                    Name = "Ayşe Demir",
+                    TCIDNumber = "22222222222",
+                    ClassId = classId
+                }
+            );
+
+            // 4. ADIM: ROZETLER
+            modelBuilder.Entity<Badge>().HasData(
+                new Badge
+                {
+                    Id = badgeGoldId,
+                    Name = "Süper Başarı",
+                    Code = "GOLD",
+                    ImagePath = "badges/gold.png" 
+                },
+                // SILVER
+                new Badge
+                {
+                    Id = badgeSilverId,
+                    Name = "Örnek Davranış",
+                    Code = "SILVER",
+                    ImagePath = "badges/silver.png" 
+                },
+                // WEEKLY (Haftanın Yıldızı)
+                new Badge
+                {
+                    Id = badgeWeeklyId,
+                    Name = "Haftanın Yıldızı",
+                    Code = "WEEKLY",
+                    ImagePath = "badges/weekly.png" 
+                }
+            );
             base.OnModelCreating(modelBuilder);
         }
     }

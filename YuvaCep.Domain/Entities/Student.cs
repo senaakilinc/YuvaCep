@@ -13,6 +13,8 @@ namespace YuvaCep.Domain.Entities
 
         [Required]
         public string Surname { get; set; } = string.Empty;
+        [Required]
+        public string TCIDNumber { get; set; } = string.Empty;
 
         [Required]
         public string ReferenceCode { get; set; } = string.Empty;
