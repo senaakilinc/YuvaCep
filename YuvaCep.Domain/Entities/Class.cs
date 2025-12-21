@@ -9,7 +9,7 @@ namespace YuvaCep.Domain.Entities
         [Required]
         public string Name { get; set; } = string.Empty;
 
-        public int YearLevel { get; set; }
+        public string YearLevel { get; set; }
         public int MaxCapacity { get; set; }
 
         // Öğrenciler
