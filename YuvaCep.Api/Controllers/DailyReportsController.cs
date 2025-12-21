@@ -82,7 +82,7 @@ namespace YuvaCep.Api.Controllers
         public async Task<IActionResult> CreateReport([FromBody] CreateDailyReportDto dto)
         {
             // 1. KURAL: Tarih o anın tarihi olsun (Elle girilmesin)
-            report.CreatedAt = DateTime.UtcNow;
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
