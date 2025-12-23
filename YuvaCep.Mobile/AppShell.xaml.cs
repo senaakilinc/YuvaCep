@@ -20,6 +20,8 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("StudentDetailPage", typeof(Views.StudentDetailPage));
         Routing.RegisterRoute("LoginPage", typeof(Views.LoginPage));
         Routing.RegisterRoute("ParentDailyReportPage", typeof(Views.ParentDailyReportPage));
+        Routing.RegisterRoute("BadgeDetailPage", typeof(Views.BadgeDetailPage));
+        Routing.RegisterRoute("BadgeTrackingPage", typeof(Views.BadgeTrackingPage));
     }
 }
 
