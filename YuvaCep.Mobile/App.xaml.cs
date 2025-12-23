@@ -17,8 +17,11 @@ namespace YuvaCep.Mobile
         }
         private async void CheckLoginStatus()
         {
+            await Task.Delay(50);
+
             bool isLoggedIn = Preferences.Get("IsLoggedIn", false);
             string userRole = Preferences.Get("UserRole", "");
+           
 
             if (isLoggedIn)
             {
