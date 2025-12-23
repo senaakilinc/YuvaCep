@@ -21,9 +21,6 @@ namespace YuvaCep.Persistence.Migrations
                 name: "FK_ParentStudents_Students_StudentId",
                 table: "ParentStudents");
 
-            migrationBuilder.DropTable(
-                name: "ParentMessages");
-
             migrationBuilder.DropPrimaryKey(
                 name: "PK_ParentStudents",
                 table: "ParentStudents");
