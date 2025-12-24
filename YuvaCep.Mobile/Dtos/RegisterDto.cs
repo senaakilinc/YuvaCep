@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace YuvaCep.Application.Dtos
+namespace YuvaCep.Mobile.Dtos
 {
-    public class RegisterRequest
+    public class RegisterDto
     {
         public string Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
         public string TCIDNumber { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string PhoneNumber {  get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public required string Role { get; set; } // 1:Öğretmen , 2: Veli
+        public int Role { get; set; } // 1: Öğretmen, 2: Veli 
     }
 }
