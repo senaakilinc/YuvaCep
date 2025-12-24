@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-
+using YuvaCep.Mobile.Services;   
+using YuvaCep.Mobile.ViewModels; 
+using YuvaCep.Mobile.Views;
 namespace YuvaCep.Mobile
 {
     public static class MauiProgram
@@ -15,10 +17,14 @@ namespace YuvaCep.Mobile
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
+            builder.Services.AddSingleton<AuthService>();
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<LoginViewModel>();
 
+
+#if DEBUG
+            builder.Logging.AddDebug();
+#endif      
             return builder.Build();
         }
     }
