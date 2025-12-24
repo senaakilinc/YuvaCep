@@ -191,7 +191,7 @@ namespace YuvaCep.Application.Services
                 Id = feedback.Id,
                 ParentId = feedback.ParentId,
                 ParentName = feedback.Parent != null
-                    ? $"{feedback.Parent.Name} {feedback.Parent.Surname}"
+                    ? $"{feedback.Parent.FirstName} {feedback.Parent.LastName}"
                     : "Bilinmiyor",
                 StudentId = feedback.StudentId,
                 StudentName = feedback.Student != null
@@ -209,7 +209,7 @@ namespace YuvaCep.Application.Services
                 TeacherResponse = feedback.TeacherResponse,
                 RespondedByTeacherId = feedback.RespondedByTeacherId,
                 TeacherName = feedback.Teacher != null
-                    ? $"{feedback.Teacher.Name}   {feedback.Teacher.Surname}"
+                    ? $"{feedback.Teacher.FirstName}   {feedback.Teacher.LastName}"
                     : null,
                 RespondedAt = feedback.RespondedAt
             };

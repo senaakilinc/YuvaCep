@@ -8,7 +8,6 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        // RegisterPage rotasını buraya kaydediyoruz
         Routing.RegisterRoute("RegisterPage", typeof(Views.RegisterPage));
         Routing.RegisterRoute("CreateClassPage", typeof(CreateClassPage));
         Routing.RegisterRoute("ParentHomePage", typeof(ParentHomePage));
@@ -18,10 +17,11 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("StudentListPage", typeof(StudentListPage));
         Routing.RegisterRoute("MealPlanPage", typeof(Views.MealPlanPage));
         Routing.RegisterRoute("StudentDetailPage", typeof(Views.StudentDetailPage));
-        Routing.RegisterRoute("LoginPage", typeof(Views.LoginPage));
+        //Routing.RegisterRoute("LoginPage", typeof(Views.LoginPage));
         Routing.RegisterRoute("ParentDailyReportPage", typeof(Views.ParentDailyReportPage));
         Routing.RegisterRoute("BadgeDetailPage", typeof(Views.BadgeDetailPage));
         Routing.RegisterRoute("BadgeTrackingPage", typeof(Views.BadgeTrackingPage));
+        Routing.RegisterRoute("LoginPage", typeof(YuvaCep.Mobile.Views.LoginPage));
     }
 }
 

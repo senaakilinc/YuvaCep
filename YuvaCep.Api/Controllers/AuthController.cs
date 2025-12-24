@@ -11,6 +11,7 @@ namespace YuvaCep.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+
         public AuthController(IAuthService authService)
         {
             _authService = authService;
@@ -30,23 +31,42 @@ namespace YuvaCep.Api.Controllers
             {
                 return Ok(response);
             }
+
             return Unauthorized(new { message = response.Message });
         }
 
-        [HttpPost("first-register")]
-        public async Task<IActionResult> FirstRegister([FromBody] FirstRegisterRequest request)
+        [HttpPost("register/parent")]
+        public async Task<IActionResult> RegisterParent([FromBody] ParentRegisterRequest request)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = await _authService.FirstRegisterAsync(request);
 
-           if (!string.IsNullOrEmpty(response.Token))
+            var response = await _authService.RegisterParentAsync(request);
+
+            if (!string.IsNullOrEmpty(response.Token))
             {
                 return Ok(response);
             }
 
+            return BadRequest(new { message = response.Message });
+        }
+
+        [HttpPost("register/teacher")]
+        public async Task<IActionResult> RegisterTeacher([FromBody] TeacherRegisterRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _authService.RegisterTeacherAsync(request);
+
+            if (!string.IsNullOrEmpty(response.Token))
+            {
+                return Ok(response);
+            }
 
             return BadRequest(new { message = response.Message });
         }

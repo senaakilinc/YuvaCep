@@ -194,7 +194,7 @@ namespace YuvaCep.Application.Services
                     : "Bilinmiyor",
                 TeacherId = report.TeacherId,
                 TeacherName = report.Teacher != null
-                    ? $"{report.Teacher.Name} {report.Teacher.Surname}"
+                    ? $"{report.Teacher.FirstName} {report.Teacher.LastName}"
                     : "Bilinmiyor",
                 CreatedAt = report.CreatedAt,
                 UpdatedAt = report.UpdatedAt,

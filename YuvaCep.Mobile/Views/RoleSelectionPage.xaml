@@ -15,8 +15,10 @@
 
         <Frame BackgroundColor="#EFF6FF" BorderColor="#2563EB" CornerRadius="15" Padding="20" HasShadow="True">
             <Frame.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnParentTapped"/>
+                <TapGestureRecognizer Command="{Binding SelectRoleCommand}" 
+                                      CommandParameter="Parent"/>
             </Frame.GestureRecognizers>
+
             <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
                 <Label Text="👨‍👩‍👧‍👦" FontSize="30" VerticalOptions="Center"/>
                 <VerticalStackLayout VerticalOptions="Center">
@@ -28,8 +30,10 @@
 
         <Frame BackgroundColor="#FDF2F8" BorderColor="#DB2777" CornerRadius="15" Padding="20" HasShadow="True">
             <Frame.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnTeacherTapped"/>
+                <TapGestureRecognizer Command="{Binding SelectRoleCommand}" 
+                                      CommandParameter="Teacher"/>
             </Frame.GestureRecognizers>
+
             <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
                 <Label Text="👩‍🏫" FontSize="30" VerticalOptions="Center"/>
                 <VerticalStackLayout VerticalOptions="Center">

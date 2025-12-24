@@ -1,20 +1,13 @@
-namespace YuvaCep.Mobile.Views;
+using YuvaCep.Mobile.ViewModels;
 
-public partial class RoleSelectionPage : ContentPage
+namespace YuvaCep.Mobile.Views
 {
-	public RoleSelectionPage()
-	{
-		InitializeComponent();
-	}
-    private async void OnParentTapped(object sender, EventArgs e)
+    public partial class RoleSelectionPage : ContentPage
     {
-        // Login sayfasýna "Veli" olduðunu söyleyerek gidiyoruz
-        await Shell.Current.GoToAsync($"LoginPage?role=Parent");
-    }
-
-    private async void OnTeacherTapped(object sender, EventArgs e)
-    {
-        // Login sayfasýna "Öðretmen" olduðunu söyleyerek gidiyoruz
-        await Shell.Current.GoToAsync($"LoginPage?role=Teacher");
+        public RoleSelectionPage()
+        {
+            InitializeComponent();
+            BindingContext = new RoleSelectionViewModel();
+        }
     }
 }
