@@ -18,8 +18,9 @@ namespace YuvaCep.Mobile
                 });
 
             builder.Services.AddSingleton<AuthService>();
-            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<YuvaCep.Mobile.Views.LoginPage>();
             builder.Services.AddTransient<LoginViewModel>();
+            
 
 
 #if DEBUG

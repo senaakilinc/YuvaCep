@@ -12,8 +12,8 @@ using YuvaCep.Persistence.Contexts;
 namespace YuvaCep.Persistence.Migrations
 {
     [DbContext(typeof(YuvaCepDbContext))]
-    [Migration("20251211095219_AddGamificationSystem")]
-    partial class AddGamificationSystem
+    [Migration("20251227213244_ParentFixed")]
+    partial class ParentFixed
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,9 @@ namespace YuvaCep.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ClassId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("text");
@@ -38,7 +41,20 @@ namespace YuvaCep.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<Guid?>("TargetClassId")
+                    b.Property<bool>("NotificationSent")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("RecipientCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TargetAudience")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TeacherId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Title")
@@ -47,7 +63,11 @@ namespace YuvaCep.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TargetClassId");
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("Announcements");
                 });
@@ -73,6 +93,29 @@ namespace YuvaCep.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Badges");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("88888888-8888-8888-8888-888888888888"),
+                            Code = "GOLD",
+                            ImagePath = "badges/gold.png",
+                            Name = "Süper Başarı"
+                        },
+                        new
+                        {
+                            Id = new Guid("99999999-9999-9999-9999-999999999999"),
+                            Code = "SILVER",
+                            ImagePath = "badges/silver.png",
+                            Name = "Örnek Davranış"
+                        },
+                        new
+                        {
+                            Id = new Guid("77777777-7777-7777-7777-777777777777"),
+                            Code = "WEEKLY",
+                            ImagePath = "badges/weekly.png",
+                            Name = "Haftanın Yıldızı"
+                        });
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.Class", b =>
@@ -88,12 +131,22 @@ namespace YuvaCep.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("YearLevel")
-                        .HasColumnType("integer");
+                    b.Property<string>("YearLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Classes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            MaxCapacity = 0,
+                            Name = "Papatyalar Sınıfı",
+                            YearLevel = "4-5 Yaş Grubu"
+                        });
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.DailyReport", b =>
@@ -102,21 +155,76 @@ namespace YuvaCep.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ActivityNotes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ActivityType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("AteWell")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("BehaviorNotes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
                     b.Property<int>("BehaviorScore")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<string>("BreakfastNotes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("GeneralNotes")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("LunchNotes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("MoodStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int?>("NapDurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("NapTaken")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("NutritionNotes")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("SnackNotes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("ToiletUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -125,6 +233,69 @@ namespace YuvaCep.Persistence.Migrations
                     b.HasIndex("TeacherId");
 
                     b.ToTable("DailyReports");
+                });
+
+            modelBuilder.Entity("YuvaCep.Domain.Entities.Feedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("FeedBackType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("ParentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid?>("RespondedByTeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TeacherResponse")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.LessonProgram", b =>
@@ -154,6 +325,52 @@ namespace YuvaCep.Persistence.Migrations
                     b.ToTable("LessonPrograms");
                 });
 
+            modelBuilder.Entity("YuvaCep.Domain.Entities.MonthlyPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PlanType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.ToTable("MonthlyPlans");
+                });
+
             modelBuilder.Entity("YuvaCep.Domain.Entities.NutritionProgram", b =>
                 {
                     b.Property<Guid>("Id")
@@ -181,75 +398,6 @@ namespace YuvaCep.Persistence.Migrations
                     b.ToTable("NutritionPrograms");
                 });
 
-            modelBuilder.Entity("YuvaCep.Domain.Entities.Parent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TCIDNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Parents");
-                });
-
-            modelBuilder.Entity("YuvaCep.Domain.Entities.ParentMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("ReceiverTeacherId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SenderParentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverTeacherId");
-
-                    b.HasIndex("SenderParentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("ParentMessages");
-                });
-
             modelBuilder.Entity("YuvaCep.Domain.Entities.ParentStudent", b =>
                 {
                     b.Property<Guid>("ParentId")
@@ -265,7 +413,7 @@ namespace YuvaCep.Persistence.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("ParentStudents");
+                    b.ToTable("ParentStudent");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.Student", b =>
@@ -295,11 +443,37 @@ namespace YuvaCep.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("TCIDNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClassId");
 
                     b.ToTable("Students");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            ClassId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            DateOfBirth = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Ali Yılmaz",
+                            ReferenceCode = "",
+                            Surname = "",
+                            TCIDNumber = "11111111111"
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            ClassId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            DateOfBirth = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Ayşe Demir",
+                            ReferenceCode = "",
+                            Surname = "",
+                            TCIDNumber = "22222222222"
+                        });
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.StudentBadge", b =>
@@ -349,39 +523,6 @@ namespace YuvaCep.Persistence.Migrations
                     b.ToTable("StudentMoods");
                 });
 
-            modelBuilder.Entity("YuvaCep.Domain.Entities.Teacher", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TCIDNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Teachers");
-                });
-
             modelBuilder.Entity("YuvaCep.Domain.Entities.TeacherClass", b =>
                 {
                     b.Property<Guid>("TeacherId")
@@ -403,7 +544,19 @@ namespace YuvaCep.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -411,21 +564,79 @@ namespace YuvaCep.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PasswordSalt")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Role")
                         .HasColumnType("integer");
+
+                    b.Property<string>("TCIDNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasDiscriminator().HasValue("User");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("YuvaCep.Domain.Entities.Parent", b =>
+                {
+                    b.HasBaseType("YuvaCep.Domain.Entities.User");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.ToTable("Users", t =>
+                        {
+                            t.Property("PhoneNumber")
+                                .HasColumnName("Parent_PhoneNumber");
+                        });
+
+                    b.HasDiscriminator().HasValue("Parent");
+                });
+
+            modelBuilder.Entity("YuvaCep.Domain.Entities.Teacher", b =>
+                {
+                    b.HasBaseType("YuvaCep.Domain.Entities.User");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasDiscriminator().HasValue("Teacher");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.Announcement", b =>
                 {
-                    b.HasOne("YuvaCep.Domain.Entities.Class", "TargetClass")
+                    b.HasOne("YuvaCep.Domain.Entities.Class", "Class")
                         .WithMany()
-                        .HasForeignKey("TargetClassId");
+                        .HasForeignKey("ClassId");
 
-                    b.Navigation("TargetClass");
+                    b.HasOne("YuvaCep.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId");
+
+                    b.HasOne("YuvaCep.Domain.Entities.Teacher", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.DailyReport", b =>
@@ -447,7 +658,45 @@ namespace YuvaCep.Persistence.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("YuvaCep.Domain.Entities.Feedback", b =>
+                {
+                    b.HasOne("YuvaCep.Domain.Entities.Parent", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YuvaCep.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YuvaCep.Domain.Entities.Teacher", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
+                });
+
             modelBuilder.Entity("YuvaCep.Domain.Entities.LessonProgram", b =>
+                {
+                    b.HasOne("YuvaCep.Domain.Entities.Class", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+                });
+
+            modelBuilder.Entity("YuvaCep.Domain.Entities.MonthlyPlan", b =>
                 {
                     b.HasOne("YuvaCep.Domain.Entities.Class", "Class")
                         .WithMany()
@@ -467,44 +716,6 @@ namespace YuvaCep.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Class");
-                });
-
-            modelBuilder.Entity("YuvaCep.Domain.Entities.Parent", b =>
-                {
-                    b.HasOne("YuvaCep.Domain.Entities.User", "User")
-                        .WithOne("ParentProfile")
-                        .HasForeignKey("YuvaCep.Domain.Entities.Parent", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("YuvaCep.Domain.Entities.ParentMessage", b =>
-                {
-                    b.HasOne("YuvaCep.Domain.Entities.Teacher", "ReceiverTeacher")
-                        .WithMany()
-                        .HasForeignKey("ReceiverTeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("YuvaCep.Domain.Entities.Parent", "SenderParent")
-                        .WithMany()
-                        .HasForeignKey("SenderParentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("YuvaCep.Domain.Entities.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ReceiverTeacher");
-
-                    b.Navigation("SenderParent");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.ParentStudent", b =>
@@ -567,17 +778,6 @@ namespace YuvaCep.Persistence.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("YuvaCep.Domain.Entities.Teacher", b =>
-                {
-                    b.HasOne("YuvaCep.Domain.Entities.User", "User")
-                        .WithOne("TeacherProfile")
-                        .HasForeignKey("YuvaCep.Domain.Entities.Teacher", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("YuvaCep.Domain.Entities.TeacherClass", b =>
                 {
                     b.HasOne("YuvaCep.Domain.Entities.Class", "Class")
@@ -587,7 +787,7 @@ namespace YuvaCep.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("YuvaCep.Domain.Entities.Teacher", "Teacher")
-                        .WithMany("TeacherClasses")
+                        .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -604,26 +804,14 @@ namespace YuvaCep.Persistence.Migrations
                     b.Navigation("TeacherClasses");
                 });
 
-            modelBuilder.Entity("YuvaCep.Domain.Entities.Parent", b =>
-                {
-                    b.Navigation("ParentStudents");
-                });
-
             modelBuilder.Entity("YuvaCep.Domain.Entities.Student", b =>
                 {
                     b.Navigation("ParentStudents");
                 });
 
-            modelBuilder.Entity("YuvaCep.Domain.Entities.Teacher", b =>
+            modelBuilder.Entity("YuvaCep.Domain.Entities.Parent", b =>
                 {
-                    b.Navigation("TeacherClasses");
-                });
-
-            modelBuilder.Entity("YuvaCep.Domain.Entities.User", b =>
-                {
-                    b.Navigation("ParentProfile");
-
-                    b.Navigation("TeacherProfile");
+                    b.Navigation("ParentStudents");
                 });
 #pragma warning restore 612, 618
         }

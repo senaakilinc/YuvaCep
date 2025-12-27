@@ -12,7 +12,13 @@
         Title="Giriş"
         ContentTemplate="{DataTemplate views:RoleSelectionPage}"
         Route="RoleSelectionPage" />
-    
-    <ShellContent ContentTemplate="{DataTemplate views:TeacherHomePage}" Route="TeacherHomePage" />
+
+    <ShellContent 
+        ContentTemplate="{DataTemplate views:TeacherHomePage}" 
+        Route="TeacherHomePage" />
+
+    <ShellContent 
+        ContentTemplate="{DataTemplate views:ParentHomePage}" 
+        Route="ParentHomePage" />
 
 </Shell>

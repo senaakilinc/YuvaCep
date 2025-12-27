@@ -4,8 +4,6 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using YuvaCep.Mobile.Dtos;
-using YuvaCep.Mobile.Dtos.YuvaCep.Mobile.Dtos;
-
 
 namespace YuvaCep.Mobile.Services
 {
@@ -15,10 +13,17 @@ namespace YuvaCep.Mobile.Services
         private readonly string _baseUrl;
         private readonly JsonSerializerOptions _serializerOptions;
 
+
+        private const string ApiUrl = "http://10.0.2.2:5000";
+
         public AuthService()
         {
+            _baseUrl = ApiUrl;
+
             _httpClient = new HttpClient();
-            _baseUrl = Constants.BaseUrl;
+
+            _httpClient.Timeout = TimeSpan.FromMinutes(2);
+
             _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -26,28 +31,25 @@ namespace YuvaCep.Mobile.Services
         }
 
         // GİRİŞ YAPMA FONKSİYONU
-        public async Task<LoginResponse> LoginAsync(string tcidnumber,string password)
+        public async Task<LoginResponse> LoginAsync(string tcidnumber, string password)
         {
-            var loginData = new {TCIDNumber = tcidnumber, Password = password};
+            var loginData = new { TCIDNumber = tcidnumber, Password = password };
 
             try
-            {   
-                //API'ye POST isteği
+            {
                 var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/Auth/login", loginData);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
-                    //Gelen Json u nesneye çevirir.
                     var result = await response.Content.ReadFromJsonAsync<LoginResponse>(_serializerOptions);
                     return result;
                 }
                 else
                 {
-                    //Hata varsa döner.
                     return new LoginResponse { IsSuccess = false, Message = "Sunucu hatası veya hatalı giriş." };
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return new LoginResponse { IsSuccess = false, Message = $"Bağlantı hatası: {ex.Message}" };
             }
@@ -61,18 +63,29 @@ namespace YuvaCep.Mobile.Services
                 TCIDNumber = tcidnumber,
                 Password = password,
                 Name = name,
-                Surname = surname,
-                Role = userType == "Öğretmen" ? 1 : 2
+                Surname = surname
             };
+
+            string endpointUrl;
+
+            // Kullanıcı tipine göre doğru adresi seçiyoruz
+            if (userType == "Öğretmen" || userType == "Teacher")
+            {
+                endpointUrl = $"{_baseUrl}/api/Auth/register/teacher";
+            }
+            else
+            {
+                endpointUrl = $"{_baseUrl}/api/Auth/register/parent";
+            }
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/Auth/register", registerData);
+                var response = await _httpClient.PostAsJsonAsync(endpointUrl, registerData);
                 return response.IsSuccessStatusCode;
             }
             catch
             {
-                return false; 
+                return false;
             }
         }
     }

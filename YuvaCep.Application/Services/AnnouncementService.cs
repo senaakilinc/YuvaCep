@@ -300,7 +300,7 @@ namespace YuvaCep.Application.Services
                     : null,
                 TeacherId = announcement.TeacherId,
                 TeacherName = announcement.Teacher != null
-                    ? $"{announcement.Teacher.Name} {announcement.Teacher.Surname}"
+                    ? $"{announcement.Teacher.FirstName} {announcement.Teacher.LastName}"
                     : "Bilinmiyor",
                 CreatedAt = announcement.CreatedAt,
                 NotificationSent = announcement.NotificationSent,

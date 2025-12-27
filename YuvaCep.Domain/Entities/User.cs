@@ -1,23 +1,19 @@
 ﻿using System;
-using YuvaCep.Domain.Enums; // Az önce yaptığın rol dosyasını çağırıyoruz
+using YuvaCep.Domain.Enums;
 
 namespace YuvaCep.Domain.Entities
 {
     public class User
     {
-        public Guid Id { get; set; } // Kimlik No
-        public string Email { get; set; } = string.Empty;
+        public Guid Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty; 
+        public string TCIDNumber { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
-        public UserRole Role { get; set; } //  Öğretmen mi?
-        public string? TCIDNumber { get; set; }
 
-        // Bu kullanıcı bir Öğretmen ise onun profilini tutar
-        public Teacher? TeacherProfile { get; set; }
+        public string PasswordSalt { get; set; } = string.Empty;
+        public UserRole Role { get; set; }
 
-        // Bu kullanıcı bir Veli ise onun profilini tutar
-        public Parent? ParentProfile { get; set; }
-        public required string PasswordSalt { get; set; }
-        public required string ReferenceCode { get; set; }
         public bool IsActive { get; set; }
     }
 }
