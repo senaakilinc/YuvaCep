@@ -66,12 +66,6 @@ namespace YuvaCep.Application.Services
                 return new LoginResponse { IsSuccess = false, Message = "Bu TC Kimlik numarası zaten kayıtlı." };
             }
 
-            // Email Kontrolü
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            {
-                return new LoginResponse { IsSuccess = false, Message = "Bu e-posta adresi zaten kullanılıyor." };
-            }
-
             // Şifre Hashleme
             HashingHelper.CreatePasswordHash(request.Password, out string passwordHash, out string passwordSalt);
 
@@ -86,8 +80,7 @@ namespace YuvaCep.Application.Services
                 PasswordSalt = passwordSalt,
                 Role = UserRole.Parent,      
                 IsActive = true,
-                PhoneNumber = string.Empty,  
-                ReferenceCode = request.StudentReferenceCode // Varsa öğrenci kodu
+                PhoneNumber = string.Empty
             };
 
             _context.Parents.Add(parent);
@@ -116,11 +109,6 @@ namespace YuvaCep.Application.Services
                 return new LoginResponse { IsSuccess = false, Message = "Bu TC Kimlik numarası zaten kayıtlı." };
             }
 
-            // Email Kontrolü
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            {
-                return new LoginResponse { IsSuccess = false, Message = "Bu e-posta adresi zaten kullanılıyor." };
-            }
 
             // Şifre Hashleme
             HashingHelper.CreatePasswordHash(request.Password, out string passwordHash, out string passwordSalt);
@@ -135,8 +123,7 @@ namespace YuvaCep.Application.Services
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
                 Role = UserRole.Teacher,     // Rolü sabit Teacher
-                IsActive = true,
-                HireDate = DateTime.UtcNow
+                IsActive = true
             };
 
             _context.Teachers.Add(teacher);

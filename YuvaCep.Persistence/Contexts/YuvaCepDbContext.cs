@@ -46,9 +46,8 @@ namespace YuvaCep.Persistence.Contexts
             modelBuilder.Entity<ParentStudent>()
                 .HasKey(pc => new { pc.ParentId, pc.StudentId });
 
-            // ==========================================
+
             //       BAŞLANGIÇ VERİLERİ (SEED DATA)
-            // ==========================================
 
             // 1. ADIM: SABİT ID'LER
             var classId = Guid.Parse("11111111-1111-1111-1111-111111111111"); // Sınıf ID
@@ -59,7 +58,7 @@ namespace YuvaCep.Persistence.Contexts
             var badgeSilverId = Guid.Parse("99999999-9999-9999-9999-999999999999");
             var badgeWeeklyId = Guid.Parse("77777777-7777-7777-7777-777777777777");
 
-            // 2. ADIM: SINIFLARI EKLE (Önce bu gelmeli!)
+
             modelBuilder.Entity<Class>().HasData(
                 new Class
                 {
@@ -69,7 +68,6 @@ namespace YuvaCep.Persistence.Contexts
                 }
             );
 
-            // 3. ADIM: ÖĞRENCİLER
             modelBuilder.Entity<Student>().HasData(
                 new Student
                 {
@@ -87,7 +85,6 @@ namespace YuvaCep.Persistence.Contexts
                 }
             );
 
-            // 4. ADIM: ROZETLER
             modelBuilder.Entity<Badge>().HasData(
                 new Badge
                 {

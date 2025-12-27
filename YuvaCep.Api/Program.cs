@@ -3,17 +3,16 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL; // PostgreSQL sürücüsü için gerekli
-using YuvaCep.Persistence;
-using YuvaCep.Persistence.Contexts; 
+using YuvaCep.Persistence.Contexts;
 using YuvaCep.Application.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// PostgreSQL'in eski tarih formatýný kabul etmesini saðlayan ayar
+// PostgreSQL'in eski tarih formatını kabul etmesini saðlayan ayar
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-// --- VERÝTABANI BAÐLANTISI ---
+// --- VERİTABANI BAĞLANTISI ---
 builder.Services.AddDbContext<YuvaCep.Persistence.Contexts.YuvaCepDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -33,10 +32,11 @@ builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IPushNotificationService, MockPushNotificationService>();
 
 
-var jwtSecret = builder.Configuration.GetSection("JwtSettings:Secret").Value ?? throw new Exception("JWT Secret key not found.");
-var key = Encoding.ASCII.GetBytes(jwtSecret);
+// 1. JSON'dan doğru anahtarı ("Jwt:Key") okuyoruz
+var jwtKey = builder.Configuration.GetSection("Jwt:Key").Value ?? throw new Exception("JWT Key bulunamadı! appsettings.json dosyasını kontrol et.");
+var key = Encoding.UTF8.GetBytes(jwtKey); // AuthService ile uyumlu olması için UTF8 yapıyoruz
 
-// Kimlik Doðrulama (Authentication) servisi
+// 2. JWT Servisini Ekliyoruz
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -44,21 +44,17 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // Geliþtirme ortamý için izin verir
+    options.RequireHttpsMetadata = false; 
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        // Token'ý imzalayan gizli anahtarý doðrula
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-
-        // Issuer ve Audience kontrolü
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidateAudience = true,
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-
-        ValidateLifetime = true,
+        // JSON'daki Issuer ve Audience ile eşleşmeli
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
         ClockSkew = TimeSpan.Zero
     };
 });
@@ -89,9 +85,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-//Console.ReadKey();
