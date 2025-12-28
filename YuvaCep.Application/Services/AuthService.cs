@@ -158,7 +158,7 @@ namespace YuvaCep.Application.Services
 
         // 5. LINK CHILD (Çocuk Bağlama)
        
-        public async Task<LinkChildResponse> LinkChildAsync(Guid parentId, LinkChildRequest request)
+        public async Task<LinkChildResponse> LinkChildAsync(Guid parentId, LinkStudentRequest request)
         {
             var parent = await _context.Parents.FindAsync(parentId);
             if (parent == null) return new LinkChildResponse { Success = false, Message = "Veli bulunamadı." };

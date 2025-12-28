@@ -14,6 +14,6 @@ namespace YuvaCep.Application.Services
         Task<LoginResponse> RegisterParentAsync(ParentRegisterRequest request);
         Task<LoginResponse> RegisterTeacherAsync(TeacherRegisterRequest request);
         Task<RegisterResponse> RegisterAsync(RegisterRequest request);
-        Task<LinkChildResponse> LinkChildAsync(Guid parentId, LinkChildRequest request);
+        Task<LinkChildResponse> LinkChildAsync(Guid parentId, LinkStudentRequest request);
     }
 }

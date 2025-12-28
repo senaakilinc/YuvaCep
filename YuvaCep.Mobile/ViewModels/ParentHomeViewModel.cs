@@ -1,86 +1,135 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+using YuvaCep.Mobile.Dtos;
+using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-
-    public class ChildCardItem
-    {
-        public string Name { get; set; }
-        public string ClassName { get; set; }
-        public string PhotoUrl { get; set; }
-
-    }
     public partial class ParentHomeViewModel : ObservableObject
     {
-        //Ekranda listelenen çocuklar.
-        public ObservableCollection<ChildCardItem> MyChild { get; } = new()
+        private readonly UserService _userService;
+
+        [ObservableProperty]
+        private StudentDto student; // Öğrenci bilgisi burada tutulacak
+
+        [ObservableProperty]
+        private bool hasStudent; // Öğrenci var mı yok mu?
+
+        [ObservableProperty]
+        private bool isBusy;
+
+        public ParentHomeViewModel(UserService userService)
         {
-            new ChildCardItem
-            {
-                Name = "Ali Yılmaz",
-                ClassName = "Papatyalar Sınıfı",
-                PhotoUrl = "child_avatar.png"
-            }
-        };
-        public ParentHomeViewModel()
+            _userService = userService;
+            _ = InitializeAsync();
+        }
+        private async Task InitializeAsync()
         {
-         
+            await LoadStudentDataAsync();
         }
 
         [RelayCommand]
-        private async Task AddChildByCodeAsync()
+        public async Task LoadStudentDataAsync()
         {
-            // Kullanıcıdan pop-up ile referans kodu iste.
-            string code = await Shell.Current.DisplayPromptAsync("Çocuk Ekle", "Öğretmenden alınan 6 Haneli Referans Kodunu Giriniz: ", "Ekle", "İptal", "Örn: E09N30", 6);
+            if (IsBusy) return;
 
-            // İptal edildiyse veya boş bırakılırsa dur.
+            try
+            {
+                IsBusy = true; 
+
+                var token = Preferences.Get("AuthToken", string.Empty);
+
+                // Veriyi çekmeyi dene
+                var result = await _userService.GetMyStudentAsync(token);
+
+                if (result != null)
+                {
+                    Student = result;
+                    HasStudent = true;
+                }
+                else
+                {
+                    Student = null;
+                    HasStudent = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Hata olursa ne olduğunu görelim
+                await Shell.Current.DisplayAlert("Hata", $"Veri çekilemedi: {ex.Message}", "Tamam");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+
+        [RelayCommand]
+        public async Task AddChildAsync()
+        {
+            // 1. Kullanıcıdan Kodu İste (Pop-up açılır)
+            string code = await Shell.Current.DisplayPromptAsync(
+                "Çocuk Ekle",
+                "Lütfen kurumdan aldığınız 6 haneli öğrenci kodunu giriniz:",
+                "Ekle",
+                "İptal",
+                "Örn: EB0903",
+                maxLength: 6,
+                keyboard: Keyboard.Text);
+
+            // Eğer iptal ederse veya boş geçerse dur
             if (string.IsNullOrWhiteSpace(code)) return;
 
-            // Kodu API a gönderip eşleşen cevap alınırsa:
-            // var child = await _apiService.GetChildByCode(code);
+            if (IsBusy) return;
+            IsBusy = true;
 
-            //Yeni çocuk ekleme için DEMO
-            await Shell.Current.DisplayAlert("Başarılı", $"{code} kodu doğrulandı!", "Tamam");
+            // 2. Servise gönder
+            var token = Preferences.Get("AuthToken", string.Empty);
+            var result = await _userService.LinkStudentAsync(token, code);
 
-            // Listeye ekle (Örnek veri)
-            MyChild.Add(new ChildCardItem
+            IsBusy = false;
+
+            if (result.isSuccess)
             {
-                Name = "Emin Badur",
-                ClassName = "Papatyalar Sınıfı",
-                PhotoUrl = "child_avatar.png"
-            });
-        }
-
-        [RelayCommand]
-        private async Task OpenChildReportAsync(ChildCardItem child)
-        {
-            if(child == null) return;
-            // İleride çocuğun detayına/günlük raporuna gitmek için
-            await Shell.Current.GoToAsync($"StudentDetailPage?name = {child.Name}&className={child.ClassName}");
-        }
-
-
-        [RelayCommand]
-        private async Task LogoutAsync()
-        {
-            bool answer = await Shell.Current.DisplayAlert("Çıkış", "Hesabınızdan çıkış yapmak istiyor musunuz?", "Evet", "Hayır");
-
-            if (answer)
+                await Shell.Current.DisplayAlert("Başarılı", result.message, "Tamam");
+                // 3. Sayfayı Yenile (Bilgiler gelsin)
+                await LoadStudentDataAsync();
+            }
+            else
             {
-                // 1. Oturumu temizle
-                Preferences.Clear();
-
-                // 2. En başa (Rol Seçimi) dön
-                await Shell.Current.GoToAsync("//RoleSelectionPage");
+                await Shell.Current.DisplayAlert("Hata", result.message, "Tamam");
             }
         }
 
+        [RelayCommand]
+        public async Task LogoutAsync()
+        {
+            // 1. Kullanıcıya soralım 
+            bool answer = await Shell.Current.DisplayAlert("Çıkış", "Hesabınızdan çıkış yapmak istiyor musunuz?", "Evet", "İptal");
+
+            if (!answer) return;
+
+            // 2. Hafızadaki bilgileri temizle 
+            Preferences.Remove("AuthToken");
+            Preferences.Remove("UserRole");
+
+            // 3. En başa (Rol Seçimi / Giriş) sayfasına gönder
+            await Shell.Current.GoToAsync("//RoleSelectionPage");
+        }
+
+        [RelayCommand]
+        private async Task GoToStudentDetailAsync()
+        {
+            if (Student == null) return;
+
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "Student", Student }
+            };
+
+            // Yeni sayfaya git
+            await Shell.Current.GoToAsync("StudentDetailPage", navigationParameter);
+        }
     }
 }
