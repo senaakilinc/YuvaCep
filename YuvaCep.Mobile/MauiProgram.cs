@@ -20,7 +20,12 @@ namespace YuvaCep.Mobile
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddTransient<YuvaCep.Mobile.Views.LoginPage>();
             builder.Services.AddTransient<LoginViewModel>();
-            
+            builder.Services.AddSingleton<UserService>();
+            builder.Services.AddTransient<ParentHomePage>();
+            builder.Services.AddTransient<ParentHomeViewModel>();
+            builder.Services.AddTransient<StudentDetailPage>();
+            builder.Services.AddTransient<StudentDetailViewModel>();
+
 
 
 #if DEBUG

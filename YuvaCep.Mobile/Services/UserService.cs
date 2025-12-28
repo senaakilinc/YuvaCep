@@ -1,0 +1,73 @@
+﻿using System.Net.Http.Json;
+using YuvaCep.Mobile.Dtos;
+
+namespace YuvaCep.Mobile.Services
+{
+    public class ApiResponse
+    {
+        public string Message { get; set; }
+    }
+    public class UserService
+    {
+        private readonly HttpClient _httpClient;
+        private const string BaseUrl = "http://10.0.2.2:5000";
+
+        public UserService()
+        {
+            _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri(BaseUrl);
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
+        }
+
+        public async Task<StudentDto> GetMyStudentAsync(string token)
+        {
+            // Token'ı başlığa ekle (Giriş bileti)
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/Parent/my-student");
+                if (response.IsSuccessStatusCode)
+                {
+                    // Eğer içerik boşsa (null) null döner
+                    if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return null;
+
+                    return await response.Content.ReadFromJsonAsync<StudentDto>();
+                }
+            }
+            catch
+            {
+                // Hata olursa (internet yok vs.)
+                return null;
+            }
+            return null;
+        }
+
+        public async Task<(bool isSuccess, string message)> LinkStudentAsync(string token, string referenceCode)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var request = new { ReferenceCode = referenceCode };
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/Parent/link-student", request);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, "Eşleşme Başarılı!");
+                }
+                else
+                {
+                    var errorResult = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                    return (false, errorResult?.Message ?? "Bir hata oluştu.");
+                }
+            }
+            catch(Exception ex)
+            {
+                return (false, "Bağlantı Hatası: " + ex.Message);
+            }
+        }
+    }
+}

@@ -22,6 +22,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("BadgeDetailPage", typeof(Views.BadgeDetailPage));
         Routing.RegisterRoute("BadgeTrackingPage", typeof(Views.BadgeTrackingPage));
         Routing.RegisterRoute("LoginPage", typeof(YuvaCep.Mobile.Views.LoginPage));
+        Routing.RegisterRoute(nameof(StudentDetailPage), typeof(StudentDetailPage));
     }
 }
 
