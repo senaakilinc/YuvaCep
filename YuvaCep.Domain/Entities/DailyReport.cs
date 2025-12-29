@@ -1,55 +1,34 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using YuvaCep.Domain.Enums;
 
 namespace YuvaCep.Domain.Entities
 {
     public class DailyReport
     {
         public Guid Id { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
-        public string NutritionNotes { get; set; } = string.Empty;
-        public int BehaviorScore { get; set; }
+        public DateTime Date { get; set; } = DateTime.UtcNow;
 
+        // Rapor Kime Ait?
         public Guid StudentId { get; set; }
-        public Student Student { get; set; } = null!;
+        public Student Student { get; set; }
 
-        public Guid TeacherId { get; set; }
-        public Teacher Teacher { get; set; } = null!;
+        // --- 1. KART: MOD (Günü Nasıl Geçti?) ---
+        public MoodStatus Mood { get; set; }
+        public string MoodNote { get; set; } = string.Empty; 
 
-        //Beslenme bilgileri
-        [StringLength(500)]
-        public string BreakfastNotes { get; set; }
+        // --- 2. KART: BESLENME ---
+        public FoodStatus Breakfast { get; set; }
+        public FoodStatus Lunch { get; set; }
+        public string FoodNote { get; set; } = string.Empty;
 
-        [StringLength(500)]
-        public string LunchNotes { get; set; }
+        // --- 3. KART: UYKU ---
+        public SleepStatus Sleep { get; set; }
 
-        [StringLength(500)]
-        public string SnackNotes { get; set; }
+        // --- 4. KART: ETKİNLİK (YENİ) ---
+        public ActivityStatus Activity { get; set; }
+        public string ActivityNote { get; set; } = string.Empty; 
 
-        public bool AteWell {  get; set; }
-
-        //AktiviteBilgileri
-        [StringLength(1000)]
-        public string ActivityNotes { get; set; }
-
-        [StringLength(200)]
-        public string ActivityType {  get; set; }
-
-        //Duygu ve Davranış
-        [StringLength(50)]
-        public string MoodStatus { get; set; }
-
-        [StringLength(1000)]
-        public string BehaviorNotes { get; set; }
-
-        //Uyku ve Hijyen
-        public bool NapTaken { get; set; }
-        public int? NapDurationMinutes { get; set; }
-        public bool ToiletUsed { get; set; }
-
-        //Öğretmen bilgisi gün sonu gibi
-        [StringLength(2000)]
-        public string GeneralNotes { get; set; }
+        // --- 5. KART: GENEL DEĞERLENDİRME ---
+        public string TeacherNote { get; set; } = string.Empty; 
     }
 }

@@ -1,141 +1,146 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Maui.Graphics;
+using YuvaCep.Mobile.Dtos;
+using YuvaCep.Mobile.Enums;
+using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-    //Basit öğrenci modeli
-    public class SimpleStudent
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
-    public partial class MoodItem : ObservableObject
-    {
-        public string Emoji { get; set; }
-        public string Description { get; set; }
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(BorderColor))] //isSelected değişince rengi güncelle
-        [NotifyPropertyChangedFor(nameof(BackgroundColor))]
-
-        private bool isSelected;
-
-        //Seçiliyse Mavi, değilse Şeffaf çerçeve
-        public Color BorderColor => IsSelected ? Color.FromArgb("#2563EB") : Colors.Transparent;
-        //Seçiliyse Açık Mavi, değilse gri arka plan
-        public Color BackgroundColor => IsSelected ? Color.FromArgb("#DBEAFE") : Color.FromArgb("#F3F4F6");
-    }
-
+    [QueryProperty(nameof(Student), "Student")]
     public partial class DailyReportViewModel : ObservableObject
     {
-        //Ekranda seçilecek öğrencilerin listesi
-        public ObservableCollection<SimpleStudent> MyStudents { get; } = new();
-        public ObservableCollection<MoodItem> MoodOptions { get; } = new();
+        private readonly DailyReportService _reportService;
 
-        // -- FORM ALANI --
-        [ObservableProperty]
-        private SimpleStudent selectedStudent; //Seçilen Öğrenci
+        // Tüm raporlar burada (Önbellek)
+        private List<DailyReportDto> _allReports = new();
 
         [ObservableProperty]
-        private string nutritionInfo; //Yemeğini yedi mi? (Form şeklinde olacak)
+        private StudentDto student;
 
         [ObservableProperty]
-        private string currentMoodText; //Keyfi nasıldı? (Emoji)
+        private DailyReportDto currentReport; // Ekranda gösterilen rapor
 
         [ObservableProperty]
-        private string teacherNote; //Öğretmenin Günlük Notu
+        private bool isBusy;
 
-        private MoodItem _selectedMood;
-        public MoodItem SelectedMood
+        [ObservableProperty]
+        private bool hasReport; // O gün rapor var mı?
+
+        [ObservableProperty]
+        private bool isReportEmpty; // O gün rapor YOK mu? (Tersi)
+
+        // TARİH SEÇİMİ
+        [ObservableProperty]
+        private DateTime selectedDate = DateTime.Now;
+
+        // --- GÖRSEL ÖZELLİKLER (CurrentReport değiştikçe güncellenir) ---
+        public string MoodEmoji => CurrentReport?.Mood switch { MoodStatus.Harika => "🤩", MoodStatus.Mutlu => "🙂", MoodStatus.Normal => "😐", MoodStatus.Uzgun => "☹️", MoodStatus.CokUzgun => "😭", _ => "❓" };
+        public string MoodText => CurrentReport?.Mood.ToString() ?? "-";
+        public Color MoodColor => CurrentReport?.Mood switch { MoodStatus.Harika or MoodStatus.Mutlu => Colors.Green, MoodStatus.Normal => Colors.Orange, _ => Colors.Red };
+
+        public string BreakfastText => CurrentReport?.Breakfast switch { FoodStatus.HepsiniYedi => "Hepsini Yedi", FoodStatus.YarisiniYedi => "Yarısını Yedi", FoodStatus.AzYedi => "Az Yedi", FoodStatus.Yemedi => "Yemedi", _ => "-" };
+        public string LunchText => CurrentReport?.Lunch switch { FoodStatus.HepsiniYedi => "Hepsini Yedi", FoodStatus.YarisiniYedi => "Yarısını Yedi", FoodStatus.AzYedi => "Az Yedi", FoodStatus.Yemedi => "Yemedi", _ => "-" };
+
+        public string SleepText => CurrentReport?.Sleep == SleepStatus.Uyudu ? "Uyudu 😴" : "Uyumadı 😳";
+        public string ActivityText => CurrentReport?.Activity switch { ActivityStatus.Katildi => "Katıldı ✅", ActivityStatus.KismenKatildi => "Kısmen Katıldı ⚠️", ActivityStatus.Katilmadi => "Katılmadı ❌", _ => "-" };
+
+
+        public DailyReportViewModel(DailyReportService reportService)
         {
-            get => _selectedMood;
-            set
-            {
-                if (SetProperty(ref _selectedMood, value))
-                {
-                    if (value != null)
-                    {
+            _reportService = reportService;
+        }
 
-                        UpdateMoodSelection(value);
+        // Sayfaya öğrenci bilgisi geldiğinde çalışır
+        async partial void OnStudentChanged(StudentDto value)
+        {
+            if (value != null)
+            {
+                await LoadAllReportsAsync();
+            }
+        }
+
+        // Tarih seçimi değiştiğinde çalışır
+        partial void OnSelectedDateChanged(DateTime value)
+        {
+            FilterReportByDate();
+        }
+
+        [RelayCommand]
+        public async Task LoadAllReportsAsync()
+        {
+            if (IsBusy || Student == null) return;
+            IsBusy = true;
+
+            try
+            {
+                var token = Preferences.Get("AuthToken", string.Empty);
+                // 1. Tüm raporları çek
+                _allReports = await _reportService.GetStudentReportsAsync(token, Student.Id);
+
+                // 2. Seçili tarihe (Bugüne) göre filtrele
+                FilterReportByDate();
+            }
+            catch (Exception)
+            {
+                // Hata yönetimi
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void FilterReportByDate()
+        {
+            if (_allReports == null || !_allReports.Any())
+            {
+                SetReport(null);
+                return;
+            }
+
+            // Seçilen tarihin gününe ait raporu bul
+            var reportForDate = _allReports.FirstOrDefault(r => r.Date.Date == SelectedDate.Date);
+
+            SetReport(reportForDate);
+        }
+
+        private void SetReport(DailyReportDto report)
+        {
+            CurrentReport = report;
+            HasReport = report != null;
+            IsReportEmpty = !HasReport; 
+
+            // UI güncellemesi için notify tetikle
+            OnPropertyChanged(nameof(MoodEmoji));
+            OnPropertyChanged(nameof(MoodText));
+            OnPropertyChanged(nameof(MoodColor));
+            OnPropertyChanged(nameof(BreakfastText));
+            OnPropertyChanged(nameof(LunchText));
+            OnPropertyChanged(nameof(SleepText));
+            OnPropertyChanged(nameof(ActivityText));
+        }
+
+        [RelayCommand]
+        private async Task GoBackAsync()
+        {
+            try
+            {
+                await Shell.Current.GoToAsync("..");
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (Shell.Current.Navigation.NavigationStack.Count > 0)
+                    {
+                        await Shell.Current.Navigation.PopAsync();
                     }
+                }
+                catch
+                {
+                    Console.WriteLine($"Geri gitme hatası: {ex.Message}");
                 }
             }
         }
-
-
-        private void UpdateMoodSelection(MoodItem value)
-        {
-            if (value == null) return;
-
-            //1. Tüm emojilerin seçimini kaldır (Rengi sıfırlar)
-            foreach (var item in MoodOptions)
-            {
-                item.IsSelected = false;
-            }
-
-            //2. Yeni seçileni işaretle 
-            value.IsSelected = true;
-
-            //3. Mavi kutudaki yazıyı güncelle
-            CurrentMoodText = $"{value.Emoji} {value.Description}";
-
-        }
-
-        public DailyReportViewModel()
-        {
-            //Örnek veri (Burası API ve önceki sayfadan dolacak)
-            MyStudents.Add(new SimpleStudent { Name = "Ali Yılmaz" });
-            MyStudents.Add(new SimpleStudent { Name = "Ayşe Demir" });
-            MyStudents.Add(new SimpleStudent { Name = "Mehmet Öz" });
-
-            MoodOptions.Add(new MoodItem { Emoji = "😭", Description = "Halsiz" });
-            MoodOptions.Add(new MoodItem { Emoji = "🙁", Description = "Keyifsiz" });
-            MoodOptions.Add(new MoodItem { Emoji = "😐", Description = "Normal" });
-            MoodOptions.Add(new MoodItem { Emoji = "🙂", Description = "İyi" });
-            MoodOptions.Add(new MoodItem { Emoji = "🤩", Description = "Harika" });
-
-            //Varsayılan Değerler
-            currentMoodText = "Seçim Yapılmadı";
-            teacherNote = "Etkinliğe aktif katıldı.";
-
-        }
-
-
-        [RelayCommand]
-        private async Task SaveReportAsync()
-        {
-            if (selectedStudent == null)
-            {
-                await Shell.Current.DisplayAlert("Uyarı", "Lütfen bir öğrenci seçiniz.", "Tamam");
-                return;
-            }
-            if (currentMoodText == "Seçim Yapılmadı")
-            {
-                await Shell.Current.DisplayAlert("Uyarı", "Lütfen bir duygu durumu (emoji) seçiniz.", "Tamam");
-                return;
-            }
-
-            //Rapor Özeti
-            string message = $"{selectedStudent.Name} için rapor oluşturuldu:\n" +
-                             $"Mod: {currentMoodText}\n" +
-                             $"Yemek: {nutritionInfo}";
-
-            await Shell.Current.DisplayAlert("Başarılı", message, "Tamam");
-
-            //Kaydettikten sonra önceki sayfaya dön
-            await Shell.Current.GoToAsync("..");
-
-
-        }
-
     }
-
 }

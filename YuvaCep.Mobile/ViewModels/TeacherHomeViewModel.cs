@@ -34,7 +34,7 @@ namespace YuvaCep.Mobile.ViewModels
         public TeacherHomeViewModel()
         {
             //Menüleri dahil ediyoruz
-            MenuItems.Add(new dashboardItem { Title = "Günlük Rapor", Icon = "📝", ColorHex = "#60A5FA", Route = "DailyReportPage" });
+            MenuItems.Add(new dashboardItem { Title = "Günlük Rapor", Icon = "📝", ColorHex = "#60A5FA", Route = "TeacherDailyReportPage" });
             MenuItems.Add(new dashboardItem { Title = "Duyuru Yayınla", Icon = "📢", ColorHex = "F472B6", Route = "AnnouncementsPage" });
             MenuItems.Add(new dashboardItem { Title = "Yemek Listesi", Icon = "🍎", ColorHex = "#34D399", Route = "MealPlanPage" });
             MenuItems.Add(new dashboardItem { Title = "Ders Programı", Icon = "📅", ColorHex = "#FBBF24", Route = "CurriculumPage" });
@@ -50,8 +50,6 @@ namespace YuvaCep.Mobile.ViewModels
                 await Shell.Current.DisplayAlert("Bilgi", "Bu özellik yakında eklenecek.", "Tamam");
                 return;
             }
-            //İlgili sayfaya git (Henüz eklemedim, uyarı atsın.
-            await Shell.Current.DisplayAlert("Yönlendirme", $"{route} sayfasına gidiliyor...", "Tamam");
 
             await Shell.Current.GoToAsync(route);
         }

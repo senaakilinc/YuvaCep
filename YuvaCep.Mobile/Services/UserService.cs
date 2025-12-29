@@ -21,7 +21,6 @@ namespace YuvaCep.Mobile.Services
 
         public async Task<StudentDto> GetMyStudentAsync(string token)
         {
-            // Token'ı başlığa ekle (Giriş bileti)
             _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
@@ -30,15 +29,18 @@ namespace YuvaCep.Mobile.Services
                 var response = await _httpClient.GetAsync("/api/Parent/my-student");
                 if (response.IsSuccessStatusCode)
                 {
-                    // Eğer içerik boşsa (null) null döner
                     if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return null;
+                    var options = new System.Text.Json.JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
 
-                    return await response.Content.ReadFromJsonAsync<StudentDto>();
+                    return await response.Content.ReadFromJsonAsync<StudentDto>(options);
+                    
                 }
             }
             catch
             {
-                // Hata olursa (internet yok vs.)
                 return null;
             }
             return null;
@@ -64,7 +66,7 @@ namespace YuvaCep.Mobile.Services
                     return (false, errorResult?.Message ?? "Bir hata oluştu.");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return (false, "Bağlantı Hatası: " + ex.Message);
             }

@@ -18,13 +18,19 @@ namespace YuvaCep.Mobile.ViewModels
         [ObservableProperty]
         private bool isBusy;
 
+        [ObservableProperty]
+        private string parentName;
+
         public ParentHomeViewModel(UserService userService)
         {
             _userService = userService;
             _ = InitializeAsync();
         }
+
         private async Task InitializeAsync()
         {
+            ParentName = Preferences.Get("UserName", "Sayın Veli");
+
             await LoadStudentDataAsync();
         }
 
@@ -35,7 +41,7 @@ namespace YuvaCep.Mobile.ViewModels
 
             try
             {
-                IsBusy = true; 
+                IsBusy = true;
 
                 var token = Preferences.Get("AuthToken", string.Empty);
 
@@ -113,6 +119,7 @@ namespace YuvaCep.Mobile.ViewModels
             // 2. Hafızadaki bilgileri temizle 
             Preferences.Remove("AuthToken");
             Preferences.Remove("UserRole");
+            Preferences.Remove("UserName"); 
 
             // 3. En başa (Rol Seçimi / Giriş) sayfasına gönder
             await Shell.Current.GoToAsync("//RoleSelectionPage");

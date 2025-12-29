@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using YuvaCep.Persistence.Contexts;
@@ -11,9 +12,11 @@ using YuvaCep.Persistence.Contexts;
 namespace YuvaCep.Persistence.Migrations
 {
     [DbContext(typeof(YuvaCepDbContext))]
-    partial class YuvaCepDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251228150002_AddAnnouncementsTable")]
+    partial class AddAnnouncementsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,46 +135,82 @@ namespace YuvaCep.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Activity")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ActivityNote")
+                    b.Property<string>("ActivityNotes")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
-                    b.Property<int>("Breakfast")
+                    b.Property<string>("ActivityType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("AteWell")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("BehaviorNotes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("BehaviorScore")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<string>("BreakfastNotes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("FoodNote")
+                    b.Property<string>("GeneralNotes")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("LunchNotes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("MoodStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int?>("NapDurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("NapTaken")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("NutritionNotes")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Lunch")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Mood")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("MoodNote")
+                    b.Property<string>("SnackNotes")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Sleep")
-                        .HasColumnType("integer");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("TeacherNote")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("ToiletUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("DailyReports");
                 });
@@ -574,7 +613,15 @@ namespace YuvaCep.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("YuvaCep.Domain.Entities.Teacher", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Student");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("YuvaCep.Domain.Entities.Feedback", b =>

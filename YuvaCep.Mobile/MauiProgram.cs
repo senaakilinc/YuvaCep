@@ -2,12 +2,18 @@
 using YuvaCep.Mobile.Services;   
 using YuvaCep.Mobile.ViewModels; 
 using YuvaCep.Mobile.Views;
+using System.Globalization;
+
 namespace YuvaCep.Mobile
 {
     public static class MauiProgram
     {
         public static MauiApp CreateMauiApp()
         {
+            var culture = new CultureInfo("tr-TR");
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
@@ -25,8 +31,15 @@ namespace YuvaCep.Mobile
             builder.Services.AddTransient<ParentHomeViewModel>();
             builder.Services.AddTransient<StudentDetailPage>();
             builder.Services.AddTransient<StudentDetailViewModel>();
-
-
+            builder.Services.AddSingleton<AnnouncementService>();
+            builder.Services.AddTransient<AnnouncementsPage>();
+            builder.Services.AddTransient<AnnouncementsViewModel>();
+            builder.Services.AddSingleton<DailyReportService>();
+            builder.Services.AddTransient<DailyReportPage>();
+            builder.Services.AddTransient<DailyReportViewModel>();
+            builder.Services.AddTransient<YuvaCep.Mobile.Views.TeacherDailyReportPage>();
+            builder.Services.AddTransient<YuvaCep.Mobile.ViewModels.TeacherDailyReportViewModel>();
+            builder.Services.AddSingleton<StudentService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

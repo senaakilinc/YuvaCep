@@ -52,7 +52,9 @@ namespace YuvaCep.Application.Services
                 Token = token,
                 UserRole = user.Role.ToString(),
                 Message = "Giriş başarılı.",
-                IsSuccess = true
+                IsSuccess = true,
+                Name = user.FirstName,       
+                Surname = user.LastName
             };
         }
 

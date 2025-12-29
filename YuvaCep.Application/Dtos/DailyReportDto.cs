@@ -3,27 +3,29 @@ using YuvaCep.Domain.Enums;
 
 namespace YuvaCep.Application.Dtos
 {
-    public class CreateDailyReportDto
+    public class DailyReportDto
     {
-        public Guid StudentId { get; set; }
+        public Guid Id { get; set; }
+        public DateTime Date { get; set; }
+        public string StudentName { get; set; }
 
-        // Mod
+        // 1. Mod Kartı
         public MoodStatus Mood { get; set; }
         public string MoodNote { get; set; }
 
-        // Yemek
+        // 2. Beslenme Kartı
         public FoodStatus Breakfast { get; set; }
         public FoodStatus Lunch { get; set; }
         public string FoodNote { get; set; }
 
-        // Uyku
+        // 3. Uyku Kartı
         public SleepStatus Sleep { get; set; }
 
-        // Etkinlik (YENİ)
+        // 4. Etkinlik Kartı
         public ActivityStatus Activity { get; set; }
         public string ActivityNote { get; set; }
 
-        // Genel Not
+        // 5. Genel Değerlendirme
         public string TeacherNote { get; set; }
     }
 }

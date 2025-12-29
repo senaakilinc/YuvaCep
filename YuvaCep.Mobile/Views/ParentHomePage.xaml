@@ -4,47 +4,58 @@
              xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.ParentHomePage"
              Title="Veli Ana Sayfası"
-             BackgroundColor="#F5F5F5">
+             BackgroundColor="#F5F5F5"
+             Shell.NavBarIsVisible="False">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Çıkış Yap" Command="{Binding LogoutCommand}" Order="Primary"/>
-    </ContentPage.ToolbarItems>
+    <Grid RowDefinitions="Auto, *" Padding="0">
 
-    <Grid RowDefinitions="Auto, *" Padding="20">
+        <Grid Grid.Row="0" BackgroundColor="#4A90E2" Padding="20,40,20,30" ColumnDefinitions="*, Auto">
 
-        <Label Text="Hoş Geldiniz" FontSize="24" FontAttributes="Bold" TextColor="#333" />
+            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                <Label Text="Hoşgeldiniz," 
+                       TextColor="#E3F2FD" FontSize="14"/>
 
-        <Grid Grid.Row="1" VerticalOptions="Center">
+                <Label Text="{Binding ParentName}" 
+                       TextColor="White" FontSize="20" FontAttributes="Bold"/>
+            </VerticalStackLayout>
 
-            <ActivityIndicator IsRunning="{Binding IsBusy}" 
-                               IsVisible="{Binding IsBusy}" 
-                               Color="Blue"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               HeightRequest="50" WidthRequest="50"/>
+            <ImageButton Grid.Column="1" 
+                         Command="{Binding LogoutCommand}" 
+                         HeightRequest="30" 
+                         VerticalOptions="Start">
+                <ImageButton.Source>
+                    <FontImageSource Glyph="🚪" Color="White" Size="30"/>
+                </ImageButton.Source>
+            </ImageButton>
+        </Grid>
 
+        <ScrollView Grid.Row="1" Padding="20">
             <VerticalStackLayout Spacing="20">
 
-                <VerticalStackLayout.Triggers>
-                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding IsBusy}" Value="True">
-                        <Setter Property="IsVisible" Value="False" />
-                    </DataTrigger>
-                </VerticalStackLayout.Triggers>
+                <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                                   IsVisible="{Binding IsBusy}" 
+                                   Color="#4A90E2"
+                                   HeightRequest="40"/>
 
                 <Frame IsVisible="{Binding HasStudent}" 
-                       BackgroundColor="White" CornerRadius="15" Padding="20" HasShadow="True">
+                       BackgroundColor="White" CornerRadius="15" Padding="20" HasShadow="True" BorderColor="Transparent">
                     <Frame.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToStudentDetailCommand}" />
                     </Frame.GestureRecognizers>
-                    <VerticalStackLayout Spacing="10">
 
-                        <Label Text="Öğrenci Bilgileri" FontSize="18" TextColor="Gray" HorizontalOptions="Center"/>
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="🎓 Öğrenci Detayları" FontSize="16" TextColor="#4A90E2" FontAttributes="Bold" HorizontalOptions="Center"/>
+                        <BoxView HeightRequest="1" Color="#F0F0F0" />
 
-                        <Label Text="{Binding Student.Name}" 
-                               FontSize="28" FontAttributes="Bold" TextColor="#2D3E50" HorizontalOptions="Center"/>
+                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                            <Label Text="{Binding Student.FullName}" 
+                                    FontSize="24" FontAttributes="Bold" TextColor="#2D3E50" HorizontalOptions="Center"/>
 
-                        <Label Text="{Binding Student.ClassName}" 
-                               FontSize="16" TextColor="Orange" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Student.ClassName}" 
+                                    FontSize="16" TextColor="Orange" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+
+                        <Label Text="Detaylar için tıklayınız 👉" FontSize="12" TextColor="Gray" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </Frame>
 
@@ -55,21 +66,25 @@
                         </DataTrigger>
                     </VerticalStackLayout.Triggers>
 
-                    <Label Text="🚫" FontSize="50" HorizontalOptions="Center"/>
+                    <Label Text="🚫" FontSize="60" HorizontalOptions="Center"/>
                     <Label Text="Henüz Bir Çocuk Eklemediniz" 
-                           FontSize="20" FontAttributes="Bold" TextColor="Red" HorizontalOptions="Center"/>
-                    <Label Text="Kurumunuzdan aldığınız kod ile çocuğunuzu eşleştirebilirsiniz." 
+                           FontSize="18" FontAttributes="Bold" TextColor="#E53935" HorizontalOptions="Center"/>
+                    <Label Text="Kurum kodunuzla çocuğunuzu ekleyebilirsiniz." 
                            FontSize="14" TextColor="Gray" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-
-                    <Button Text="Çocuk Ekle" 
-                            Command="{Binding AddChildCommand}" 
-                            BackgroundColor="#2D3E50" 
-                            TextColor="White" 
-                            CornerRadius="20"/>
                 </VerticalStackLayout>
 
+                <BoxView HeightRequest="1" Color="#E0E0E0" Margin="0,10"/>
+
+                <Button Text="➕ Çocuk Ekle" 
+                        Command="{Binding AddChildCommand}" 
+                        BackgroundColor="#2D3E50" 
+                        TextColor="White" 
+                        FontAttributes="Bold"
+                        CornerRadius="25"
+                        HeightRequest="50"/>
+
             </VerticalStackLayout>
-        </Grid>
+        </ScrollView>
     </Grid>
 
 </ContentPage>

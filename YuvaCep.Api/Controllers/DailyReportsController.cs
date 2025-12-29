@@ -1,149 +1,106 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using YuvaCep.Application.Dtos;
-using YuvaCep.Application.Services;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using YuvaCep.Domain.Entities;
+using YuvaCep.Persistence.Contexts;
 
 namespace YuvaCep.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class DailyReportsController : ControllerBase
     {
-        private readonly IDailyReportService _dailyReportService;
+        private readonly YuvaCepDbContext _context;
 
-        public DailyReportsController(IDailyReportService dailyReportService)
+        public DailyReportsController(YuvaCepDbContext context)
         {
-            _dailyReportService = dailyReportService;
+            _context = context;
         }
 
-        // GET: api/DailyReports
-        [HttpGet]
-        [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> GetAllReports(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            var reports = await _dailyReportService.GetAllAsync(pageNumber, pageSize);
-            return Ok(reports);
-        }
-
-        // GET: api/DailyReports/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetReport(Guid id)
-        {
-            var report = await _dailyReportService.GetByIdAsync(id);
-
-            if (report == null)
-            {
-                return NotFound(new { message = "Rapor bulunamadı." });
-            }
-
-            return Ok(report);
-        }
-
-        // GET: api/DailyReports/student/{studentId}
-        [HttpGet("student/{studentId}")]
-        public async Task<IActionResult> GetReportsByStudent(
-            Guid studentId,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            var reports = await _dailyReportService.GetByStudentIdAsync(studentId, pageNumber, pageSize);
-            return Ok(reports);
-        }
-
-        // GET: api/DailyReports/student/{studentId}/date-range
-        [HttpGet("student/{studentId}/date-range")]
-        public async Task<IActionResult> GetReportsByDateRange(
-            Guid studentId,
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
-        {
-            var reports = await _dailyReportService.GetByDateRangeAsync(studentId, startDate, endDate);
-            return Ok(reports);
-        }
-
-        // GET: api/DailyReports/today
-        [HttpGet("today")]
-        [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> GetTodayReports()
-        {
-            var reports = await _dailyReportService.GetTodayReportsAsync();
-            return Ok(reports);
-        }
-
-        // POST: api/DailyReports
+        // 1. RAPOR OLUŞTUR (Öğretmen)
         [HttpPost]
-        [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> CreateReport([FromBody] CreateDailyReportDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateDailyReportDto request)
         {
-            // 1. KURAL: Tarih o anın tarihi olsun (Elle girilmesin)
-            
-            if (!ModelState.IsValid)
+            var report = new DailyReport
             {
-                return BadRequest(ModelState);
-            }
+                Id = Guid.NewGuid(),
+                Date = DateTime.UtcNow,
+                StudentId = request.StudentId,
 
-            var teacherId = GetCurrentUserId();
+                // Mod
+                Mood = request.Mood,
+                MoodNote = request.MoodNote ?? "",
 
-            try
-            {
-                var response = await _dailyReportService.CreateAsync(dto, teacherId);
-                return CreatedAtAction(nameof(GetReport), new { id = response.Id }, response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                // Yemek
+                Breakfast = request.Breakfast,
+                Lunch = request.Lunch,
+                FoodNote = request.FoodNote ?? "",
+
+                // Uyku
+                Sleep = request.Sleep,
+
+                // Etkinlik
+                Activity = request.Activity,
+                ActivityNote = request.ActivityNote ?? "",
+
+                // Genel
+                TeacherNote = request.TeacherNote ?? ""
+            };
+
+            _context.DailyReports.Add(report);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Günlük rapor kaydedildi." });
         }
 
-        // PUT: api/DailyReports/{id}
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> UpdateReport(Guid id, [FromBody] UpdateDailyReportDto dto)
+        // 2. ÖĞRENCİNİN RAPORLARINI GETİR (Veli)
+        [HttpGet("student/{studentId}")]
+        public async Task<IActionResult> GetByStudentId(Guid studentId)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var reports = await _context.DailyReports
+                .Include(r => r.Student)
+                .Where(r => r.StudentId == studentId)
+                .OrderByDescending(r => r.Date)
+                .Select(r => new DailyReportDto
+                {
+                    Id = r.Id,
+                    Date = r.Date,
+                    StudentName = r.Student.Name,
 
-            var response = await _dailyReportService.UpdateAsync(id, dto);
+                    Mood = r.Mood,
+                    MoodNote = r.MoodNote,
 
-            if (response == null)
-            {
-                return NotFound(new { message = "Rapor bulunamadı." });
-            }
+                    Breakfast = r.Breakfast,
+                    Lunch = r.Lunch,
+                    FoodNote = r.FoodNote,
 
-            return Ok(response);
+                    Sleep = r.Sleep,
+
+                    Activity = r.Activity,
+                    ActivityNote = r.ActivityNote,
+
+                    TeacherNote = r.TeacherNote
+                })
+                .ToListAsync();
+
+            return Ok(reports);
         }
 
-        // DELETE: api/DailyReports/{id}
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> DeleteReport(Guid id)
+        [HttpGet("reported-today-ids")]
+        public async Task<IActionResult> GetReportedStudentIds()
         {
-            var result = await _dailyReportService.DeleteAsync(id);
+            // Bugünün başlangıcı (Saat 00:00)
+            var today = DateTime.UtcNow.Date;
 
-            if (!result)
-            {
-                return NotFound(new { message = "Rapor bulunamadı." });
-            }
+            // Veritabanında tarihi 'bugün' olan raporların Öğrenci ID'lerini çek
+            var reportedStudentIds = await _context.DailyReports
+                .Where(r => r.Date >= today) // Bugün ve sonrası
+                .Select(r => r.StudentId)
+                .Distinct() // Aynı öğrenci 2 kere geldiyse 1 kere say
+                .ToListAsync();
 
-            return NoContent();
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-            {
-                throw new UnauthorizedAccessException("Geçersiz kullanıcı.");
-            }
-            return userId;
+            return Ok(reportedStudentIds);
         }
     }
 }

@@ -1,77 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+using YuvaCep.Mobile.Dtos;
+using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-
-    //Ekranda eski duyuruları da listelemek için model
-    public class AnnouncementItem
-    {
-        public string Title { get; set; }
-        public string Content { get; set; }
-        public string Date { get; set; }
-
-    }
-
+    // Bir önceki sayfadan (Öğrenci Detay) gönderilen Öğrenciyi yakalar
+    [QueryProperty(nameof(Student), "Student")]
     public partial class AnnouncementsViewModel : ObservableObject
     {
-        //Yeni duyuru alanları
-        [ObservableProperty]
-        private string title;
+        private readonly AnnouncementService _announcementService;
 
         [ObservableProperty]
-        private string content;
+        private StudentDto student;
 
-        //Geçmiş duyurular listesi (Sayfanın altında görünür)
-        public ObservableCollection<AnnouncementItem> History { get; } = new();
+        [ObservableProperty]
+        private bool isBusy;
 
-        public AnnouncementsViewModel()
+        // Ekranda gösterilecek gerçek liste
+        public ObservableCollection<AnnouncementDto> Announcements { get; } = new();
+
+        public AnnouncementsViewModel(AnnouncementService announcementService)
         {
-            //Örnek veriler
-            History.Add(new AnnouncementItem { Title = "Hoşgeldiniz", Content = "Yeni eğitim yılımız hayırlı olsun.", Date = "01.09.2025" });
+            _announcementService = announcementService;
+        }
+
+        // Sayfa yüklenirken veya Öğrenci bilgisi geldiğinde çalışır
+        async partial void OnStudentChanged(StudentDto value)
+        {
+            if (value != null)
+            {
+                await LoadAnnouncementsAsync();
+            }
         }
 
         [RelayCommand]
-        private async Task SendAnnouncementAsync()
+        public async Task LoadAnnouncementsAsync()
         {
-            if ((string.IsNullOrWhiteSpace(title)) || (string.IsNullOrWhiteSpace(content)))
+            if (IsBusy || Student == null) return;
+            IsBusy = true;
+
+            try
             {
-                await Shell.Current.DisplayAlert("Eksik Bilgi!", "Lütfen başlık ve içerik giriniz.", "Tamam");
-                return;
+                var token = Preferences.Get("AuthToken", string.Empty);
+
+                // SERVİSTEN VERİYİ ÇEK (Sınıf ID'sine göre)
+                var list = await _announcementService.GetAnnouncementsAsync(token, Student.ClassId);
+
+                Announcements.Clear();
+                foreach (var item in list)
+                {
+                    Announcements.Add(item);
+                }
             }
-
-            //2. Onay penceresi (EVET / HAYIR)
-            bool answer = await Shell.Current.DisplayAlert(
-                "Yayınla",
-                "Bu duyuruyu yayınlamak istiyor musunuz? (Tüm velilere bildirim gönderilecektir!)",
-                "Evet",
-                "Hayır");
-
-
-            //Eğer kullanıcı HAYIR'a bastıysa işlemden çık
-            if (!answer) return;
-
-            //3. Listeye ekle (Kullanıcı EVET'e basarsa burası çalışır)
-            History.Insert(0, new AnnouncementItem
+            catch (Exception ex)
             {
-                Title = Title,
-                Content = content,
-                Date = DateTime.Now.ToString("dd.MM.yyyy")
-            });
-
-            //4. Başarılı mesajı
-            await Shell.Current.DisplayAlert("Başarılı", "Duyuru başarıyla yayımlandı.", "Tamam");
-
-            //5. Kutucukları temizle
-            Title = string.Empty;
-            Content = string.Empty;
-
+                await Shell.Current.DisplayAlert("Hata", "Duyurular yüklenirken hata oluştu.", "Tamam");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         [RelayCommand]
