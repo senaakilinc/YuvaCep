@@ -8,9 +8,9 @@ namespace YuvaCep.Mobile
         public App()
         {
             InitializeComponent();
-            UserAppTheme = AppTheme.Light;
-
             MainPage = new AppShell();
+
+            UserAppTheme = AppTheme.Light;
 
             // --- BENİ HATIRLA KONTROLÜ ---
             CheckLoginStatus();

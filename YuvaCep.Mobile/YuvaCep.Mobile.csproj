@@ -36,6 +36,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Views\ParentDailyReportPage.xaml.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Remove="Views\ParentDailyReportPage.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.20" />
@@ -69,9 +77,6 @@
 		<MauiXaml Update="Views\MealPlanPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
-		<MauiXaml Update="Views\ParentDailyReportPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</MauiXaml>
 		<MauiXaml Update="Views\ParentHomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
@@ -85,6 +90,9 @@
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\StudentListPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="Views\TeacherDailyReportPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="Views\TeacherHomePage.xaml">

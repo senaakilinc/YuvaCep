@@ -27,12 +27,12 @@ namespace YuvaCep.Api.Controllers
 
             var response = await _authService.LoginAsync(request);
 
-            if (response.Token != null)
+            if (response != null && !string.IsNullOrEmpty(response.Token))
             {
                 return Ok(response);
             }
 
-            return Unauthorized(new { message = response.Message });
+            return Unauthorized(new { message = "Giriş Başarısız" });
         }
 
         [HttpPost("register/parent")]

@@ -1,14 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
-{   
+{
     public partial class LoginViewModel : ObservableObject, IQueryAttributable
     {
         private readonly AuthService _authService;
@@ -19,32 +14,28 @@ namespace YuvaCep.Mobile.ViewModels
         }
 
         [ObservableProperty]
-        private string userRole = string.Empty; // "Parent" veya "Teacher"
+        private string userRole = string.Empty;
 
         [ObservableProperty]
         private string tcKimlikNo = string.Empty;
-        
+
         [ObservableProperty]
         private string password = string.Empty;
 
         [ObservableProperty]
-        private bool isRememberMeChecked; // Beni Hatırla Checkbox'ı
-
+        private bool isRememberMeChecked;
 
         [ObservableProperty]
         private string registerButtonText = "Kayıt Ol";
 
         [ObservableProperty]
-        private bool isBusy; // İşlem sırasında butonu kilitlemek için
+        private bool isBusy;
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             if (query.ContainsKey("role"))
             {
-                // Gelen veriyi al (Teacher veya Parent)
                 UserRole = query["role"].ToString();
-
-                // Buton yazısını hemen güncelle
                 if (UserRole == "Teacher")
                     RegisterButtonText = "Kayıt Ol (Öğretmen)";
                 else
@@ -52,14 +43,11 @@ namespace YuvaCep.Mobile.ViewModels
             }
         }
 
-
-
         [RelayCommand]
         private async Task LoginAsync()
         {
             if (IsBusy) return;
 
-            // Ekrana uyarı verirken de TC'yi gösterelim.
             if (string.IsNullOrWhiteSpace(TcKimlikNo) || string.IsNullOrWhiteSpace(Password))
             {
                 await Shell.Current.DisplayAlert("Hata", "Lütfen tüm alanları doldurunuz", "Tamam");
@@ -74,17 +62,22 @@ namespace YuvaCep.Mobile.ViewModels
 
                 if (response != null && response.IsSuccess)
                 {
+                    // Token ve Rolü Kaydet
                     Preferences.Set("AuthToken", response.Token);
-
                     string roleFromServer = response.UserRole;
                     Preferences.Set("UserRole", roleFromServer);
+
+                    // İsmi Kaydet
+                    string fullName = $"{response.Name} {response.Surname}";
+                    Preferences.Set("UserName", fullName);
 
                     if (IsRememberMeChecked)
                     {
                         Preferences.Set("IsLoggedIn", true);
                     }
 
-                    await Shell.Current.DisplayAlert("Başarılı", $"Hoşgeldiniz, {response.Message}", "Tamam");
+                    // Hoşgeldiniz mesajında ismi gösterelim
+                    await Shell.Current.DisplayAlert("Başarılı", $"Hoşgeldiniz, {fullName}", "Tamam");
 
                     if (roleFromServer == "Teacher")
                     {
@@ -114,7 +107,6 @@ namespace YuvaCep.Mobile.ViewModels
         [RelayCommand]
         private async Task GoToRegisterAsync()
         {
-            // Kayıt sayfasına rol bilgisiyle git
             await Shell.Current.GoToAsync($"RegisterPage?role={UserRole}");
         }
 
@@ -123,7 +115,5 @@ namespace YuvaCep.Mobile.ViewModels
         {
             await Shell.Current.GoToAsync("..");
         }
-
     }
- 
 }

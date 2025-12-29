@@ -1,9 +1,11 @@
+using YuvaCep.Mobile.ViewModels;
 namespace YuvaCep.Mobile.Views;
 
 public partial class AnnouncementsPage : ContentPage
 {
-	public AnnouncementsPage()
-	{
-		InitializeComponent();
-	}
+    public AnnouncementsPage(AnnouncementsViewModel viewModel)
+    {
+        InitializeComponent();
+        BindingContext = viewModel;
+    }
 }

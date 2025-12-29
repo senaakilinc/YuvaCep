@@ -7,12 +7,21 @@ using YuvaCep.Mobile.Dtos;
 
 namespace YuvaCep.Mobile.Services
 {
+    public class LoginResponse
+    {
+        public bool IsSuccess { get; set; }
+        public string Token { get; set; }
+        public string UserRole { get; set; }
+        public string Message { get; set; }
+        public string Name { get; set; }
+        public string Surname { get; set; }
+    }
+
     public class AuthService
     {
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
         private readonly JsonSerializerOptions _serializerOptions;
-
 
         private const string ApiUrl = "http://10.0.2.2:5000";
 
@@ -21,12 +30,11 @@ namespace YuvaCep.Mobile.Services
             _baseUrl = ApiUrl;
 
             _httpClient = new HttpClient();
-
             _httpClient.Timeout = TimeSpan.FromMinutes(2);
 
             _serializerOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true // Büyük/Küçük harf hatasını önler
             };
         }
 
@@ -42,11 +50,19 @@ namespace YuvaCep.Mobile.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadFromJsonAsync<LoginResponse>(_serializerOptions);
+
+                    if (result != null)
+                    {
+                        result.IsSuccess = true; // HTTP 200 geldiyse başarılıdır
+                    }
+
                     return result;
                 }
                 else
                 {
-                    return new LoginResponse { IsSuccess = false, Message = "Sunucu hatası veya hatalı giriş." };
+                    // Hata mesajını okumaya çalışalım
+                    var errorMsg = await response.Content.ReadAsStringAsync();
+                    return new LoginResponse { IsSuccess = false, Message = "Giriş başarısız. Bilgileri kontrol ediniz." };
                 }
             }
             catch (Exception ex)

@@ -1,72 +1,118 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
+             xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.DailyReportPage"
-             Title="Günlük Rapor Yaz"
-             BackgroundColor="White">
-    <ContentPage.BindingContext>
-        <vm:DailyReportViewModel />
-    </ContentPage.BindingContext>
+             Title="Günlük Rapor"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F5F5F5">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="20">
+    <Grid RowDefinitions="Auto, *">
 
-            <Label Text="Öğrenci Seçiniz" FontAttributes="Bold" TextColor="#1F2937"/>
-            <Frame BorderColor="Gray" Padding="0" CornerRadius="10" BackgroundColor="#F3F4F6">
-                <Picker Title="Listeden Seçiniz"
-                        ItemsSource="{Binding MyStudents}"
-                        ItemDisplayBinding="{Binding Name}"
-                        SelectedItem="{Binding SelectedStudent}"
-                        TextColor="Black"
-                        TitleColor="Gray"/>
-            </Frame>
+        <Grid Grid.Row="0" BackgroundColor="#4A90E2" Padding="20,40,20,20" ColumnDefinitions="Auto, *">
+            <ImageButton Clicked="BackButton_Clicked" HeightRequest="24" HorizontalOptions="Start">
+                <ImageButton.Source>
+                    <FontImageSource Glyph="&#x2190;" Color="White" Size="24" />
+                </ImageButton.Source>
+            </ImageButton>
+            <Label Grid.Column="1" Text="Günlük Rapor" TextColor="White" FontSize="20" FontAttributes="Bold" 
+                   HorizontalOptions="Center" VerticalOptions="Center" Margin="-24,0,0,0"/>
+        </Grid>
 
-            <Label Text="Günü Nasıl Geçti?" FontAttributes="Bold" TextColor="#1F2937" Margin="0,10,0,0"/>
+        <ScrollView Grid.Row="1" Padding="20">
+            <VerticalStackLayout Spacing="5">
 
-            <Frame BackgroundColor="#EFF6FF" BorderColor="#2563EB" Padding="10" HorizontalOptions="Center">
-                <Label Text="{Binding CurrentMoodText}" FontSize="18" FontAttributes="Bold" TextColor="#2563EB" HorizontalOptions="Center"/>
-            </Frame>
+                <Frame Padding="15" CornerRadius="15" BackgroundColor="White" BorderColor="#E0E0E0" HasShadow="True">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <Label Text="📅 Tarih:" VerticalOptions="Center" FontAttributes="Bold" TextColor="#333" FontSize="16"/>
 
-            <CollectionView ItemsSource="{Binding MoodOptions}" 
-                            HeightRequest="70" 
-                            SelectionMode="Single"  
-                            SelectedItem="{Binding SelectedMood}">
+                        <DatePicker Date="{Binding SelectedDate}" 
+                                    Format="d MMMM yyyy, dddd"
+                                    TextColor="#4A90E2"
+                                    FontAttributes="Bold"
+                                    FontSize="16"
+                                    MinimumDate="01/01/2024"/>
+                    </HorizontalStackLayout>
+                </Frame>
 
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="5" HorizontalItemSpacing="5"/>
-                </CollectionView.ItemsLayout>
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#4A90E2"/>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Padding="0" 
-                               CornerRadius="10"
-                               HasShadow="False"
-                               BorderColor="{Binding BorderColor}" 
-                               BackgroundColor="{Binding BackgroundColor}"
-                               HeightRequest="60">
+                <VerticalStackLayout IsVisible="{Binding IsReportEmpty}" Spacing="15" VerticalOptions="Center" Margin="0,50,0,0">
+                    <Label Text="🤷‍♂️" FontSize="80" HorizontalOptions="Center"/>
+                    <Label Text="Bu tarihte rapor girilmemiş." 
+                           TextColor="Gray" FontSize="18" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
 
-                            <Label Text="{Binding Emoji}" 
-                                   FontSize="30" 
-                                   HorizontalOptions="Center" 
-                                   VerticalOptions="Center"/>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
 
-            <Label Text="Beslenme / Yemek" FontAttributes="Bold" TextColor="#1F2937" Margin="0,10,0,0"/>
-            <Frame BorderColor="Gray" Padding="10" CornerRadius="10" BackgroundColor="#F3F4F6">
-                <Editor Placeholder="Bugün ne yedi?" Text="{Binding NutritionInfo}" TextColor="Black" PlaceholderColor="Gray" HeightRequest="80" AutoSize="TextChanges"/>
-            </Frame>
+                <VerticalStackLayout IsVisible="{Binding HasReport}" Spacing="15">
 
-            <Label Text="Öğretmen Notu" FontAttributes="Bold" TextColor="#1F2937" Margin="0,10,0,0"/>
-            <Frame BorderColor="Gray" Padding="10" CornerRadius="10" BackgroundColor="#F3F4F6">
-                <Editor Placeholder="Veliye not..." Text="{Binding TeacherNote}" TextColor="Black" PlaceholderColor="Gray" HeightRequest="80" AutoSize="TextChanges"/>
-            </Frame>
+                    <Frame Padding="15" CornerRadius="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="15">
+                            <Frame Grid.Column="0" HeightRequest="60" WidthRequest="60" CornerRadius="30" Padding="0" IsClippedToBounds="True" BorderColor="#4A90E2" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Image Aspect="AspectFill" Source="student_avatar_placeholder.png"/>
+                            </Frame>
 
-            <Button Text="RAPORU KAYDET" Command="{Binding SaveReportCommand}" BackgroundColor="#2563EB" TextColor="White" FontAttributes="Bold" HeightRequest="50" CornerRadius="10" Margin="0,20,0,30"/>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="Öğrenci" TextColor="#90A4AE" FontSize="12" FontAttributes="Bold"/>
+                                <Label Text="{Binding Student.Name}" TextColor="#37474F" FontSize="20" FontAttributes="Bold"/>
+                                <Label Text="{Binding Student.ClassName}" TextColor="#4A90E2" FontSize="14"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Frame>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                    <Frame Padding="20" CornerRadius="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="15">
+                            <Label Text="{Binding MoodEmoji}" FontSize="50" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="5">
+                                <Label Text="Günün Modu" TextColor="Gray" FontSize="12"/>
+                                <Label Text="{Binding MoodText}" TextColor="{Binding MoodColor}" FontSize="22" FontAttributes="Bold"/>
+                                <Label Text="{Binding CurrentReport.MoodNote}" TextColor="#555" FontSize="14" IsVisible="{Binding CurrentReport.MoodNote, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Frame>
+
+                    <Frame Padding="20" CornerRadius="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="🍽️ Yemek Durumu" TextColor="#4A90E2" FontAttributes="Bold"/>
+                            <BoxView HeightRequest="1" Color="#F0F0F0"/>
+
+                            <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0" Text="Kahvaltı"/>
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding BreakfastText}" FontAttributes="Bold" TextColor="#333"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Text="Öğle Yemeği"/>
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding LunchText}" FontAttributes="Bold" TextColor="#333"/>
+                            </Grid>
+                            <Label Text="{Binding CurrentReport.FoodNote}" TextColor="#666" FontSize="13" FontAttributes="Italic"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Padding="20" CornerRadius="15" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="💤 Uyku &amp; Etkinlik" TextColor="#4A90E2" FontAttributes="Bold"/>
+                            <BoxView HeightRequest="1" Color="#F0F0F0"/>
+
+                            <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0" Text="Uyku"/>
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding SleepText}" FontAttributes="Bold" TextColor="#333"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Text="Etkinlik"/>
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding ActivityText}" FontAttributes="Bold" TextColor="#333"/>
+                            </Grid>
+                            <Label Text="{Binding CurrentReport.ActivityNote}" TextColor="#666" FontSize="13" FontAttributes="Italic"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Padding="20" CornerRadius="15" BackgroundColor="#E3F2FD" HasShadow="True" BorderColor="#90CAF9">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="📝 Öğretmenin Notu" TextColor="#1565C0" FontAttributes="Bold"/>
+                            <Label Text="{Binding CurrentReport.TeacherNote}" TextColor="#0D47A1" FontSize="15"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

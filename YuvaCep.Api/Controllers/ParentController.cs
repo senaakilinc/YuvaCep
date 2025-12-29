@@ -53,6 +53,8 @@ namespace YuvaCep.Api.Controllers
             {
                 Id = studentEntity.Id,
                 Name = studentEntity.Name,
+                Surname = studentEntity.Surname,
+                ClassId = studentEntity.ClassId,
                 ClassName = studentEntity.Class != null ? studentEntity.Class.Name : "Sınıfı Yok",
                 // ImagePath = studentEntity.ImagePath // Fotoğraf alanı varsa
             };

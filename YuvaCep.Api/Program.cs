@@ -25,10 +25,8 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IDailyReportService, DailyReportService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IMonthlyPlanService, MonthlyPlanService>();
-builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IPushNotificationService, MockPushNotificationService>();
 
 
