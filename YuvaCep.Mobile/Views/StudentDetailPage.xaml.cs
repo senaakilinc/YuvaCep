@@ -4,9 +4,9 @@ namespace YuvaCep.Mobile.Views;
 
 public partial class StudentDetailPage : ContentPage
 {
-    public StudentDetailPage(StudentDetailViewModel viewModel)
+    public StudentDetailPage(StudentDetailViewModel vm)
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = vm;
     }
 }

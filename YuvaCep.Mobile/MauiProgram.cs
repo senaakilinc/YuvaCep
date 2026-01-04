@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using YuvaCep.Mobile.Services;   
-using YuvaCep.Mobile.ViewModels; 
+using YuvaCep.Mobile.Services;
+using YuvaCep.Mobile.ViewModels;
 using YuvaCep.Mobile.Views;
 using System.Globalization;
 
@@ -23,27 +23,66 @@ namespace YuvaCep.Mobile
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            // --- SERVİSLER ---
             builder.Services.AddSingleton<AuthService>();
-            builder.Services.AddTransient<YuvaCep.Mobile.Views.LoginPage>();
-            builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddSingleton<UserService>();
+            builder.Services.AddSingleton<AnnouncementService>();
+            builder.Services.AddSingleton<DailyReportService>();
+            builder.Services.AddSingleton<StudentService>();
+            builder.Services.AddSingleton<ClassService>();
+            builder.Services.AddSingleton<FoodListService>();
+            builder.Services.AddSingleton<CurriculumService>();
+           
+
+            // --- GİRİŞ & KAYIT EKRANLARI ---
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<LoginViewModel>();
+
+            builder.Services.AddTransient<RegisterPage>();
+            builder.Services.AddTransient<RegisterViewModel>();
+
+            builder.Services.AddTransient<RoleSelectionPage>();
+            builder.Services.AddTransient<RoleSelectionViewModel>();
+
+            // --- 3. VELİ EKRANLARI ---
             builder.Services.AddTransient<ParentHomePage>();
             builder.Services.AddTransient<ParentHomeViewModel>();
-            builder.Services.AddTransient<StudentDetailPage>();
-            builder.Services.AddTransient<StudentDetailViewModel>();
-            builder.Services.AddSingleton<AnnouncementService>();
+
+            builder.Services.AddTransient<StudentCardsPage>();
+            builder.Services.AddTransient<StudentCardsViewModel>();
+
             builder.Services.AddTransient<AnnouncementsPage>();
             builder.Services.AddTransient<AnnouncementsViewModel>();
-            builder.Services.AddSingleton<DailyReportService>();
+
             builder.Services.AddTransient<DailyReportPage>();
             builder.Services.AddTransient<DailyReportViewModel>();
-            builder.Services.AddTransient<YuvaCep.Mobile.Views.TeacherDailyReportPage>();
-            builder.Services.AddTransient<YuvaCep.Mobile.ViewModels.TeacherDailyReportViewModel>();
-            builder.Services.AddSingleton<StudentService>();
+
+            // --- ÖĞRETMEN EKRANLARI ---
+
+            builder.Services.AddTransient<CreateClassPage>();
+            builder.Services.AddTransient<CreateClassViewModel>();
+
+            builder.Services.AddTransient<TeacherHomePage>();
+            builder.Services.AddTransient<TeacherHomeViewModel>();
+
+            builder.Services.AddTransient<TeacherDailyReportPage>();
+            builder.Services.AddTransient<TeacherDailyReportViewModel>();
+
+            builder.Services.AddTransient<StudentListPage>();
+            builder.Services.AddTransient<StudentListViewModel>();
+
+            builder.Services.AddTransient<StudentDetailPage>();
+            builder.Services.AddTransient<StudentDetailViewModel>();
+
+            builder.Services.AddTransient<FoodListPage>();
+            builder.Services.AddTransient<FoodListViewModel>();
+
+            builder.Services.AddTransient<CurriculumViewModel>();
+            builder.Services.AddTransient<CurriculumPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();
-#endif      
+#endif       
             return builder.Build();
         }
     }

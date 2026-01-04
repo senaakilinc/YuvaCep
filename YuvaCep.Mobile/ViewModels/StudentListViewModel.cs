@@ -1,42 +1,106 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-
+using YuvaCep.Mobile.Dtos;
+using YuvaCep.Mobile.Services;
+using YuvaCep.Mobile.Views;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-    //Öğrenci Modeli (CreateClassViewModel'dekiyle aynı yapıda)
-    public class StudentViewItem
-    {
-        public string Name { get; set; }
-        public string ParentName {  get; set; }
-        public string ReferenceCode { get; set; }
-        public string PhotoUrl { get; set; }
-
-    }
-
     public partial class StudentListViewModel : ObservableObject
     {
-        //Ekranda görünecek liste 
-        public ObservableCollection<StudentViewItem> ClassRoster { get; } = new();
-        public StudentListViewModel()
+        private readonly StudentService _studentService;
+
+        [ObservableProperty] private string className;
+        [ObservableProperty] private bool isBusy;
+
+        // --- POP-UP ---
+        [ObservableProperty] private bool isPopupVisible;
+        [ObservableProperty] private string newStudentName;
+        [ObservableProperty] private string newStudentSurname;
+
+        // Liste bu türden nesneler tutuyor:
+        public ObservableCollection<StudentListDto> Students { get; } = new();
+
+        public StudentListViewModel(StudentService studentService)
         {
-            //Örnek veriler (DB den çekmişiz gibi)
-            ClassRoster.Add(new StudentViewItem { Name = "Ali Yılmaz", ParentName = "Mehmet Yılmaz", ReferenceCode = "A7X29B" });
-            ClassRoster.Add(new StudentViewItem { Name = "Ayşe Demir", ParentName = "Zeynep Demir", ReferenceCode = "K9L12M" });
-            ClassRoster.Add(new StudentViewItem { Name = "Can Öz", ParentName = "Fatma Öz", ReferenceCode = "B2R44Z" });
-            ClassRoster.Add(new StudentViewItem { Name = "Elif Su", ParentName = "Ahmet Su", ReferenceCode = "T8Q99P" });
+            _studentService = studentService;
+            ClassName = Preferences.Get("ClassName", "Sınıfım");
+            LoadStudentsAsync();
         }
 
         [RelayCommand]
-        private async Task GoBackAsync()
+        public async Task LoadStudentsAsync()
         {
-            await Shell.Current.GoToAsync("..");
+            if (IsBusy) return;
+            IsBusy = true;
+
+            try
+            {
+                Students.Clear();
+                var list = await _studentService.GetMyStudentsAsync();
+
+                foreach (var student in list)
+                {
+                    Students.Add(student);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Hata", $"Liste yüklenirken hata: {ex.Message}", "Tamam");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        private void OpenPopup()
+        {
+            NewStudentName = "";
+            NewStudentSurname = "";
+            IsPopupVisible = true;
+        }
+
+        [RelayCommand]
+        private void ClosePopup()
+        {
+            IsPopupVisible = false;
+        }
+
+        [RelayCommand]
+        private async Task SaveStudentAsync()
+        {
+            if (string.IsNullOrWhiteSpace(NewStudentName) || string.IsNullOrWhiteSpace(NewStudentSurname))
+            {
+                await Shell.Current.DisplayAlert("Uyarı", "Lütfen ad ve soyad giriniz.", "Tamam");
+                return;
+            }
+
+            IsBusy = true;
+            string result = await _studentService.AddStudentAsync(NewStudentName.Trim(), NewStudentSurname.Trim());
+            IsBusy = false;
+
+            if (result == "OK")
+            {
+                await Shell.Current.DisplayAlert("Başarılı", "Öğrenci sınıfa eklendi!", "Tamam");
+                IsPopupVisible = false;
+                NewStudentName = "";
+                NewStudentSurname = "";
+                await LoadStudentsAsync();
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Hata Detayı", result, "Tamam");
+            }
+        }
+
+        [RelayCommand]
+        async Task GoToDetail(StudentListDto student)
+        {
+            if (student == null) return;
+            await Shell.Current.GoToAsync($"StudentDetail_Route?id={student.Id}");
         }
     }
 }

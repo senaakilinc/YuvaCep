@@ -1,94 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-
-    // Listede göstereceğimiz geçici öğrenci modeli
-    public class StudentItem
-    {
-        public string Name { get; set; }
-        public string ParentName { get; set; }
-        public string ParentTC { get; set; }
-        public string ReferenceCode { get; set; }
-    }
-
     public partial class CreateClassViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private string className; //Sınıfın İsmi
-        [ObservableProperty]
-        private string ageGroup; //Yaş Grubu
+        private readonly ClassService _classService;
 
-
-        // --- Yeni Öğrenci Ekleme Alanı ---
-        [ObservableProperty]
-        private string newStudentName;
-        [ObservableProperty]
-        private string newParentName;
-        [ObservableProperty]
-        private string newParentTC;
-
-        // Eklenen öğrencilerin listesi (Ekranda anlık görülecek.)
-        public ObservableCollection<StudentItem> Students { get; } = new();
-
-        //Rastgele referans kodu üretici fonksiyon
-        private string GenerateReferenceCode()
+        public CreateClassViewModel(ClassService classService)
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, 6)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+            _classService = classService;
         }
 
-        [RelayCommand]
-        private async Task AddStudentAsync()
-        {
+        [ObservableProperty]
+        private string className;
 
-            //Basit Doğrulama
-            if ((string.IsNullOrWhiteSpace(newStudentName)) || (string.IsNullOrWhiteSpace(newParentTC)))
+        [ObservableProperty]
+        private string selectedAgeGroup;
+
+        public List<string> AgeGroups { get; } = new List<string>
+        {
+            "3-4 Yaş Grubu",
+            "4-5 Yaş Grubu",
+            "5-6 Yaş Grubu"
+        };
+
+        [ObservableProperty]
+        private bool isBusy;
+
+        [RelayCommand]
+        private async Task CreateClassAsync()
+        {
+            if (IsBusy) return;
+
+            if (string.IsNullOrWhiteSpace(ClassName) || string.IsNullOrWhiteSpace(SelectedAgeGroup))
             {
-                await Shell.Current.DisplayAlert("Eksik Bilgi", "Lütfen öğrenci adı ve veli TC giriniz.", "Tamam");
+                await Shell.Current.DisplayAlert("Uyarı", "Lütfen sınıf adı ve yaş grubu seçiniz.", "Tamam");
                 return;
             }
 
-            //Öğrenciyi oluştururken Referans Kodunu da üretiyoruz
-            var student = new StudentItem
+            try
             {
-                Name = newStudentName,
-                ParentName = newParentName,
-                ParentTC = newParentTC,
-                ReferenceCode = GenerateReferenceCode() //Kodu burada ürettik.
-            };
-            Students.Add(student);
+                IsBusy = true;
 
+                var isSuccess = await _classService.CreateClassAsync(ClassName, SelectedAgeGroup);
 
-            //Kutucukları temizler, yeni giriş yapılması için.
-            newStudentName = string.Empty;
-            newParentName = string.Empty;
-            newParentTC = string.Empty;
-        }
+                if (isSuccess)
+                {
+                    Preferences.Set("ClassName", ClassName);
 
-        [RelayCommand]
-        private async Task SaveClassAsync()
-        {
-            if ((string.IsNullOrWhiteSpace(className)) || (Students.Count == 0))
-            {
-                await Shell.Current.DisplayAlert("Uyarı!", "Lütfen sınıf adı girin ve en az bir öğrenci ekleyin.", "Tamam");
-                return;
+                    await Shell.Current.DisplayAlert("Başarılı", "Sınıfınız oluşturuldu!", "Tamam");
+                    await Shell.Current.GoToAsync("//TeacherHomePage");
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Hata", "Sınıf oluşturulurken bir hata oluştu.", "Tamam");
+                }
             }
-            //Burada sonra API'ye tüm listeyi göndereceğiz.
-            await Shell.Current.DisplayAlert("Başarılı", $"{className} sınıfı ve {Students.Count} öğrenci oluşturuldu!", "Tamam");
-
-            //Ana sayfaya yönlendiriyoruz.
-            await Shell.Current.GoToAsync("TeacherHomePage");
+            finally
+            {
+                IsBusy = false;
+            }
         }
-
     }
 }

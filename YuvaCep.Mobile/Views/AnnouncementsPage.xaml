@@ -10,46 +10,59 @@
     <Grid RowDefinitions="Auto, *">
 
         <Grid Grid.Row="0" BackgroundColor="#4A90E2" Padding="15" ColumnDefinitions="Auto, *">
-            <ImageButton Command="{Binding GoBackCommand}" HeightRequest="24" HorizontalOptions="Start">
+            <ImageButton Command="{Binding GoBackCommand}" HeightRequest="24" HorizontalOptions="Start" BackgroundColor="Transparent">
                 <ImageButton.Source>
                     <FontImageSource Glyph="&#x2190;" Color="White" Size="24" />
                 </ImageButton.Source>
             </ImageButton>
-
             <Label Grid.Column="1" Text="Sınıf Duyuruları" 
                    TextColor="White" FontSize="20" FontAttributes="Bold" 
                    HorizontalOptions="Center" VerticalOptions="Center" Margin="-24,0,0,0"/>
         </Grid>
 
         <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" 
-                           Color="#4A90E2" HorizontalOptions="Center" VerticalOptions="Center"/>
+                           Color="#4A90E2" HorizontalOptions="Center" VerticalOptions="Center" ZIndex="2"/>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Announcements}" Margin="0,10,0,0">
-
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Announcements}" Margin="0,10,0,0" ZIndex="1">
             <CollectionView.EmptyView>
                 <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
                     <Label Text="📭" FontSize="50" HorizontalOptions="Center"/>
                     <Label Text="Henüz bir duyuru yok." TextColor="Gray" HorizontalOptions="Center"/>
                 </StackLayout>
             </CollectionView.EmptyView>
-
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame Margin="15,5" Padding="15" CornerRadius="10" HasShadow="True" BorderColor="Transparent" BackgroundColor="White">
                         <VerticalStackLayout Spacing="8">
-
                             <Grid ColumnDefinitions="*, Auto">
                                 <Label Grid.Column="0" Text="{Binding Title}" FontAttributes="Bold" TextColor="#2D3E50" FontSize="16"/>
                                 <Label Grid.Column="1" Text="{Binding CreatedDate, StringFormat='{0:dd.MM.yyyy}'}" TextColor="Gray" FontSize="12"/>
                             </Grid>
-
                             <Label Text="{Binding Content}" TextColor="#555" FontSize="14"/>
-
                         </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+        <Button Grid.Row="1"
+                Text="+"
+                FontSize="30"
+                CornerRadius="30"
+                WidthRequest="60"
+                HeightRequest="60"
+                BackgroundColor="#FF7043"
+                TextColor="White"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="20"
+                ZIndex="3"
+                Command="{Binding AddAnnouncementCommand}"
+                IsVisible="{Binding IsTeacher}">
+            <Button.Shadow>
+                <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.3"/>
+            </Button.Shadow>
+        </Button>
 
     </Grid>
 </ContentPage>

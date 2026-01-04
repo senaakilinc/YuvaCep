@@ -11,7 +11,8 @@
     <ShellContent
         Title="Giriş"
         ContentTemplate="{DataTemplate views:RoleSelectionPage}"
-        Route="RoleSelectionPage" />
+        Route="RoleSelectionPage"
+        Shell.TabBarIsVisible="False" />
 
     <ShellContent 
         ContentTemplate="{DataTemplate views:TeacherHomePage}" 

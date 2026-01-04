@@ -8,20 +8,27 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        Routing.RegisterRoute("RegisterPage", typeof(Views.RegisterPage));
-        Routing.RegisterRoute("CreateClassPage", typeof(CreateClassPage));
-        Routing.RegisterRoute("ParentHomePage", typeof(ParentHomePage));
-        Routing.RegisterRoute("TeacherHomePage", typeof(TeacherHomePage));
-        Routing.RegisterRoute("DailyReportPage", typeof(DailyReportPage));
-        Routing.RegisterRoute("AnnouncementsPage", typeof(AnnouncementsPage));
-        Routing.RegisterRoute("StudentListPage", typeof(StudentListPage));
-        Routing.RegisterRoute("MealPlanPage", typeof(Views.MealPlanPage));
-        Routing.RegisterRoute("StudentDetailPage", typeof(Views.StudentDetailPage));
-        Routing.RegisterRoute("BadgeDetailPage", typeof(Views.BadgeDetailPage));
-        Routing.RegisterRoute("BadgeTrackingPage", typeof(Views.BadgeTrackingPage));
-        Routing.RegisterRoute("LoginPage", typeof(YuvaCep.Mobile.Views.LoginPage));
-        Routing.RegisterRoute(nameof(StudentDetailPage), typeof(StudentDetailPage));
-        Routing.RegisterRoute("TeacherDailyReportPage", typeof(YuvaCep.Mobile.Views.TeacherDailyReportPage));
+        // --- GİRİŞ VE KAYIT ---
+        Routing.RegisterRoute("Login_Route", typeof(LoginPage));
+        Routing.RegisterRoute("Register_Route", typeof(RegisterPage));
+        Routing.RegisterRoute("RoleSelection_Route", typeof(RoleSelectionPage));
+
+        // --- ÖĞRETMEN ROTALARI ---
+        Routing.RegisterRoute("CreateClass_Route", typeof(CreateClassPage));
+        Routing.RegisterRoute("TeacherDailyReport_Route", typeof(TeacherDailyReportPage));
+        Routing.RegisterRoute("StudentList_Route", typeof(StudentListPage));
+
+        // --- DETAY VE DİĞER ROTALAR ---
+        Routing.RegisterRoute("StudentDetail_Route", typeof(StudentDetailPage));
+        Routing.RegisterRoute("ParentHome_Route", typeof(ParentHomePage));
+        Routing.RegisterRoute("DailyReport_Route", typeof(DailyReportPage));
+        Routing.RegisterRoute("Announcements_Route", typeof(AnnouncementsPage));
+        Routing.RegisterRoute("BadgeDetail_Route", typeof(BadgeDetailPage));
+        Routing.RegisterRoute("BadgeTracking_Route", typeof(BadgeTrackingPage));
+        Routing.RegisterRoute("StudentCards_Route", typeof(StudentCardsPage));
+        Routing.RegisterRoute("FoodList_Route", typeof(FoodListPage));
+        Routing.RegisterRoute("CurriculumPage", typeof(CurriculumPage));
+
+
     }
 }
-

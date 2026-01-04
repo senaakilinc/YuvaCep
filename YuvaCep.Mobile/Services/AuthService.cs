@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Maui.Storage; 
 using YuvaCep.Mobile.Dtos;
 
 namespace YuvaCep.Mobile.Services
@@ -15,6 +17,9 @@ namespace YuvaCep.Mobile.Services
         public string Message { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }
+
+        public string ClassName { get; set; } 
+        public Guid? ClassId { get; set; }    
     }
 
     public class AuthService
@@ -34,11 +39,11 @@ namespace YuvaCep.Mobile.Services
 
             _serializerOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true // Büyük/Küçük harf hatasını önler
+                PropertyNameCaseInsensitive = true // Büyük/Küçük harf uyumu sağlar
             };
         }
 
-        // GİRİŞ YAPMA FONKSİYONU
+        // GİRİŞ YAPMA 
         public async Task<LoginResponse> LoginAsync(string tcidnumber, string password)
         {
             var loginData = new { TCIDNumber = tcidnumber, Password = password };
@@ -53,16 +58,38 @@ namespace YuvaCep.Mobile.Services
 
                     if (result != null)
                     {
-                        result.IsSuccess = true; // HTTP 200 geldiyse başarılıdır
-                    }
+                        result.IsSuccess = true;
 
+                        // Token'ı kaydet
+                        await SecureStorage.SetAsync("auth_token", result.Token);
+
+                        // Kullanıcı Adını Kaydet 
+                        string fullName = $"{result.Name} {result.Surname}";
+                        Preferences.Set("UserName", fullName);
+
+                        // Rolü Kaydet
+                        Preferences.Set("UserRole", result.UserRole);
+
+                        // SINIF BİLGİSİNİ KAYDET
+                        if (!string.IsNullOrEmpty(result.ClassName))
+                        {
+                            Preferences.Set("ClassName", result.ClassName);
+                            Preferences.Set("ClassId", result.ClassId.ToString());
+                        }
+                        else
+                        {
+                            // Eğer sınıfı yoksa eski veriyi temizle
+                            Preferences.Remove("ClassName");
+                            Preferences.Remove("ClassId");
+                        }
+
+                    }
                     return result;
                 }
                 else
                 {
-                    // Hata mesajını okumaya çalışalım
-                    var errorMsg = await response.Content.ReadAsStringAsync();
-                    return new LoginResponse { IsSuccess = false, Message = "Giriş başarısız. Bilgileri kontrol ediniz." };
+                    var errorResult = await response.Content.ReadFromJsonAsync<LoginResponse>(_serializerOptions);
+                    return errorResult ?? new LoginResponse { IsSuccess = false, Message = "Giriş başarısız." };
                 }
             }
             catch (Exception ex)
@@ -71,37 +98,55 @@ namespace YuvaCep.Mobile.Services
             }
         }
 
-        // KAYIT FONKSİYONU
-        public async Task<bool> RegisterAsync(string tcidnumber, string password, string name, string surname, string userType)
+        // VELİ KAYIT 
+        public async Task<LoginResponse> RegisterParentAsync(ParentRegisterRequest request)
         {
-            var registerData = new
-            {
-                TCIDNumber = tcidnumber,
-                Password = password,
-                Name = name,
-                Surname = surname
-            };
-
-            string endpointUrl;
-
-            // Kullanıcı tipine göre doğru adresi seçiyoruz
-            if (userType == "Öğretmen" || userType == "Teacher")
-            {
-                endpointUrl = $"{_baseUrl}/api/Auth/register/teacher";
-            }
-            else
-            {
-                endpointUrl = $"{_baseUrl}/api/Auth/register/parent";
-            }
-
             try
             {
-                var response = await _httpClient.PostAsJsonAsync(endpointUrl, registerData);
-                return response.IsSuccessStatusCode;
+                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/Auth/register/parent", request);
+                var result = await response.Content.ReadFromJsonAsync<LoginResponse>(_serializerOptions);
+
+                if (result == null) return new LoginResponse { IsSuccess = false, Message = "Sunucudan boş cevap döndü." };
+
+                // Kayıt başarılıysa otomatik giriş yapılmış gibi verileri kaydet
+                if (!string.IsNullOrEmpty(result.Token))
+                {
+                    await SecureStorage.SetAsync("auth_token", result.Token);
+                    Preferences.Set("UserRole", "Parent");
+                    Preferences.Set("UserName", $"{result.Name} {result.Surname}");
+                }
+
+                return result;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                return new LoginResponse { IsSuccess = false, Message = $"Bağlantı hatası: {ex.Message}" };
+            }
+        }
+
+        // ÖĞRETMEN KAYIT 
+        public async Task<LoginResponse> RegisterTeacherAsync(TeacherRegisterRequest request)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/Auth/register/teacher", request);
+                var result = await response.Content.ReadFromJsonAsync<LoginResponse>(_serializerOptions);
+
+                if (result == null) return new LoginResponse { IsSuccess = false, Message = "Sunucudan boş cevap döndü." };
+
+                // Kayıt başarılıysa otomatik giriş yapılmış gibi verileri kaydet
+                if (!string.IsNullOrEmpty(result.Token))
+                {
+                    await SecureStorage.SetAsync("auth_token", result.Token);
+                    Preferences.Set("UserRole", "Teacher");
+                    Preferences.Set("UserName", $"{result.Name} {result.Surname}");
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new LoginResponse { IsSuccess = false, Message = $"Bağlantı hatası: {ex.Message}" };
             }
         }
     }

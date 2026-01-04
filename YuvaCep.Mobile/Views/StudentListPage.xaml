@@ -3,59 +3,126 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.StudentListPage"
-             Title="Sınıf Listesi"
-             BackgroundColor="#F3F4F6">
-    <ContentPage.BindingContext>
-        <vm:StudentListViewModel />
-    </ContentPage.BindingContext>
+             Title="Öğrenci Listesi"
+             BackgroundColor="#F3F4F6"
+             Shell.NavBarIsVisible="False">
 
-    <Grid RowDefinitions="Auto, *">
+    <Grid>
+        <Grid RowDefinitions="Auto, *, Auto" ZIndex="1">
 
-        <Frame Grid.Row="0" BackgroundColor="#8B5CF6" CornerRadius="0" Padding="20" HasShadow="False">
-            <Label Text="Öğrenci Listesi &amp; Kodlar" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
-        </Frame>
+            <Grid Grid.Row="0" BackgroundColor="#A78BFA" Padding="20,40,20,30" ColumnDefinitions="Auto, *">
+                <ImageButton Grid.Column="0" Source="{FontImage Glyph='⬅️', Color='White', Size=28}"
+                             BackgroundColor="Transparent" Clicked="OnGoBackClicked" VerticalOptions="Center" HeightRequest="40" WidthRequest="40"/>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="20,0,0,0">
+                    <Label Text="Öğrenci Listesi" TextColor="White" Opacity="0.9" FontSize="14"/>
+                    <Label Text="{Binding ClassName}" TextColor="White" FontSize="24" FontAttributes="Bold"/>
+                </VerticalStackLayout>
+            </Grid>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding ClassRoster}" Margin="10">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Margin="10,6" 
-                           Padding="12" 
-                           BorderColor="#E5E7EB" 
-                           CornerRadius="12" 
-                           HasShadow="True"
-                           BackgroundColor="White">
-                        <Grid ColumnDefinitions="Auto, *, Auto">
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Students}" Margin="15">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+                </CollectionView.ItemsLayout>
 
-                            <Frame Grid.Column="0" HeightRequest="45" WidthRequest="45" CornerRadius="22" Padding="0" BackgroundColor="#F3F4F6" HasShadow="False" BorderColor="Transparent">
-                                <Label Text="👤" HorizontalOptions="Center" VerticalOptions="Center" FontSize="22" TextColor="Black"/>
-                            </Frame>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame CornerRadius="15" HasShadow="True" Padding="15" BackgroundColor="White" BorderColor="Transparent">
 
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0,0,0">
-                                <Label Text="{Binding Name}" FontAttributes="Bold" TextColor="#1F2937" FontSize="16"/>
-                                <Label Text="{Binding ParentName, StringFormat='Veli: {0}'}" TextColor="#6B7280" FontSize="13"/>
-                            </VerticalStackLayout>
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:StudentListViewModel}}, Path=GoToDetailCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            </Frame.GestureRecognizers>
 
-                            <Frame Grid.Column="2" 
-                                   BackgroundColor="#FFF7ED" 
-                                   BorderColor="#F97316" 
-                                   Padding="12,6" 
-                                   CornerRadius="8"
-                                   VerticalOptions="Center"
-                                   HasShadow="False">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="KOD" FontSize="9" TextColor="#EA580C" HorizontalOptions="Center" FontAttributes="Bold"/>
-                                    <Label Text="{Binding ReferenceCode}" 
-                                           FontSize="15" 
-                                           FontAttributes="Bold" 
-                                           TextColor="#C2410C" 
-                                           HorizontalOptions="Center"/>
+                            <Grid ColumnDefinitions="Auto, *, Auto">
+                                <Frame Grid.Column="0" HeightRequest="50" WidthRequest="50" CornerRadius="25" BackgroundColor="#E0F2FE" Padding="0" HorizontalOptions="Start" HasShadow="False">
+                                    <Label Text="👤" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Frame>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="10,0,0,0">
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="16" TextColor="#374151"/>
+                                    <Label Text="{Binding ParentName, StringFormat='Veli: {0}'}" FontSize="12" TextColor="Gray"/>
                                 </VerticalStackLayout>
-                            </Frame>
 
-                        </Grid>
+                                <Frame Grid.Column="2" BorderColor="#F97316" BackgroundColor="White" CornerRadius="8" Padding="10,5" HasShadow="False">
+                                    <VerticalStackLayout Spacing="0">
+                                        <Label Text="KOD" FontSize="8" TextColor="#F97316" HorizontalOptions="Center"/>
+                                        <Label Text="{Binding ReferenceCode}" FontSize="14" FontAttributes="Bold" TextColor="#F97316"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10" Opacity="0.6">
+                        <Label Text="📭" FontSize="50" HorizontalOptions="Center"/>
+                        <Label Text="Henüz öğrenci eklenmemiş." TextColor="Gray" FontSize="16"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+            <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#A78BFA" HorizontalOptions="Center" VerticalOptions="Center"/>
+
+            <Button Grid.Row="2" Text="+ Öğrenci Ekle" Command="{Binding OpenPopupCommand}"
+                    BackgroundColor="#A78BFA" TextColor="White" FontAttributes="Bold" CornerRadius="25" HeightRequest="50" Margin="20,10,20,20"/>
+        </Grid>
+
+        <Grid BackgroundColor="#80000000" 
+              IsVisible="{Binding IsPopupVisible}" 
+              ZIndex="99">
+
+            <Frame BackgroundColor="White" 
+                   CornerRadius="20" 
+                   Padding="25" 
+                   HorizontalOptions="Center" 
+                   VerticalOptions="Center" 
+                   WidthRequest="320"
+                   HasShadow="True">
+
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Yeni Öğrenci Ekle" 
+                           FontSize="20" 
+                           FontAttributes="Bold" 
+                           TextColor="#1F2937" 
+                           HorizontalOptions="Center"/>
+
+                    <Frame BorderColor="#E5E7EB" Padding="0" CornerRadius="10" HasShadow="False">
+                        <Entry Placeholder="Öğrenci Adı" 
+                               Text="{Binding NewStudentName}"
+                               HeightRequest="50" 
+                               Margin="10,0"/>
                     </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+
+                    <Frame BorderColor="#E5E7EB" Padding="0" CornerRadius="10" HasShadow="False">
+                        <Entry Placeholder="Öğrenci Soyadı" 
+                               Text="{Binding NewStudentSurname}"
+                               HeightRequest="50" 
+                               Margin="10,0"/>
+                    </Frame>
+
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
+                        <Button Grid.Column="0" 
+                                Text="İptal" 
+                                Command="{Binding ClosePopupCommand}"
+                                BackgroundColor="#EF4444" 
+                                TextColor="White" 
+                                CornerRadius="10"
+                                HeightRequest="45"/>
+
+                        <Button Grid.Column="1" 
+                                Text="Ekle" 
+                                Command="{Binding SaveStudentCommand}"
+                                BackgroundColor="#22C55E" 
+                                TextColor="White" 
+                                CornerRadius="10"
+                                HeightRequest="45"/>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+
     </Grid>
 </ContentPage>

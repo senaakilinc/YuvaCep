@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using YuvaCep.Application.Dtos;
 using YuvaCep.Domain.Entities;
 using YuvaCep.Persistence.Contexts;
 
@@ -10,54 +13,124 @@ namespace YuvaCep.Api.Controllers
     public class LessonProgramsController : ControllerBase
     {
         private readonly YuvaCepDbContext _context;
-        private readonly IWebHostEnvironment _env;
 
-        public LessonProgramsController(YuvaCepDbContext context, IWebHostEnvironment env)
+        public LessonProgramsController(YuvaCepDbContext context)
         {
             _context = context;
-            _env = env;
         }
 
-        // GET: api/LessonPrograms?classId=...
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<LessonProgram>>> GetPrograms([FromQuery] Guid classId)
-        {
-            return await _context.LessonPrograms
-                                 .Where(p => p.ClassId == classId)
-                                 .OrderByDescending(p => p.CreatedAt)
-                                 .ToListAsync();
-        }
-
-        // POST: api/LessonPrograms
+        [Authorize(Roles = "Teacher")]
         [HttpPost]
-        public async Task<ActionResult<LessonProgram>> PostProgram(
-            [FromForm] string title,
-            [FromForm] Guid classId,
-            IFormFile imageFile)
+        [DisableRequestSizeLimit]
+        public async Task<IActionResult> Upload([FromBody] CreateLessonProgramDto request)
         {
-            if (imageFile == null || imageFile.Length == 0) return BadRequest("Resim yok.");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+            var teacherClass = await _context.Classes.FirstOrDefaultAsync(c => c.TeacherId == Guid.Parse(userId));
+            if (teacherClass == null) return BadRequest("Sınıfınız bulunamadı.");
 
-            using (var stream = new FileStream(Path.Combine(uploadsFolder, fileName), FileMode.Create))
+            var existing = await _context.LessonPrograms
+                .Include(lp => lp.Images)
+                .FirstOrDefaultAsync(l => l.ClassId == teacherClass.Id && l.Month == request.Date.Month && l.Year == request.Date.Year);
+
+            if (existing != null)
             {
-                await imageFile.CopyToAsync(stream);
+                foreach (var img in request.Images)
+                {
+                    _context.LessonProgramImages.Add(new LessonProgramImage
+                    {
+                        Id = Guid.NewGuid(),
+                        ImageBase64 = img,
+                        LessonProgramId = existing.Id
+                    });
+                }
+                existing.CreatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                var newProgram = new LessonProgram
+                {
+                    Id = Guid.NewGuid(),
+                    ClassId = teacherClass.Id,
+                    Month = request.Date.Month,
+                    Year = request.Date.Year,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.LessonPrograms.Add(newProgram);
+
+                foreach (var img in request.Images)
+                {
+                    newProgram.Images.Add(new LessonProgramImage
+                    {
+                        Id = Guid.NewGuid(),
+                        ImageBase64 = img
+                    });
+                }
             }
 
-            var program = new LessonProgram
+            try
             {
-                Title = title,
-                ClassId = classId,
-                ImagePath = "/uploads/" + fileName,
-                CreatedAt = DateTime.UtcNow
-            };
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Resimler başarıyla eklendi." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Veritabanı hatası: {ex.Message}");
+            }
+        }
 
-            _context.LessonPrograms.Add(program);
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] int month, [FromQuery] int year, [FromQuery] Guid? studentId)
+        {
+            Guid classId = Guid.Empty;
+
+            if (User.IsInRole("Teacher"))
+            {
+                var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var cls = await _context.Classes.FirstOrDefaultAsync(c => c.TeacherId == userId);
+                if (cls != null) classId = cls.Id;
+            }
+            else if (studentId.HasValue)
+            {
+                var student = await _context.Students.FindAsync(studentId.Value);
+                if (student != null) classId = student.ClassId;
+            }
+
+            if (classId == Guid.Empty) return NotFound("Sınıf bilgisi bulunamadı.");
+
+            var program = await _context.LessonPrograms
+                .Include(lp => lp.Images)
+                .FirstOrDefaultAsync(l => l.ClassId == classId && l.Month == month && l.Year == year);
+
+            if (program == null || !program.Images.Any()) return NoContent();
+
+            return Ok(new LessonProgramDto
+            {
+                Id = program.Id,
+                Month = program.Month,
+                Year = program.Year,
+                Images = program.Images.Select(i => new LessonProgramImageDto
+                {
+                    Id = i.Id,
+                    ImageBase64 = i.ImageBase64
+                }).ToList()
+            });
+        }
+
+        [Authorize(Roles = "Teacher")]
+        [HttpDelete("image/{imageId}")]
+        public async Task<IActionResult> DeleteImage(Guid imageId)
+        {
+            var image = await _context.LessonProgramImages.FindAsync(imageId);
+            if (image == null) return NotFound("Resim bulunamadı.");
+
+            _context.LessonProgramImages.Remove(image);
             await _context.SaveChangesAsync();
 
-            return Ok(program);
+            return Ok(new { message = "Resim silindi." });
         }
     }
 }

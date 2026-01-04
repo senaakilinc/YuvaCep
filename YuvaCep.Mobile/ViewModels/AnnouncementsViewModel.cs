@@ -6,19 +6,19 @@ using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-    // Bir önceki sayfadan (Öğrenci Detay) gönderilen Öğrenciyi yakalar
-    [QueryProperty(nameof(Student), "Student")]
+    [QueryProperty(nameof(StudentId), "studentId")]
     public partial class AnnouncementsViewModel : ObservableObject
     {
         private readonly AnnouncementService _announcementService;
 
         [ObservableProperty]
-        private StudentDto student;
+        private string studentId;
 
         [ObservableProperty]
         private bool isBusy;
 
-        // Ekranda gösterilecek gerçek liste
+        public bool IsTeacher => Preferences.Get("UserRole", "") == "Teacher";
+
         public ObservableCollection<AnnouncementDto> Announcements { get; } = new();
 
         public AnnouncementsViewModel(AnnouncementService announcementService)
@@ -26,41 +26,94 @@ namespace YuvaCep.Mobile.ViewModels
             _announcementService = announcementService;
         }
 
-        // Sayfa yüklenirken veya Öğrenci bilgisi geldiğinde çalışır
-        async partial void OnStudentChanged(StudentDto value)
+        partial void OnStudentIdChanged(string value)
         {
-            if (value != null)
+            if (!string.IsNullOrEmpty(value) && !IsTeacher)
             {
-                await LoadAnnouncementsAsync();
+                MainThread.BeginInvokeOnMainThread(async () => await LoadAnnouncementsAsync());
             }
         }
 
         [RelayCommand]
         public async Task LoadAnnouncementsAsync()
         {
-            if (IsBusy || Student == null) return;
-            IsBusy = true;
 
+            if (IsBusy) return;
+
+            IsBusy = true;
             try
             {
                 var token = Preferences.Get("AuthToken", string.Empty);
+                List<AnnouncementDto> list = new();
 
-                // SERVİSTEN VERİYİ ÇEK (Sınıf ID'sine göre)
-                var list = await _announcementService.GetAnnouncementsAsync(token, Student.ClassId);
+                if (IsTeacher)
+                {
+                    list = await _announcementService.GetTeacherAnnouncementsAsync(token);
+                }
+                else
+                {
+                    if (Guid.TryParse(StudentId, out Guid guidId))
+                    {
+                        list = await _announcementService.GetAnnouncementsByStudentAsync(token, guidId);
+                    }
+                }
 
                 Announcements.Clear();
-                foreach (var item in list)
+                foreach (var item in list.OrderByDescending(x => x.CreatedDate))
                 {
                     Announcements.Add(item);
                 }
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Hata", "Duyurular yüklenirken hata oluştu.", "Tamam");
+                System.Diagnostics.Debug.WriteLine($"Hata: {ex.Message}");
             }
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task AddAnnouncementAsync()
+        {
+            if (!IsTeacher) return;
+
+            string title = await Shell.Current.DisplayPromptAsync("Yeni Duyuru", "Duyuru başlığını giriniz:");
+            if (string.IsNullOrWhiteSpace(title)) return;
+
+            string content = await Shell.Current.DisplayPromptAsync("Yeni Duyuru", "Duyuru içeriğini giriniz:");
+            if (string.IsNullOrWhiteSpace(content)) return;
+
+            bool answer = await Shell.Current.DisplayAlert("Duyuru Yayınla",
+                "Duyuru tüm velilere bildirim olarak gidecektir. Yayınlamak istediğinize emin misiniz?",
+                "Evet, Yayınla", "Vazgeç");
+
+            if (!answer) return;
+
+            IsBusy = true; 
+
+            try
+            {
+                var token = Preferences.Get("AuthToken", string.Empty);
+                bool success = await _announcementService.CreateAnnouncementAsync(token, title, content);
+
+                IsBusy = false;
+
+                if (success)
+                {
+                    await Shell.Current.DisplayAlert("Başarılı", "Duyuru tüm sınıfa gönderildi.", "Tamam");
+                    await LoadAnnouncementsAsync();
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Hata", "Duyuru gönderilemedi.", "Tamam");
+                }
+            }
+            catch (Exception ex)
+            {
+                IsBusy = false; 
+                await Shell.Current.DisplayAlert("Hata", ex.Message, "Tamam");
             }
         }
 

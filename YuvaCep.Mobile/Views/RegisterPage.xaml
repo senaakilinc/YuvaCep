@@ -5,10 +5,6 @@
              x:Class="YuvaCep.Mobile.Views.RegisterPage"
              Title="Yeni Kullanıcı Kaydı">
 
-    <ContentPage.BindingContext>
-        <vm:RegisterViewModel />
-    </ContentPage.BindingContext>
-
     <ScrollView>
         <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
 

@@ -27,9 +27,7 @@ namespace YuvaCep.Application.Services
             _configuration = configuration;
         }
 
-        
-        // 1. LOGIN 
-
+        // LOGIN
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
             var user = await _context.Users
@@ -47,21 +45,45 @@ namespace YuvaCep.Application.Services
 
             var token = CreateToken(user);
 
+            string? className = null;
+            Guid? classId = null;
+
+            // Eğer giriş yapan Öğretmense, sınıfını bulup gönderelim
+            if (user.Role == UserRole.Teacher)
+            {
+                var teacherClass = await _context.TeacherClasses
+                    .Include(tc => tc.Class) // Sınıf ismini almak için Join yap
+                    .FirstOrDefaultAsync(tc => tc.TeacherId == user.Id);
+
+                if (teacherClass != null)
+                {
+                    className = teacherClass.Class.Name;
+                    classId = teacherClass.ClassId;
+                }
+            }
+
             return new LoginResponse
             {
                 Token = token,
                 UserRole = user.Role.ToString(),
                 Message = "Giriş başarılı.",
                 IsSuccess = true,
-                Name = user.FirstName,       
-                Surname = user.LastName
+                Name = user.FirstName,
+                Surname = user.LastName,
+                ClassName = className,
+                ClassId = classId
             };
         }
 
-        // 2. REGISTER PARENT 
-      
+        // REGISTER PARENT 
         public async Task<LoginResponse> RegisterParentAsync(ParentRegisterRequest request)
         {
+            var validation = ValidateRegisterRules(request.TCIDNumber, request.PhoneNumber, request.Password);
+            if (!validation.IsValid)
+            {
+                return new LoginResponse { IsSuccess = false, Message = validation.Message };
+            }
+
             // TC Kontrolü
             if (await _context.Users.AnyAsync(u => u.TCIDNumber == request.TCIDNumber))
             {
@@ -75,14 +97,14 @@ namespace YuvaCep.Application.Services
             var parent = new Parent
             {
                 Id = Guid.NewGuid(),
-                FirstName = request.Name,   
-                LastName = request.Surname,  
+                FirstName = request.Name,
+                LastName = request.Surname,
                 TCIDNumber = request.TCIDNumber,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
-                Role = UserRole.Parent,      
+                Role = UserRole.Parent,
                 IsActive = true,
-                PhoneNumber = string.Empty
+                PhoneNumber = request.PhoneNumber
             };
 
             _context.Parents.Add(parent);
@@ -96,21 +118,25 @@ namespace YuvaCep.Application.Services
                 IsSuccess = true,
                 Token = token,
                 UserRole = "Parent",
-                Message = "Veli kaydı başarıyla oluşturuldu."
+                Message = "Veli kaydı başarıyla oluşturuldu.",
+                Name = parent.FirstName,
+                Surname = parent.LastName
             };
         }
 
-
-        // 3. REGISTER TEACHER 
-        
+        // REGISTER TEACHER 
         public async Task<LoginResponse> RegisterTeacherAsync(TeacherRegisterRequest request)
         {
+            var validationTeacher = ValidateRegisterRules(request.TCIDNumber, request.PhoneNumber, request.Password);
+            if (!validationTeacher.IsValid)
+            {
+                return new LoginResponse { IsSuccess = false, Message = validationTeacher.Message };
+            }
             // TC Kontrolü
             if (await _context.Users.AnyAsync(u => u.TCIDNumber == request.TCIDNumber))
             {
                 return new LoginResponse { IsSuccess = false, Message = "Bu TC Kimlik numarası zaten kayıtlı." };
             }
-
 
             // Şifre Hashleme
             HashingHelper.CreatePasswordHash(request.Password, out string passwordHash, out string passwordSalt);
@@ -124,8 +150,9 @@ namespace YuvaCep.Application.Services
                 TCIDNumber = request.TCIDNumber,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
-                Role = UserRole.Teacher,     // Rolü sabit Teacher
-                IsActive = true
+                Role = UserRole.Teacher,
+                IsActive = true,
+                PhoneNumber = request.PhoneNumber
             };
 
             _context.Teachers.Add(teacher);
@@ -139,27 +166,22 @@ namespace YuvaCep.Application.Services
                 IsSuccess = true,
                 Token = token,
                 UserRole = "Teacher",
-                Message = "Öğretmen kaydı başarıyla oluşturuldu."
+                Message = "Öğretmen kaydı başarıyla oluşturuldu.",
+                Name = teacher.FirstName,
+                Surname = teacher.LastName
             };
         }
 
-        // 4.GENEL REGISTER 
-       
+        // GENEL REGISTER
         public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
         {
-            // (Buradaki kodların aynen kalabilir, yukarıdaki özelleştirilmiş metodları kullanacağımız için buraya dokunmadım)
-            // ... Senin mevcut kodun ...
             var existingUserByTC = await _context.Users.AnyAsync(u => u.TCIDNumber == request.TCIDNumber);
             if (existingUserByTC) return new RegisterResponse { Success = false, Message = "Bu TC zaten kayıtlı." };
 
-            HashingHelper.CreatePasswordHash(request.Password, out string pHash, out string pSalt);
-
-            // Basitçe geçiyorum burayı, yukarıdaki özel metodlar daha önemli şu an
             return new RegisterResponse { Success = false, Message = "Lütfen özel kayıt endpointlerini kullanın." };
         }
 
-        // 5. LINK CHILD (Çocuk Bağlama)
-       
+        // LINK CHILD
         public async Task<LinkChildResponse> LinkChildAsync(Guid parentId, LinkStudentRequest request)
         {
             var parent = await _context.Parents.FindAsync(parentId);
@@ -171,13 +193,13 @@ namespace YuvaCep.Application.Services
 
             if (student == null) return new LinkChildResponse { Success = false, Message = "Geçersiz referans kodu." };
 
-            var existingLink = await _context.ParentStudent
+            var existingLink = await _context.ParentStudents
                 .AnyAsync(ps => ps.ParentId == parentId && ps.StudentId == student.Id);
 
             if (existingLink) return new LinkChildResponse { Success = false, Message = "Bu çocuk zaten ekli." };
 
             var parentStudent = new ParentStudent { ParentId = parentId, StudentId = student.Id };
-            _context.ParentStudent.Add(parentStudent);
+            _context.ParentStudents.Add(parentStudent);
             await _context.SaveChangesAsync();
 
             return new LinkChildResponse
@@ -189,30 +211,22 @@ namespace YuvaCep.Application.Services
             };
         }
 
-
-        // 6. TOKEN OLUŞTURUCU METODLAR
-
-        
-
-        // 1. Genel User İçin (Login olurken kullanılır)
+        // TOKEN OLUŞTURUCU METODLAR
         private string CreateToken(User user)
         {
             return GenerateJwt(user.Id.ToString(), user.TCIDNumber, user.Role.ToString());
         }
 
-        // 2. Parent İçin (Kayıt olurken kullanılır)
         private string CreateToken(Parent parent)
         {
             return GenerateJwt(parent.Id.ToString(), parent.TCIDNumber, parent.Role.ToString());
         }
 
-        // 3. Teacher İçin (Kayıt olurken kullanılır)
         private string CreateToken(Teacher teacher)
         {
             return GenerateJwt(teacher.Id.ToString(), teacher.TCIDNumber, teacher.Role.ToString());
         }
 
-        // --- Asıl Token Üreten Ortak Metod ---
         private string GenerateJwt(string userId, string tcNumber, string role)
         {
             var claims = new List<Claim>
@@ -238,6 +252,34 @@ namespace YuvaCep.Application.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        private (bool IsValid, string Message) ValidateRegisterRules(string tc, string phone, string password)
+        {
+            if (string.IsNullOrWhiteSpace(tc) || tc.Length != 11 || !long.TryParse(tc, out _))
+            {
+                return (false, "TC Kimlik Numarası 11 haneli olmalı ve sadece rakamlardan oluşmalıdır.");
+            }
+
+            if (string.IsNullOrWhiteSpace(phone) || phone.Length != 11 || !phone.StartsWith("0") || !long.TryParse(phone, out _))
+            {
+                return (false, "Telefon numarası 11 haneli olmalı ve '0' ile başlamalıdır.");
+            }
+
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+            {
+                return (false, "Şifre en az 8 karakter olmalıdır.");
+            }
+            if (!password.Any(char.IsUpper))
+            {
+                return (false, "Şifre en az 1 tane büyük harf içermelidir.");
+            }
+            if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
+            {
+                return (false, "Şifre en az 1 tane özel karakter (nokta, ünlem vb.) içermelidir.");
+            }
+
+            return (true, string.Empty);
         }
     }
 }
