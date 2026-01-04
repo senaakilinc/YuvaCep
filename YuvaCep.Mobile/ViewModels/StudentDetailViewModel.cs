@@ -1,87 +1,137 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using YuvaCep.Mobile.Dtos;
+using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-    // Sayfaya parametre olarak gelen öğrenci bilgisini alacağız
-    [QueryProperty(nameof(Student), "Student")]
-    [QueryProperty(nameof(ClassName), "className")]
-    public partial class StudentDetailViewModel : ObservableObject
+    public partial class StudentDetailViewModel : ObservableObject, IQueryAttributable
     {
-        [ObservableProperty]
-        private StudentDto student;
+        private readonly StudentService _service;
+        private Guid _realStudentId;
+
+        [ObservableProperty] string firstName;
+        [ObservableProperty] string lastName;
+        [ObservableProperty] string parentName;
+        [ObservableProperty] string gender;
+        [ObservableProperty] string tCIDNumber;
+        [ObservableProperty] DateTime dateOfBirth = DateTime.Now;
+        [ObservableProperty] string healthNotes;
+        [ObservableProperty] string displayHealthNotes;
+        [ObservableProperty] string photoUrl;
+        [ObservableProperty] ImageSource profileImage;
 
         [ObservableProperty]
-        private string className;
+        [NotifyPropertyChangedFor(nameof(IsNotNameEditing))]
+        bool isNameEditing = false;
 
-        // --- ROL KONTROLÜ ---
-        public bool IsTeacher => Preferences.Get("UserRole", "") == "Teacher";
+        public bool IsNotNameEditing => !IsNameEditing;
 
-        // --- ÖĞRETMEN İÇİN RAPOR EKLEME ---
-        [RelayCommand]
-        private async Task GoToTeacherDailyReportAsync()
+        [ObservableProperty] bool isBusy;
+
+        public StudentDetailViewModel()
         {
-            if (Student == null) return;
+            _service = new StudentService();
+            ProfileImage = "icon_student.png";
+        }
 
-            var navigationParameter = new Dictionary<string, object>
+        public void ApplyQueryAttributes(IDictionary<string, object> query)
+        {
+            if (query.ContainsKey("id"))
             {
-                { "Student", Student } // Öğrenci bilgisini rapor ekleme sayfasına taşıyoruz
+                string idStr = query["id"].ToString();
+                if (Guid.TryParse(idStr, out Guid guidId))
+                {
+                    _realStudentId = guidId;
+                    LoadStudentData(_realStudentId);
+                }
+            }
+        }
+
+        private async void LoadStudentData(Guid id)
+        {
+            if (IsBusy) return;
+            IsBusy = true;
+            try
+            {
+                var data = await _service.GetStudentDetailAsync(id);
+                if (data != null)
+                {
+                    FirstName = data.FirstName;
+                    LastName = data.LastName;
+
+                    if (!string.IsNullOrEmpty(data.Gender))
+                    {
+                        Gender = data.Gender.Trim();
+                    }
+
+                    ParentName = data.ParentName;
+                    TCIDNumber = data.TCIDNumber;
+                    DateOfBirth = data.DateOfBirth ?? DateTime.Now;
+
+                    HealthNotes = data.HealthNotes;
+                    DisplayHealthNotes = string.IsNullOrEmpty(HealthNotes) ? "Not bulunmuyor." : HealthNotes;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hata: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        void ToggleNameEdit() => IsNameEditing = !IsNameEditing;
+
+        [RelayCommand]
+        async Task ChangePhoto()
+        {
+            try
+            {
+                var photo = await MediaPicker.PickPhotoAsync();
+                if (photo != null)
+                {
+                    var stream = await photo.OpenReadAsync();
+                    ProfileImage = ImageSource.FromStream(() => stream);
+                }
+            }
+            catch { }
+        }
+
+        [RelayCommand]
+        async Task Save()
+        {
+            if (IsBusy) return;
+            IsBusy = true;
+
+            var updateModel = new StudentUpdateDto
+            {
+                Id = _realStudentId,
+                FirstName = FirstName,
+                LastName = LastName,
+                Gender = Gender,
+                TCIDNumber = TCIDNumber,
+                DateOfBirth = DateOfBirth,
             };
 
-            // Öğretmen rapor sayfasına yönlendiriyoruz
-            await Shell.Current.GoToAsync("TeacherDailyReportPage", navigationParameter);
-        }
+            bool success = await _service.UpdateStudentAsync(updateModel);
 
-        // 1. Günlük Raporu Gör (VELİ İÇİN)
-        [RelayCommand]
-        private async Task GoToDailyReportAsync()
-        {
-            if (Student == null) return;
-            var navigationParameter = new Dictionary<string, object>
+            if (success)
             {
-                { "Student", Student }
-            };
+                IsNameEditing = false;
+                await Shell.Current.DisplayAlert("Başarılı", "Bilgiler güncellendi", "Tamam");
 
-            await Shell.Current.GoToAsync("DailyReportPage", navigationParameter);
-        }
-
-        // 2. Yemek Listesini Gör
-        [RelayCommand]
-        private async Task GoToFoodListAsync()
-        {
-            await Shell.Current.DisplayAlert("Bilgi", "Yemek Listesi Sayfası Hazırlanıyor...", "Tamam");
-        }
-
-        [RelayCommand]
-        private async Task GoToLessonProgramAsync()
-        {
-            await Shell.Current.DisplayAlert("Bilgi", "Ders Programı Sayfası Hazırlanıyor...", "Tamam");
-        }
-
-        // 3. Duyuruları Gör
-        [RelayCommand]
-        private async Task GoToAnnouncementsAsync()
-        {
-            var navigationParameter = new Dictionary<string, object>
+                await Shell.Current.GoToAsync("..");
+            }
+            else
             {
-                { "Student", Student }
-            };
-
-            await Shell.Current.GoToAsync("AnnouncementsPage", navigationParameter);
-        }
-
-        // 4. Rozet Detaylarını Gör
-        [RelayCommand]
-        private async Task GoToBadgeDetailsAsync()
-        {
-            await Shell.Current.GoToAsync("BadgeDetailPage");
-        }
-
-        [RelayCommand]
-        private async Task GoBackAsync()
-        {
-            await Shell.Current.GoToAsync("..");
+                await Shell.Current.DisplayAlert("Hata", "Güncelleme başarısız.", "Tamam");
+            }
+            IsBusy = false;
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace YuvaCep.Application.Dtos
+﻿namespace YuvaCep.Application.Dtos
 {
     public class AnnouncementDto
     {

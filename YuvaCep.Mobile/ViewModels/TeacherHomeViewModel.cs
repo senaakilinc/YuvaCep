@@ -1,45 +1,61 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Controls;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace YuvaCep.Mobile.ViewModels
 {
-    // Ekranda göstereceğimiz her bir kartın modeli
     public class dashboardItem
     {
         public string Title { get; set; }
         public string Icon { get; set; }
-        public string ColorHex { get; set; } //Kartın rengi
-        public string Route { get; set; }  //Tıklayınca gideceğimiz ekran
-
+        public string ColorHex { get; set; }
+        public string Route { get; set; }
     }
 
     public partial class TeacherHomeViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string className = "Papatyalar Sınıfı"; //API'den gelecek
+        private string className;
 
         [ObservableProperty]
-        private string teacherName = "Ayşe Yılmaz";
+        private string teacherName;
 
-        //Ekranda gözükecek kartların listesi
+        [ObservableProperty]
+        private string greetingMessage;
+
         public ObservableCollection<dashboardItem> MenuItems { get; } = new();
 
         public TeacherHomeViewModel()
         {
-            //Menüleri dahil ediyoruz
-            MenuItems.Add(new dashboardItem { Title = "Günlük Rapor", Icon = "📝", ColorHex = "#60A5FA", Route = "TeacherDailyReportPage" });
-            MenuItems.Add(new dashboardItem { Title = "Duyuru Yayınla", Icon = "📢", ColorHex = "F472B6", Route = "AnnouncementsPage" });
-            MenuItems.Add(new dashboardItem { Title = "Yemek Listesi", Icon = "🍎", ColorHex = "#34D399", Route = "MealPlanPage" });
+            LoadData();
+
+            MenuItems.Add(new dashboardItem { Title = "Günlük Rapor", Icon = "📝", ColorHex = "#60A5FA", Route = "TeacherDailyReport_Route" });
+            MenuItems.Add(new dashboardItem { Title = "Duyuru Yayınla", Icon = "📢", ColorHex = "F472B6", Route = "Announcements_Route" });
+            MenuItems.Add(new dashboardItem { Title = "Yemek Listesi", Icon = "🍎", ColorHex = "#34D399", Route = "FoodList_Route" });
             MenuItems.Add(new dashboardItem { Title = "Ders Programı", Icon = "📅", ColorHex = "#FBBF24", Route = "CurriculumPage" });
-            MenuItems.Add(new dashboardItem { Title = "Öğrenci Listesi", Icon = "👶", ColorHex = "#A78BFA", Route = "StudentListPage" });
-            MenuItems.Add(new dashboardItem { Title = "Rozet Takibi", Icon = "🏆", ColorHex = "#F59E0B", Route = "BadgeTrackingPage" });
+            MenuItems.Add(new dashboardItem { Title = "Öğrenci Listesi", Icon = "👶", ColorHex = "#A78BFA", Route = "StudentList_Route" });
+            MenuItems.Add(new dashboardItem { Title = "Rozet Takibi", Icon = "🏆", ColorHex = "#F59E0B", Route = "BadgeTracking_Route" });
+        }
+
+        public void LoadData()
+        {
+            TeacherName = Preferences.Get("UserName", "Değerli Öğretmenimiz");
+            ClassName = Preferences.Get("ClassName", "Sınıf Bilgisi Yok");
+
+            var hour = DateTime.Now.Hour;
+
+            if (hour >= 6 && hour < 12)
+            {
+                GreetingMessage = "Günaydın! ☀️";
+            }
+            else if (hour >= 12 && hour < 18)
+            {
+                GreetingMessage = "İyi Günler! 👋";
+            }
+            else
+            {
+                GreetingMessage = "İyi Akşamlar! 🌙";
+            }
         }
 
         [RelayCommand]
@@ -51,7 +67,20 @@ namespace YuvaCep.Mobile.ViewModels
                 return;
             }
 
-            await Shell.Current.GoToAsync(route);
+            try
+            {
+                await Shell.Current.GoToAsync(route);
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Hata", "Bu sayfa henüz hazır değil veya rota bulunamadı.", "Tamam");
+            }
+        }
+
+        [RelayCommand]
+        private async Task GoToFoodListAsync()
+        {
+            await Shell.Current.GoToAsync("FoodList_Route");
         }
 
         [RelayCommand]
@@ -61,13 +90,10 @@ namespace YuvaCep.Mobile.ViewModels
 
             if (answer)
             {
-                // 1. Kayıtlı bilgileri sil (Beni Hatırla'yı iptal et)
+                SecureStorage.Remove("auth_token");
                 Preferences.Clear();
-
-                // 2. En başa (Rol Seçimi) yönlendir
-                await Shell.Current.GoToAsync("//RoleSelectionPage");
+                await Shell.Current.GoToAsync("RoleSelection_Route");
             }
         }
     }
-
 }

@@ -5,7 +5,6 @@ namespace YuvaCep.Mobile.ViewModels
 {
     public partial class RoleSelectionViewModel : ObservableObject
     {
-        // Öğretmen veya Veli butonuna basıldığında bu çalışacak
         [RelayCommand]
         private async Task SelectRoleAsync(string role)
         {

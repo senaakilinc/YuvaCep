@@ -1,109 +1,105 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.StudentDetailPage"
              Title="Öğrenci Detayı"
-             Shell.NavBarIsVisible="False"
-             BackgroundColor="#F5F5F5">
+             BackgroundColor="#F3F4F6">
 
-    <Grid RowDefinitions="Auto, *">
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
 
-        <Grid Grid.Row="0" BackgroundColor="#4A90E2" Padding="20,40,20,30" RowDefinitions="Auto, Auto">
-            <Grid ColumnDefinitions="Auto, *" VerticalOptions="Center">
-                <ImageButton Command="{Binding GoBackCommand}" HeightRequest="24" HorizontalOptions="Start">
-                    <ImageButton.Source>
-                        <FontImageSource Glyph="&#x2190;" Color="White" Size="24" />
-                    </ImageButton.Source>
-                </ImageButton>
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Frame CornerRadius="60" HeightRequest="120" WidthRequest="120" 
+                       Padding="0" IsClippedToBounds="True" BorderColor="#A78BFA">
+                    <Image Source="{Binding ProfileImage}" Aspect="AspectFill" HeightRequest="120" WidthRequest="120">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChangePhotoCommand}"/>
+                        </Image.GestureRecognizers>
+                    </Image>
+                </Frame>
+                <Label Text="Fotoğrafı değiştirmek için dokunun" FontSize="10" TextColor="Gray" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
 
-                <Label Text="{Binding Student.ClassName}" 
-                       TextColor="White" FontSize="22" FontAttributes="Bold" 
-                       HorizontalOptions="Center" VerticalOptions="Center" 
-                       Grid.Column="1" Margin="-24,0,0,0"/>
+            <Grid ColumnDefinitions="*, Auto" HorizontalOptions="Center">
+
+                <Label FontSize="22" FontAttributes="Bold" TextColor="#1F2937"
+                       IsVisible="{Binding IsNotNameEditing}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding FirstName}" />
+                            <Span Text=" " />
+                            <Span Text="{Binding LastName}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+                <HorizontalStackLayout IsVisible="{Binding IsNameEditing}" Spacing="5">
+                    <Entry Text="{Binding FirstName}" Placeholder="Ad" WidthRequest="100"/>
+                    <Entry Text="{Binding LastName}" Placeholder="Soyad" WidthRequest="100"/>
+                </HorizontalStackLayout>
+
+                <ImageButton Grid.Column="1" Source="icon_edit.png" 
+                             HeightRequest="25" WidthRequest="25" Margin="10,0,0,0"
+                             Command="{Binding ToggleNameEditCommand}"
+                             VerticalOptions="Center"
+                             BackgroundColor="Transparent"/>
             </Grid>
 
-            <StackLayout Grid.Row="1" Margin="0,20,0,0">
-                <Label Text="Öğrenci:" TextColor="#E0E0E0" FontSize="14"/>
-                <Label Text="{Binding Student.Name}" TextColor="White" FontSize="28" FontAttributes="Bold"/>
-            </StackLayout>
-        </Grid>
+            <Label Text="{Binding ParentName, StringFormat='Veli: {0}'}" 
+                   FontSize="14" TextColor="Gray" 
+                   HorizontalOptions="Center" Margin="0,-10,0,0"/>
 
-        <ScrollView Grid.Row="1" Padding="20">
-            <VerticalStackLayout Spacing="20">
+            <Frame CornerRadius="15" Padding="20" BackgroundColor="White" HasShadow="True" BorderColor="Transparent">
+                <VerticalStackLayout Spacing="15">
 
-                <Button Text="➕ GÜNLÜK RAPOR EKLE"
-                        Command="{Binding GoToTeacherDailyReportCommand}"
-                        IsVisible="{Binding IsTeacher}"
-                        BackgroundColor="#FF7043"
-                        TextColor="White"
-                        FontAttributes="Bold"
-                        CornerRadius="15"
-                        HeightRequest="60"
-                        ImageSource="{FontImageSource Glyph='📝', Color=White, Size=20}"
-                        ContentLayout="Right,10"/>
+                    <VerticalStackLayout>
+                        <Label Text="Cinsiyet" FontSize="12" TextColor="Gray"/>
+                        <Picker SelectedItem="{Binding Gender}" Title="Seçiniz">
+                            <Picker.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>Erkek</x:String>
+                                    <x:String>Kız</x:String>
+                                </x:Array>
+                            </Picker.ItemsSource>
+                        </Picker>
+                    </VerticalStackLayout>
 
-                <Grid ColumnDefinitions="*,*" RowDefinitions="140, 140, 140" ColumnSpacing="15" RowSpacing="15">
+                    <BoxView HeightRequest="1" Color="#F0F0F0"/>
 
-                    <Frame Grid.Row="0" Grid.Column="0" CornerRadius="15" HasShadow="True" Padding="0">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToDailyReportCommand}"/>
-                        </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="📝" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Günlük Rapor" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
-                    </Frame>
+                    <VerticalStackLayout>
+                        <Label Text="TC Kimlik Numarası" FontSize="12" TextColor="Gray"/>
+                        <Entry Text="{Binding TCIDNumber}" Keyboard="Numeric" Placeholder="TC Giriniz"/>
+                    </VerticalStackLayout>
 
-                    <Frame Grid.Row="0" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToAnnouncementsCommand}"/>
-                        </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="📢" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Duyurular" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
-                    </Frame>
+                    <BoxView HeightRequest="1" Color="#F0F0F0"/>
 
-                    <Frame Grid.Row="1" Grid.Column="0" CornerRadius="15" HasShadow="True" Padding="0">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToFoodListCommand}"/>
-                        </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="🍎" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Yemek Listesi" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
-                    </Frame>
+                    <VerticalStackLayout>
+                        <Label Text="Doğum Tarihi" FontSize="12" TextColor="Gray"/>
+                        <DatePicker Date="{Binding DateOfBirth}"/>
+                    </VerticalStackLayout>
 
-                    <Frame Grid.Row="1" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToLessonProgramCommand}"/>
-                        </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="📅" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Ders Programı" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
-                    </Frame>
+                    <BoxView HeightRequest="1" Color="#F0F0F0"/>
 
-                    <Frame Grid.Row="2" Grid.Column="0" CornerRadius="15" HasShadow="True" Padding="0">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToBadgesCommand}"/>
-                        </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="🏆" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Rozetlerim" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
-                    </Frame>
+                    <VerticalStackLayout>
+                        <Label Text="Sağlık Notları" FontSize="12" TextColor="#A78BFA" FontAttributes="Bold"/>
+                        <Editor Text="{Binding DisplayHealthNotes}" 
+                                IsReadOnly="True" 
+                                AutoSize="TextChanges" 
+                                BackgroundColor="#F9F9F9" 
+                                TextColor="#1F2937"/>
+                    </VerticalStackLayout>
 
-                    <Frame Grid.Row="2" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0" BackgroundColor="#EEE">
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="⚙️" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Ayarlar" FontAttributes="Bold" TextColor="Gray"/>
-                        </StackLayout>
-                    </Frame>
+                </VerticalStackLayout>
+            </Frame>
 
-                </Grid>
-            </VerticalStackLayout>
-        </ScrollView>
-    </Grid>
+            <Button Text="DEĞİŞİKLİKLERİ KAYDET" 
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="#A78BFA"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    FontAttributes="Bold"
+                    TextColor="White"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

@@ -1,14 +1,49 @@
-﻿<?xml version = "1.0" encoding = "UTF-8" ?>
-<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:YuvaCep.Mobile"
+             xmlns:local="clr-namespace:YuvaCep"
              x:Class="YuvaCep.Mobile.App">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+
+            <Color x:Key="PrimaryColor">#4A90E2</Color>
+            <Color x:Key="SecondaryColor">#FFB74D</Color>
+            <Color x:Key="PageBackgroundColor">#F5F7FA</Color>
+            <Color x:Key="CardBackgroundColor">#FFFFFF</Color>
+            <Color x:Key="PrimaryTextColor">#2C3E50</Color>
+            <Color x:Key="SecondaryTextColor">#7F8C8D</Color>
+            <Color x:Key="PlaceholderColor">#B0BEC5</Color>
+
+            <x:Double x:Key="GeneralCornerRadius">20</x:Double>
+            <x:Double x:Key="ButtonCornerRadius">12</x:Double>
+
+            <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="CornerRadius" Value="{StaticResource ButtonCornerRadius}" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HeightRequest" Value="50" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+
+            <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                <Setter Property="BackgroundColor" Value="{StaticResource SecondaryColor}" />
+            </Style>
+
+            <Style x:Key="EntryFrameStyle" TargetType="Frame">
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="BackgroundColor" Value="White" />
+                <Setter Property="Padding" Value="15,5,15,5" />
+                <Setter Property="HasShadow" Value="False" />
+                <Setter Property="BorderColor" Value="#E0E0E0" />
+            </Style>
+
+            <Style x:Key="PageTitleStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="28" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

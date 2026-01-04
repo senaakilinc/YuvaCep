@@ -64,7 +64,7 @@ namespace YuvaCep.Application.Services
         public async Task<int> SendToClassParentsAsync(Guid classId, string title, string body, Dictionary<string, string> data = null)
         {
             // Sınıftaki öğrencilerin velilerini bul
-            var parentIds = await _context.ParentStudent
+            var parentIds = await _context.ParentStudents
                 .Where(ps => ps.Student.ClassId == classId)
                 .Select(ps => ps.ParentId)
                 .Distinct()
@@ -77,7 +77,7 @@ namespace YuvaCep.Application.Services
         public async Task<int> SendToStudentParentAsync(Guid studentId, string title, string body, Dictionary<string, string> data = null)
         {
             // Öğrencinin velilerini bul (ParentStudent ara tablosu)
-            var parentIds = await _context.ParentStudent
+            var parentIds = await _context.ParentStudents
                 .Where(ps => ps.StudentId == studentId)
                 .Select(ps => ps.ParentId)
                 .ToListAsync();

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
+             x:Class="YuvaCep.Mobile.Views.FoodListPage"
+             x:DataType="viewModels:FoodListViewModel"
+             Title="Yemek Listesi"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F5F5F5">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <Grid Grid.Row="0" BackgroundColor="#4A90E2" Padding="15" ColumnDefinitions="Auto, *">
+            <ImageButton Command="{Binding GoBackCommand}" HeightRequest="24" HorizontalOptions="Start" BackgroundColor="Transparent">
+                <ImageButton.Source>
+                    <FontImageSource Glyph="&#x2190;" Color="White" Size="24" />
+                </ImageButton.Source>
+            </ImageButton>
+            <Label Grid.Column="1" Text="Yemek Listesi" 
+                   TextColor="White" FontSize="20" FontAttributes="Bold" 
+                   HorizontalOptions="Center" VerticalOptions="Center" Margin="-24,0,0,0"/>
+        </Grid>
+
+        <ScrollView Grid.Row="1" Padding="20">
+            <VerticalStackLayout Spacing="15">
+
+                <Frame Padding="15" CornerRadius="15" BackgroundColor="White" BorderColor="#E0E0E0" HasShadow="True">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <Label Text="📅 Dönem:" VerticalOptions="Center" FontAttributes="Bold" TextColor="#333" FontSize="16"/>
+                        <DatePicker Date="{Binding SelectedDate}" 
+                                    Format="MMMM yyyy"
+                                    TextColor="#4A90E2"
+                                    FontAttributes="Bold"
+                                    FontSize="16"/>
+                    </HorizontalStackLayout>
+                </Frame>
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#4A90E2"/>
+
+                <VerticalStackLayout IsVisible="{Binding IsImageEmpty}" Spacing="15" VerticalOptions="Center" Margin="0,50,0,0">
+                    <Label Text="🍽️" FontSize="80" HorizontalOptions="Center"/>
+                    <Label Text="Bu ay için henüz yemek listesi eklenmedi." 
+                           TextColor="Gray" FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <Frame IsVisible="{Binding HasImage}" Padding="0" CornerRadius="10" HasShadow="True" BorderColor="Gray">
+                    <Image Source="{Binding CurrentImage}" Aspect="AspectFit" MaximumHeightRequest="500"/>
+                </Frame>
+
+                <Button Text="📷 Listeyi Güncelle / Yükle"
+                        Command="{Binding PickAndUploadImageCommand}"
+                        IsVisible="{Binding IsTeacher}"
+                        BackgroundColor="#FF7043"
+                        TextColor="White"
+                        CornerRadius="20"
+                        Margin="0,20,0,0"
+                        FontAttributes="Bold"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -8,5 +8,7 @@
         public bool IsSuccess { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }
+        public string? ClassName { get; set; }
+        public Guid? ClassId { get; set; }
     }
 }

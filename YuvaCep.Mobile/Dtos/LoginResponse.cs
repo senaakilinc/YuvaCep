@@ -7,6 +7,8 @@ namespace YuvaCep.Mobile.Dtos
         public string Token { get; set; }      
         public string UserRole { get; set; }   
         public string Message { get; set; }    
-        public bool IsSuccess { get; set; }    
+        public bool IsSuccess { get; set; }
+        public string? ClassName { get; set; }
+        public Guid? ClassId { get; set; }
     }
 }

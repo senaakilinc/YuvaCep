@@ -13,10 +13,10 @@ namespace YuvaCep.Mobile.ViewModels
         private readonly StudentService _studentService;
 
         // --- ÖĞRENCİ SEÇİMİ ---
-        public ObservableCollection<StudentDto> Students { get; } = new();
+        public ObservableCollection<StudentListDto> Students { get; } = new();
 
         [ObservableProperty]
-        private StudentDto selectedStudent; // Listeden seçilen öğrenci
+        private StudentListDto selectedStudent; // Listeden seçilen öğrenci
 
         [ObservableProperty]
         private bool isBusy;
@@ -58,7 +58,7 @@ namespace YuvaCep.Mobile.ViewModels
                 var token = Preferences.Get("AuthToken", string.Empty);
 
                 // Tüm sınıf listesini çek
-                var allStudents = await _studentService.GetAllStudentsAsync(token);
+                var allStudents = await _studentService.GetMyStudentsAsync();
 
                 // Bugün raporu girilmiş olanların ID listesini çek
                 var reportedStudentIds = await _reportService.GetReportedStudentIdsAsync(token);

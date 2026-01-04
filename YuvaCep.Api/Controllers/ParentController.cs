@@ -76,7 +76,7 @@ namespace YuvaCep.Api.Controllers
                 return NotFound(new { message = "Geçersiz kod! Lütfen kodu kontrol ediniz." });
 
             // 3. Zaten eşleşmiş mi?
-            var exists = await _context.ParentStudent.AnyAsync(ps => ps.ParentId == parentId && ps.StudentId == student.Id);
+            var exists = await _context.ParentStudents.AnyAsync(ps => ps.ParentId == parentId && ps.StudentId == student.Id);
             if (exists)
                 return BadRequest(new { message = "Bu öğrenci zaten ekli." });
 
@@ -87,7 +87,7 @@ namespace YuvaCep.Api.Controllers
                 StudentId = student.Id
             };
 
-            _context.ParentStudent.Add(link);
+            _context.ParentStudents.Add(link);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Eşleşme başarılı!" });

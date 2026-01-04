@@ -1,21 +1,23 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
 
 namespace YuvaCep.Domain.Entities
 {
+
     public class LessonProgram
     {
         public Guid Id { get; set; }
-
-        // Örn: "Nisan İlk Hafta Ders Programı"
-        public string Title { get; set; } = string.Empty;
-
-        public string ImagePath { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public Guid ClassId { get; set; }
+        public int Month { get; set; }
+        public int Year { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-        [JsonIgnore]
-        public Class? Class { get; set; }
+        public ICollection<LessonProgramImage> Images { get; set; } = new List<LessonProgramImage>();
+    }
+
+    public class LessonProgramImage
+    {
+        public Guid Id { get; set; }
+        public Guid LessonProgramId { get; set; }
+        public string ImageBase64 { get; set; }
     }
 }

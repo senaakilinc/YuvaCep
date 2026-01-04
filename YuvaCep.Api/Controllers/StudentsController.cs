@@ -1,11 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using YuvaCep.Api.DTOs;
+using System.Security.Claims;
+using YuvaCep.Application.Dtos;
+using YuvaCep.Application.DTOs;
 using YuvaCep.Domain.Entities;
 using YuvaCep.Persistence.Contexts;
 
 namespace YuvaCep.Api.Controllers
 {
+    public class CreateStudentRequest
+    {
+        public string Name { get; set; }
+        public string Surname { get; set; }
+    }
+    public class LinkStudentRequest
+    {
+        public string ReferenceCode { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class StudentsController : ControllerBase
@@ -17,198 +30,256 @@ namespace YuvaCep.Api.Controllers
             _context = context;
         }
 
-        // GET: api/Students
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<StudentDto>>> GetStudents()
+        // SADECE ÖĞRETMENLER GİREBİLİR
+        [Authorize(Roles = "Teacher")]
+        [HttpGet("my-class-students")]
+        public async Task<IActionResult> GetMyStudents()
         {
-            var students = await _context.Students
-                .Include(s => s.Class)
-                .Select(s => new StudentDto
+            try
+            {
+                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+
+                var teacherId = Guid.Parse(userIdString);
+
+                var classId = await _context.Classes
+                    .Where(c => c.TeacherId == teacherId)
+                    .Select(c => c.Id)
+                    .FirstOrDefaultAsync();
+
+                if (classId == Guid.Empty) return NotFound("Henüz bir sınıfınız yok.");
+
+                var students = await _context.Students
+                    .Where(s => s.ClassId == classId)
+                    .Select(s => new
+                    {
+                        s.Id,
+                        s.Name,
+                        s.Surname,
+                        s.ReferenceCode
+                    })
+                    .ToListAsync();
+
+                if (!students.Any()) return Ok(new List<object>());
+
+                var studentIds = students.Select(s => s.Id).ToList();
+
+                var links = await _context.ParentStudents
+                    .Where(ps => studentIds.Contains(ps.StudentId))
+                    .Select(ps => new
+                    {
+                        ps.StudentId,
+                        ps.ParentId
+                    })
+                    .ToListAsync();
+
+                var parentIds = links.Select(l => l.ParentId).Distinct().ToList();
+
+                var parentNames = await _context.Users
+                    .Where(u => parentIds.Contains(u.Id))
+                    .Select(u => new
+                    {
+                        u.Id,
+                        FullName = u.FirstName + " " + u.LastName
+                    })
+                    .ToDictionaryAsync(k => k.Id, v => v.FullName);
+
+                var result = students.Select(s =>
                 {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Surname = s.Surname,
-                    TCIDNumber = s.TCIDNumber,
-                    ReferenceCode = s.ReferenceCode,
-                    DateOfBirth = s.DateOfBirth,
-                    HealthNotes = s.HealthNotes,
-                    ClassId = s.ClassId,
-                    ClassName = s.Class != null ? s.Class.Name : null
+                    var link = links.FirstOrDefault(l => l.StudentId == s.Id);
+                    string parentNameStr = "Henüz Eşleşmedi";
+
+                    if (link != null && parentNames.ContainsKey(link.ParentId))
+                    {
+                        parentNameStr = parentNames[link.ParentId];
+                    }
+
+                    return new
+                    {
+                        Id = s.Id,
+                        Name = s.Name + " " + (s.Surname ?? ""),
+                        ReferenceCode = s.ReferenceCode,
+                        ParentName = parentNameStr
+                    };
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"KRİTİK HATA: {ex.Message}");
+                return StatusCode(500, $"Sunucu Hatası: {ex.Message}");
+            }
+        }
+
+        // SADECE ÖĞRETMENLER GİREBİLİR 
+        [Authorize(Roles = "Teacher")]
+        [HttpPost("add")]
+        public async Task<IActionResult> AddStudent([FromBody] CreateStudentRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Name))
+                return BadRequest("Öğrenci adı boş olamaz.");
+
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+
+            var teacherId = Guid.Parse(userIdString);
+
+            var teacherClass = await _context.Classes.FirstOrDefaultAsync(c => c.TeacherId == teacherId);
+
+            if (teacherClass == null) return NotFound("Önce bir sınıf oluşturmalısınız.");
+
+            string refCode = GenerateReferenceCode();
+            while (await _context.Students.AnyAsync(s => s.ReferenceCode == refCode))
+            {
+                refCode = GenerateReferenceCode();
+            }
+
+            var newStudent = new Student
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name.Trim(),
+                Surname = request.Surname.Trim(),
+                ClassId = teacherClass.Id,
+                ReferenceCode = refCode
+            };
+
+            _context.Students.Add(newStudent);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Öğrenci eklendi.", data = newStudent });
+        }
+
+        private string GenerateReferenceCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+
+        // SADECE VELİLER GİREBİLİR 
+        [Authorize(Roles = "Parent")]
+        [HttpPost("link-student")]
+        public async Task<IActionResult> LinkStudent([FromBody] LinkStudentRequest request)
+        {
+
+            if (string.IsNullOrWhiteSpace(request.ReferenceCode))
+                return BadRequest("Kod boş olamaz.");
+
+            var cleanCode = request.ReferenceCode.Trim().ToUpper();
+
+            // Öğrenciyi bul
+            var student = await _context.Students
+                .FirstOrDefaultAsync(s => s.ReferenceCode == cleanCode);
+
+            if (student == null)
+                return NotFound($"'{cleanCode}' koduna sahip öğrenci bulunamadı.");
+
+            // Veli ID'sini al
+            var parentIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(parentIdString)) return Unauthorized();
+            var parentId = Guid.Parse(parentIdString);
+
+            // Zaten ekli mi?
+            var alreadyLinked = await _context.ParentStudents
+                .AnyAsync(ps => ps.ParentId == parentId && ps.StudentId == student.Id);
+
+            if (alreadyLinked)
+                return BadRequest("Bu öğrenci zaten listenizde ekli.");
+
+            // Eşleştir
+            var parentStudent = new ParentStudent
+            {
+                ParentId = parentId,
+                StudentId = student.Id
+            };
+
+            _context.ParentStudents.Add(parentStudent);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Öğrenci başarıyla eklendi!", studentName = student.Name });
+        }
+
+        // SADECE VELİLER GİREBİLİR
+        [Authorize(Roles = "Parent")]
+        [HttpGet("my-children")]
+        public async Task<IActionResult> GetMyChildren()
+        {
+            var parentId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var children = await _context.ParentStudents
+                .Where(ps => ps.ParentId == parentId)
+                .Select(ps => new
+                {
+                    Id = ps.Student.Id,
+                    Name = ps.Student.Name + " " + (ps.Student.Surname ?? ""),
+                    ClassName = ps.Student.Class.Name,
+                    ReferenceCode = ps.Student.ReferenceCode
                 })
                 .ToListAsync();
 
-            return Ok(students);
+            return Ok(children);
         }
 
-        // GET: api/Students/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<StudentDto>> GetStudent(Guid id)
+        [Authorize(Roles = "Teacher,Parent")] 
+        [HttpGet("{id}/detail")]
+        public async Task<IActionResult> GetStudentDetail(Guid id)
         {
             var student = await _context.Students
                 .Include(s => s.Class)
-                .Where(s => s.Id == id)
-                .Select(s => new StudentDto
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Surname = s.Surname,
-                    TCIDNumber = s.TCIDNumber,
-                    ReferenceCode = s.ReferenceCode,
-                    DateOfBirth = s.DateOfBirth,
-                    HealthNotes = s.HealthNotes,
-                    ClassId = s.ClassId,
-                    ClassName = s.Class != null ? s.Class.Name : null
-                })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(s => s.Id == id);
 
-            if (student == null)
-            {
-                return NotFound(new { message = "Öğrenci bulunamadı" });
-            }
+            if (student == null) return NotFound("Öğrenci bulunamadı.");
 
-            return Ok(student);
-        }
+            var parentLink = await _context.ParentStudents
+                .Include(ps => ps.Parent)
+                .FirstOrDefaultAsync(ps => ps.StudentId == id);
 
-        // POST: api/Students
-        [HttpPost]
-        public async Task<ActionResult<StudentDto>> PostStudent(CreateStudentDto createDto)
-        {
-            // Sınıfın var olup olmadığını kontrol et
-            var classExists = await _context.Classes.AnyAsync(c => c.Id == createDto.ClassId);
-            if (!classExists)
-            {
-                return BadRequest(new { message = "Belirtilen sınıf bulunamadı" });
-            }
+            string parentFullName = parentLink?.Parent != null
+                ? $"{parentLink.Parent.FirstName} {parentLink.Parent.LastName}"
+                : "Atanmış Veli Yok";
 
-            // Referans kodunun benzersiz olup olmadığını kontrol et
-            var referenceCodeExists = await _context.Students
-                .AnyAsync(s => s.ReferenceCode == createDto.ReferenceCode);
-            if (referenceCodeExists)
-            {
-                return BadRequest(new { message = "Bu referans kodu zaten kullanılıyor" });
-            }
-
-            // TC Kimlik No'nun benzersiz olup olmadığını kontrol et
-            var tcExists = await _context.Students
-                .AnyAsync(s => s.TCIDNumber == createDto.TCIDNumber);
-            if (tcExists)
-            {
-                return BadRequest(new { message = "Bu TC Kimlik No zaten kayıtlı" });
-            }
-
-            var student = new Student
-            {
-                Id = Guid.NewGuid(),
-                Name = createDto.Name,
-                Surname = createDto.Surname,
-                TCIDNumber = createDto.TCIDNumber,
-                ReferenceCode = createDto.ReferenceCode,
-                DateOfBirth = createDto.DateOfBirth,
-                HealthNotes = createDto.HealthNotes,
-                ClassId = createDto.ClassId
-            };
-
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
-
-            // Oluşturulan öğrenciyi DTO olarak döndür
-            var studentDto = new StudentDto
+            var dto = new StudentDetailDto
             {
                 Id = student.Id,
-                Name = student.Name,
-                Surname = student.Surname,
+                FirstName = student.Name,
+                LastName = student.Surname,
+                Name = $"{student.Name} {student.Surname}",
+                PhotoUrl = null,
+                ParentName = parentFullName,
+                ClassName = student.Class?.Name ?? "Sınıf Bilgisi Yok",
+                Gender = student.Gender,
                 TCIDNumber = student.TCIDNumber,
-                ReferenceCode = student.ReferenceCode,
                 DateOfBirth = student.DateOfBirth,
-                HealthNotes = student.HealthNotes,
-                ClassId = student.ClassId,
-                ClassName = await _context.Classes
-                    .Where(c => c.Id == student.ClassId)
-                    .Select(c => c.Name)
-                    .FirstOrDefaultAsync()
+                HealthNotes = student.HealthNotes
             };
 
-            return CreatedAtAction(nameof(GetStudent), new { id = student.Id }, studentDto);
+            return Ok(dto);
         }
 
-        // PUT: api/Students/5
+        [Authorize(Roles = "Teacher")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudent(Guid id, UpdateStudentDto updateDto)
-        {
-            if (id != updateDto.Id)
-            {
-                return BadRequest(new { message = "ID uyuşmazlığı" });
-            }
-
-            var student = await _context.Students.FindAsync(id);
-            if (student == null)
-            {
-                return NotFound(new { message = "Öğrenci bulunamadı" });
-            }
-
-            // Sınıfın var olup olmadığını kontrol et
-            var classExists = await _context.Classes.AnyAsync(c => c.Id == updateDto.ClassId);
-            if (!classExists)
-            {
-                return BadRequest(new { message = "Belirtilen sınıf bulunamadı" });
-            }
-
-            // TC Kimlik No değişmişse, benzersizliğini kontrol et
-            if (student.TCIDNumber != updateDto.TCIDNumber)
-            {
-                var tcExists = await _context.Students
-                    .AnyAsync(s => s.TCIDNumber == updateDto.TCIDNumber && s.Id != id);
-                if (tcExists)
-                {
-                    return BadRequest(new { message = "Bu TC Kimlik No zaten kayıtlı" });
-                }
-            }
-
-            student.Name = updateDto.Name;
-            student.Surname = updateDto.Surname;
-            student.TCIDNumber = updateDto.TCIDNumber;
-            student.DateOfBirth = updateDto.DateOfBirth;
-            student.HealthNotes = updateDto.HealthNotes;
-            student.ClassId = updateDto.ClassId;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudentExists(id))
-                {
-                    return NotFound(new { message = "Öğrenci bulunamadı" });
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/Students/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStudent(Guid id)
+        public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] StudentUpdateDto model)
         {
             var student = await _context.Students.FindAsync(id);
-            if (student == null)
+            if (student == null) return NotFound();
+
+            student.Name = model.FirstName;
+            student.Surname = model.LastName;
+            student.Gender = model.Gender;
+            student.TCIDNumber = model.TCIDNumber;
+            student.DateOfBirth = model.DateOfBirth;
+
+            if (!string.IsNullOrEmpty(model.PhotoBase64))
             {
-                return NotFound(new { message = "Öğrenci bulunamadı" });
+                // Burada Base64'ü dosyaya çevirip kaydetme kodu olmalı
+                // Şimdilik DB'ye string olarak veya URL olarak bastığını varsayıyorum
+                // student.PhotoUrl = SaveImage(model.PhotoBase64); 
             }
 
-            _context.Students.Remove(student);
             await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool StudentExists(Guid id)
-        {
-            return _context.Students.Any(e => e.Id == id);
+            return Ok(new { message = "Bilgiler güncellendi." });
         }
     }
 }

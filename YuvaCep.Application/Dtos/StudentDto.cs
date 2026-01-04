@@ -1,4 +1,4 @@
-﻿namespace YuvaCep.Api.DTOs
+﻿namespace YuvaCep.Application.Dtos
 {
     public class StudentDto
     {

@@ -11,37 +11,35 @@ namespace YuvaCep.Mobile
             MainPage = new AppShell();
 
             UserAppTheme = AppTheme.Light;
-
-            // --- BENİ HATIRLA KONTROLÜ ---
-            CheckLoginStatus();
         }
-        private async void CheckLoginStatus()
+
+        protected override async void OnStart()
         {
+            base.OnStart();
+            await CheckLoginStatus();
+        }
+
+        private async Task CheckLoginStatus()
+        {
+
             await Task.Delay(500);
 
             bool isLoggedIn = Preferences.Get("IsLoggedIn", false);
             string userRole = Preferences.Get("UserRole", "");
-           
 
             if (isLoggedIn)
             {
-                // Kullanıcı daha önce "Beni Hatırla" demiş.
-                // Direkt ilgili ana sayfaya yönlendir.
+
                 if (userRole == "Teacher")
                 {
-                    await Shell.Current.GoToAsync("TeacherHomePage");
+                    await Shell.Current.GoToAsync("//TeacherHomePage");
                 }
-                else if (userRole == "Parent")
+                else
                 {
-                    await Shell.Current.GoToAsync("ParentHomePage");
+                    await Shell.Current.GoToAsync("//ParentHomePage");
                 }
             }
-            else
-            {
-                // Giriş yapılmamışsa Rol Seçim Ekranına git
-                await Shell.Current.GoToAsync("//RoleSelectionPage");
-            }
-        }
 
+        }
     }
 }

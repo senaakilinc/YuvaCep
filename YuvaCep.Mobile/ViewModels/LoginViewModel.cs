@@ -76,8 +76,8 @@ namespace YuvaCep.Mobile.ViewModels
                         Preferences.Set("IsLoggedIn", true);
                     }
 
-                    // Hoşgeldiniz mesajında ismi gösterelim
                     await Shell.Current.DisplayAlert("Başarılı", $"Hoşgeldiniz, {fullName}", "Tamam");
+
 
                     if (roleFromServer == "Teacher")
                     {
@@ -107,7 +107,14 @@ namespace YuvaCep.Mobile.ViewModels
         [RelayCommand]
         private async Task GoToRegisterAsync()
         {
-            await Shell.Current.GoToAsync($"RegisterPage?role={UserRole}");
+            try
+            {
+                await Shell.Current.GoToAsync($"Register_Route?role={UserRole}");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Kritik Hata", ex.ToString(), "Tamam");
+            }
         }
 
         [RelayCommand]

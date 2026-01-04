@@ -17,19 +17,11 @@ namespace YuvaCep.Application.Dtos
         [RegularExpression("^[0-9]{11}$", ErrorMessage = "TC Kimlik numarası 11 haneli olmalıdır")]
         public string TCIDNumber { get; set; }
 
-        [Required(ErrorMessage = "E-posta zorunludur")]
-        [EmailAddress]
-        public string Email { get; set; }
-
         [Required(ErrorMessage = "Şifre zorunludur")]
         [StringLength(100, MinimumLength = 6)]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$",
             ErrorMessage = "Şifre en az bir büyük harf, küçük harf ve rakam içermelidir")]
         public string Password { get; set; }
-
-        [Required]
-        [Compare("Password", ErrorMessage = "Şifreler eşleşmiyor")]
-        public string ConfirmPassword { get; set; }
 
         // OPSIYONEL: Rol belirtilmezse Parent
         public string Role { get; set; }
