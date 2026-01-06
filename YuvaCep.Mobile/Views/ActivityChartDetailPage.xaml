@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
+             xmlns:dtos="clr-namespace:YuvaCep.Mobile.Dtos"
+             xmlns:converters="clr-namespace:YuvaCep.Mobile.Converters" 
+             x:Class="YuvaCep.Mobile.Views.ActivityChartDetailPage"
+             x:DataType="viewModels:ActivityChartDetailViewModel"
+             Title="Detay"
+             BackgroundColor="#F5F5F5"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <converters:BoolToIconConverter x:Key="BoolToIconConverter"/>
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, *">
+        <Grid Grid.Row="0" BackgroundColor="#8B5CF6" HeightRequest="60" Padding="15,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ImageButton Command="{Binding GoBackCommand}" Grid.Column="0" VerticalOptions="Center" BackgroundColor="Transparent">
+                <ImageButton.Source>
+                    <FontImageSource Glyph="&#x2190;" Color="White" Size="24"/>
+                </ImageButton.Source>
+            </ImageButton>
+            <Label Text="{Binding ChartTitle}" Grid.Column="1" TextColor="White" FontSize="18" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" Margin="-30,0,0,0"/>
+        </Grid>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Students}" Margin="10">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="dtos:ChartStudentDetailDto">
+
+                    <Frame Padding="10" CornerRadius="10" BackgroundColor="White" HasShadow="True">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ActivityChartDetailViewModel}}, Path=OpenStudentPopupCommand}"
+                                                  CommandParameter="{Binding .}"/>
+                        </Frame.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="50, *, Auto">
+                            <Image Grid.Column="0" Source="icon_student.png" Aspect="AspectFill" HeightRequest="40" WidthRequest="40" VerticalOptions="Center"/>
+
+                            <StackLayout Grid.Column="1" VerticalOptions="Center" Margin="10,0">
+                                <Label Text="{Binding StudentName}" FontAttributes="Bold" FontSize="16" TextColor="#333"/>
+                                <Label Text="{Binding CompletedCount, StringFormat='Toplam: {0} gün tamamlandı'}" TextColor="Gray" FontSize="12"/>
+                            </StackLayout>
+
+                            <Label Grid.Column="2" 
+                                   Text="{Binding IsCompletedToday, Converter={StaticResource BoolToIconConverter}}" 
+                                   TextColor="{Binding IsCompletedToday, Converter={StaticResource BoolToColorConverter}}"
+                                   FontSize="24"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#8B5CF6" HorizontalOptions="Center" VerticalOptions="Center"/>
+    </Grid>
+</ContentPage>

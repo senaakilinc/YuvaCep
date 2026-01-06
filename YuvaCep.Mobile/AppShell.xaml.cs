@@ -28,6 +28,11 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("StudentCards_Route", typeof(StudentCardsPage));
         Routing.RegisterRoute("FoodList_Route", typeof(FoodListPage));
         Routing.RegisterRoute("CurriculumPage", typeof(CurriculumPage));
+        Routing.RegisterRoute("CreateActivityPage", typeof(CreateActivityPage));
+        Routing.RegisterRoute("ActivityChartsListPage", typeof(ActivityChartsListPage));
+        Routing.RegisterRoute("ActivityChartDetailPage", typeof(ActivityChartDetailPage));
+        Routing.RegisterRoute("StudentChartsListPage", typeof(StudentChartsListPage));
+        Routing.RegisterRoute("StudentChartDetailPage", typeof(StudentChartDetailPage));
 
 
     }

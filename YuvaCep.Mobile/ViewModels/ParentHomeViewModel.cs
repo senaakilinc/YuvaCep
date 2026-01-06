@@ -79,7 +79,7 @@ namespace YuvaCep.Mobile.ViewModels
         private async Task GoToChildCards(ChildDto child)
         {
             if (child == null) return;
-            await Shell.Current.GoToAsync($"StudentCards_Route?studentId={child.Id}");
+            await Shell.Current.GoToAsync($"StudentCards_Route?studentId={child.Id}&name={child.Name}");
         }
 
         [RelayCommand]

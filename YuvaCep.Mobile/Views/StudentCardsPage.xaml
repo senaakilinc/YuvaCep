@@ -25,7 +25,6 @@
             </Grid>
 
             <StackLayout Grid.Row="1" Margin="0,20,0,0">
-                <Label Text="Öğrenci:" TextColor="#E0E0E0" FontSize="14"/>
                 <Label Text="{Binding StudentName}" TextColor="White" FontSize="28" FontAttributes="Bold"/>
             </StackLayout>
         </Grid>
@@ -96,10 +95,13 @@
                         </StackLayout>
                     </Frame>
 
-                    <Frame Grid.Row="2" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0" BackgroundColor="#EEE" BorderColor="Transparent">
+                    <Frame Grid.Row="2" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0" BorderColor="Transparent">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToActivityChartsCommand}"/>
+                        </Frame.GestureRecognizers>
                         <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="⚙️" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Ayarlar" FontAttributes="Bold" TextColor="Gray"/>
+                            <Label Text="📊" FontSize="40" HorizontalOptions="Center"/>
+                            <Label Text="Aktiviteler" FontAttributes="Bold" TextColor="#333"/>
                         </StackLayout>
                     </Frame>
 
