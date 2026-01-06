@@ -98,7 +98,7 @@ namespace YuvaCep.Mobile.ViewModels
                     if (UserRole == "Teacher")
                     {
                         // Öğretmen ise sınıf oluşturma sayfasına git
-                        await Shell.Current.GoToAsync("CreateClassPage");
+                        await Shell.Current.GoToAsync("CreateClass_Route");
                     }
                     else
                     {
