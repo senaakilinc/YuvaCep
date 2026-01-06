@@ -98,6 +98,13 @@ namespace YuvaCep.Mobile
             builder.Services.AddTransient<ActivityChartDetailViewModel>();
             builder.Services.AddTransient<ActivityChartDetailPage>();
 
+            // --- ROZET EKRANLARI ---
+            builder.Services.AddTransient<BadgeTrackingPage>();
+            builder.Services.AddTransient<TeacherBadgeStatusViewModel>();
+
+            builder.Services.AddTransient<BadgeDetailPage>();
+            builder.Services.AddTransient<StudentBadgeCollectionViewModel>();
+
 #if DEBUG
             builder.Logging.AddDebug();
 #endif       

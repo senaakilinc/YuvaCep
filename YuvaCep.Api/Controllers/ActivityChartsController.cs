@@ -152,17 +152,19 @@ namespace YuvaCep.Api.Controllers
         [HttpPost("complete")]
         public async Task<IActionResult> Complete([FromBody] CompleteChartDto request)
         {
-
             if (request.ActivityChartId == Guid.Empty || request.StudentId == Guid.Empty)
                 return BadRequest("Eksik veri.");
+
+            // Zaten yapılmış mı kontrol et
             var existingEntry = await _context.StudentChartEntries
                 .FirstOrDefaultAsync(e => e.ActivityChartId == request.ActivityChartId
-                                       && e.StudentId == request.StudentId
-                                       && e.Date.Date == request.Date.Date);
+                                          && e.StudentId == request.StudentId
+                                          && e.Date.Date == request.Date.Date);
 
             if (existingEntry != null)
-                return Ok(new { message = "Zaten tamamlanmış." });
+                return Ok(new { success = true, message = "Zaten tamamlanmış.", newBadge = (object)null });
 
+            // Görevi Tamamla
             var newEntry = new StudentChartEntry
             {
                 Id = Guid.NewGuid(),
@@ -175,7 +177,112 @@ namespace YuvaCep.Api.Controllers
             _context.StudentChartEntries.Add(newEntry);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Başarıyla kaydedildi." });
+            // ROZET MANTIĞI
+
+            var activeDayCount = await _context.StudentChartEntries
+                .AsNoTracking()
+                .Where(e => e.StudentId == request.StudentId && e.IsCompleted)
+                .Select(e => e.Date.Date)
+                .Distinct()
+                .CountAsync();
+
+            // Bu sayıya denk gelen veya daha düşük olan rozetleri bul
+            var eligibleBadges = await _context.BadgeDefinitions
+                .Where(b => b.TargetCount <= activeDayCount)
+                .ToListAsync();
+
+            // Öğrencinin zaten sahip olduğu rozetleri bul
+            var existingBadgeIds = await _context.StudentBadges
+                .Where(sb => sb.StudentId == request.StudentId)
+                .Select(sb => sb.BadgeDefinitionId)
+                .ToListAsync();
+
+            BadgeDefinition newlyEarnedBadge = null;
+
+            // Hakkı olup da henüz almadığı rozet var mı?
+            foreach (var badge in eligibleBadges)
+            {
+                if (!existingBadgeIds.Contains(badge.Id))
+                {
+                    // ROZET KAZANILDI! 
+                    var studentBadge = new StudentBadge
+                    {
+                        Id = Guid.NewGuid(),
+                        StudentId = request.StudentId,
+                        BadgeDefinitionId = badge.Id,
+                        EarnedDate = DateTime.UtcNow
+                    };
+
+                    _context.StudentBadges.Add(studentBadge);
+
+                    newlyEarnedBadge = badge;
+                }
+            }
+
+            if (newlyEarnedBadge != null)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "Başarıyla kaydedildi.",
+                newBadge = newlyEarnedBadge == null ? null : new
+                {
+                    name = newlyEarnedBadge.Name,
+                    imageUrl = newlyEarnedBadge.ImageUrl,
+                    description = newlyEarnedBadge.Description
+                }
+            });
+        }
+
+
+        [HttpPost("seed-badges")]
+        public async Task<IActionResult> SeedBadges()
+        {
+            if (_context.BadgeDefinitions.Any()) return Ok("Zaten rozetler var.");
+
+            var badges = new List<BadgeDefinition>
+            {
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Başlangıç Rozeti",
+                    Description = "İlk aktiviteni tamamladın!",
+                    ImageUrl = "badge_start.png",
+                    TargetCount = 1 
+                },
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Bronz Kupa",
+                    Description = "5 farklı gün aktivite yaptın!",
+                    ImageUrl = "badge_bronze.png",
+                    TargetCount = 5
+                },
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Gümüş Madalya",
+                    Description = "10 farklı gün aktivite yaptın!",
+                    ImageUrl = "badge_silver.png",
+                    TargetCount = 10
+                },
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Altın Yıldız",
+                    Description = "20 farklı gün aktivite yaptın!",
+                    ImageUrl = "badge_gold.png",
+                    TargetCount = 20
+                }
+            };
+
+            _context.BadgeDefinitions.AddRange(badges);
+            await _context.SaveChangesAsync();
+
+            return Ok("Rozetler başarıyla oluşturuldu.");
         }
 
         [Authorize]

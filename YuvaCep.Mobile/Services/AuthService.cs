@@ -25,16 +25,14 @@ namespace YuvaCep.Mobile.Services
     public class AuthService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _baseUrl;
         private readonly JsonSerializerOptions _serializerOptions;
 
-        private const string ApiUrl = "http://10.0.2.2:5000";
 
         public AuthService()
         {
-            _baseUrl = ApiUrl;
 
             _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri(Constants.BaseUrl);
             _httpClient.Timeout = TimeSpan.FromMinutes(2);
 
             _serializerOptions = new JsonSerializerOptions
@@ -50,7 +48,7 @@ namespace YuvaCep.Mobile.Services
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/Auth/login", loginData);
+                var response = await _httpClient.PostAsJsonAsync("api/Auth/login", loginData);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -103,7 +101,7 @@ namespace YuvaCep.Mobile.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/Auth/register/parent", request);
+                var response = await _httpClient.PostAsJsonAsync("api/Auth/register/parent", request);
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>(_serializerOptions);
 
                 if (result == null) return new LoginResponse { IsSuccess = false, Message = "Sunucudan boş cevap döndü." };
@@ -129,7 +127,7 @@ namespace YuvaCep.Mobile.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/Auth/register/teacher", request);
+                var response = await _httpClient.PostAsJsonAsync("api/Auth/register/teacher", request);
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>(_serializerOptions);
 
                 if (result == null) return new LoginResponse { IsSuccess = false, Message = "Sunucudan boş cevap döndü." };

@@ -23,7 +23,7 @@ namespace YuvaCep.Persistence.Contexts
         public DbSet<LessonProgramImage> LessonProgramImages { get; set; }
 
         // Rozet Sistemi Tabloları
-        public DbSet<Badge> Badges { get; set; }
+        public DbSet<BadgeDefinition> BadgeDefinitions { get; set; }
         public DbSet<StudentBadge> StudentBadges { get; set; }
         public DbSet<StudentMood> StudentMoods { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }

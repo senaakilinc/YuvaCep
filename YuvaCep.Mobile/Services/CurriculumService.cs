@@ -6,12 +6,11 @@ namespace YuvaCep.Mobile.Services
     public class CurriculumService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "http://10.0.2.2:5000";
 
         public CurriculumService()
         {
             _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(BaseUrl);
+            _httpClient.BaseAddress = new Uri(Constants.BaseUrl);
             _httpClient.Timeout = TimeSpan.FromSeconds(60);
         }
 

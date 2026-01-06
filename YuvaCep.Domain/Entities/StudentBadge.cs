@@ -1,18 +1,14 @@
-﻿using System;
-
-namespace YuvaCep.Domain.Entities
+﻿namespace YuvaCep.Domain.Entities
 {
     public class StudentBadge
     {
         public Guid Id { get; set; }
-        public DateTime EarnedAt { get; set; } = DateTime.UtcNow;
 
-        // Kime verildi?
         public Guid StudentId { get; set; }
-        public Student Student { get; set; } = null!;
 
-        // Hangi rozet verildi?
-        public Guid BadgeId { get; set; }
-        public Badge Badge { get; set; } = null!;
+        public Guid BadgeDefinitionId { get; set; }
+        public BadgeDefinition BadgeDefinition { get; set; }
+
+        public DateTime EarnedDate { get; set; }
     }
 }

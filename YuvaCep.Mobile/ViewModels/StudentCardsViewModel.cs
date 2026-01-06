@@ -68,7 +68,10 @@ namespace YuvaCep.Mobile.ViewModels
         private async Task GoToAnnouncementsAsync() => await Shell.Current.GoToAsync($"Announcements_Route?studentId={StudentId}");
 
         [RelayCommand]
-        private async Task GoToBadgeDetailsAsync() => await Shell.Current.GoToAsync("BadgeDetail_Route");
+        private async Task GoToBadgeDetailsAsync()
+        {
+            await Shell.Current.GoToAsync($"BadgeDetail_Route?StudentId={StudentId}");
+        }
 
 
         [RelayCommand]
