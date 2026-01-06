@@ -199,6 +199,7 @@ namespace YuvaCep.Api.Controllers
                 Title = chart.Title,
                 Month = chart.Month,
                 Year = chart.Year,
+                Theme = (int)chart.Theme,
                 CompletedDates = completedDates 
             };
 

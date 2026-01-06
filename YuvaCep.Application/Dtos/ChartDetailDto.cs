@@ -25,7 +25,8 @@
         public Guid StudentId { get; set; }  
         public string Title { get; set; }    
         public int Month { get; set; }       
-        public int Year { get; set; }        
+        public int Year { get; set; }
+        public int Theme { get; set; }
         public List<DateTime> CompletedDates { get; set; } = new(); 
     }
 }

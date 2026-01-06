@@ -5,7 +5,6 @@ using YuvaCep.Mobile.Dtos;
 using YuvaCep.Mobile.Services;
 using YuvaCep.Mobile.Enums;
 
-
 namespace YuvaCep.Mobile.ViewModels
 {
     [QueryProperty(nameof(ChartId), "ChartId")]
@@ -16,15 +15,21 @@ namespace YuvaCep.Mobile.ViewModels
 
         [ObservableProperty] private string studentId;
         [ObservableProperty] private string chartId;
-
         [ObservableProperty] private ActivityChartDetailDto chartDetail;
         [ObservableProperty] private ObservableCollection<StudentDayModel> days;
         [ObservableProperty] private bool isBusy;
         [ObservableProperty] private string pageTitle;
 
-        [ObservableProperty] private string completeButtonText = "✅ BUGÜNÜ TAMAMLADIM";
-        [ObservableProperty] private Color completeButtonColor = Color.FromArgb("#4CAF50"); // Yeşil
-        [ObservableProperty] private bool isCompleteButtonEnabled = true;
+        // PUZZLE DEĞİŞKENLERİ
+        [ObservableProperty] private string puzzleImage; // Ana Resim 
+        [ObservableProperty] private bool isCompletedToday;
+        [ObservableProperty] private string successMessage;
+
+        // KOORDİNATLAR
+        [ObservableProperty] private double holeX;       // Deliğin X konumu
+        [ObservableProperty] private double holeY;       // Deliğin Y konumu
+        [ObservableProperty] private double pieceImageX; // Parça resminin X kayması
+        [ObservableProperty] private double pieceImageY; // Parça resminin Y kayması
 
         public StudentChartDetailViewModel()
         {
@@ -58,12 +63,94 @@ namespace YuvaCep.Mobile.ViewModels
                 {
                     ChartDetail = data;
                     PageTitle = data.Title;
+
                     GenerateCalendar(data);
+
+                    var today = DateTime.Today;
+                    IsCompletedToday = data.CompletedDates.Any(d => d.Date == today);
+
+                    // Temaya göre resmi seç
+                    var currentTheme = (ChartTheme)data.Theme;
+                    SetupPuzzle(currentTheme, IsCompletedToday);
                 }
             }
             catch (Exception ex)
             {
                 await Shell.Current.DisplayAlert("Hata", ex.Message, "Tamam");
+            }
+            finally { IsBusy = false; }
+        }
+
+        private void SetupPuzzle(ChartTheme theme, bool isDone)
+        {
+            string imageName = "puzzle_default";
+
+            switch (theme)
+            {
+                case ChartTheme.Hygiene: imageName = "puzzle_hygiene"; break; 
+                case ChartTheme.Sport: imageName = "puzzle_sport"; break;     
+                case ChartTheme.Education: imageName = "puzzle_reading"; break; 
+                case ChartTheme.Nutrition: imageName = "puzzle_nutrition"; break;
+                case ChartTheme.Art: imageName = "puzzle_art"; break;
+                default: imageName = "puzzle_default"; break;
+            }
+
+            PuzzleImage = imageName;
+
+            if (isDone)
+            {
+                SuccessMessage = "Harika İş Çıkardın! 🎉";
+            }
+            else
+            {
+                SuccessMessage = "";
+                RandomizePuzzlePosition();
+            }
+        }
+
+        // RASTGELE KONUM BELİRLEME
+        private void RandomizePuzzlePosition()
+        {
+            // Resim: 300x300, Parça: 100x100
+            // Hareket alanı: 0 ile 200 arası (300-100)
+            var rnd = new Random();
+            double x = rnd.Next(0, 201);
+            double y = rnd.Next(0, 201);
+
+            // Deliği bu konuma koy
+            HoleX = x;
+            HoleY = y;
+
+            // Parçadaki resmi tam tersine kaydır ki eşleşsin
+            PieceImageX = -x;
+            PieceImageY = -y;
+        }
+
+        [RelayCommand]
+        public async Task CompleteActivityAsync()
+        {
+            if (IsCompletedToday) return;
+
+            IsBusy = true;
+            try
+            {
+                var token = Preferences.Get("AuthToken", "");
+                var success = await _activityService.CompleteChartAsync(token, ChartDetail.Id, ChartDetail.StudentId, DateTime.Now);
+
+                if (success)
+                {
+                    IsCompletedToday = true;
+                    var currentTheme = (ChartTheme)ChartDetail.Theme;
+                    SetupPuzzle(currentTheme, true);
+
+                    var todayItem = Days.FirstOrDefault(d => d.Date.Date == DateTime.Today);
+                    if (todayItem != null)
+                    {
+                        todayItem.IsCompleted = true;
+                        todayItem.BoxColor = Colors.Green;
+                        todayItem.TextColor = Colors.White;
+                    }
+                }
             }
             finally { IsBusy = false; }
         }
@@ -74,34 +161,13 @@ namespace YuvaCep.Mobile.ViewModels
             int daysInMonth = DateTime.DaysInMonth(data.Year, data.Month);
             DateTime today = DateTime.Today;
 
-            bool isTodayDone = data.CompletedDates.Any(d => d.Date == today);
-
-            UpdateButtonState(isTodayDone);
-
             for (int i = 1; i <= daysInMonth; i++)
             {
                 DateTime currentDayDate = new DateTime(data.Year, data.Month, i);
-
                 bool isDone = data.CompletedDates.Any(d => d.Date == currentDayDate.Date);
 
-                Color boxColor;
-                Color textColor;
-
-                if (isDone)
-                {
-                    boxColor = Colors.Green;
-                    textColor = Colors.White;
-                }
-                else if (currentDayDate < today)
-                {
-                    boxColor = Colors.Red;
-                    textColor = Colors.White;
-                }
-                else
-                {
-                    boxColor = Color.FromArgb("#E0E0E0");
-                    textColor = Colors.Black;
-                }
+                Color boxColor = isDone ? Colors.Green : (currentDayDate < today ? Colors.Red : Color.FromArgb("#E0E0E0"));
+                Color textColor = isDone || currentDayDate < today ? Colors.White : Colors.Black;
 
                 Days.Add(new StudentDayModel
                 {
@@ -114,67 +180,22 @@ namespace YuvaCep.Mobile.ViewModels
             }
         }
 
-        private void UpdateButtonState(bool isDone)
-        {
-            if (isDone)
-            {
-                CompleteButtonText = "YARIN GÖRÜŞÜRÜZ 👋"; 
-                CompleteButtonColor = Colors.Gray;
-                IsCompleteButtonEnabled = false; 
-            }
-            else
-            {
-                CompleteButtonText = "✅ BUGÜNÜ TAMAMLADIM";
-                CompleteButtonColor = Color.FromArgb("#4CAF50");
-                IsCompleteButtonEnabled = true; 
-            }
-        }
-
-        [RelayCommand]
-        private async Task CompleteTodayAsync()
-        {
-            bool answer = await Shell.Current.DisplayAlert("Tamamla", "Bugünkü görevi tamamladın mı?", "Evet", "Hayır");
-            if (!answer) return;
-
-            if (ChartDetail == null) return;
-            IsBusy = true;
-            try
-            {
-                var token = Preferences.Get("AuthToken", "");
-                var success = await _activityService.CompleteChartAsync(token, ChartDetail.Id, ChartDetail.StudentId, DateTime.Now);
-                if (success)
-                {
-                    var todayItem = Days.FirstOrDefault(d => d.Date.Date == DateTime.Today);
-                    if (todayItem != null)
-                    {
-                        todayItem.IsCompleted = true;
-                        todayItem.BoxColor = Colors.Green;
-                        todayItem.TextColor = Colors.White;
-                    }
-
-                    UpdateButtonState(true);
-
-                    await Shell.Current.DisplayAlert("Harika!", "Bugünü başarıyla tamamladın.", "Tamam");
-                }
-                else
-                {
-                    await Shell.Current.DisplayAlert("Hata", "Kaydedilemedi.", "Tamam");
-                }
-            }
-            finally { IsBusy = false; }
-        }
-
         [RelayCommand]
         private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
     }
 
-    public partial class StudentDayModel : ObservableObject
+    public class StudentDayModel : ObservableObject
     {
         public int DayNumber { get; set; }
         public DateTime Date { get; set; }
 
-        [ObservableProperty] private bool isCompleted;
-        [ObservableProperty] private Color boxColor;
-        [ObservableProperty] private Color textColor;
+        private bool isCompleted;
+        public bool IsCompleted { get => isCompleted; set => SetProperty(ref isCompleted, value); }
+
+        private Color boxColor;
+        public Color BoxColor { get => boxColor; set => SetProperty(ref boxColor, value); }
+
+        private Color textColor;
+        public Color TextColor { get => textColor; set => SetProperty(ref textColor, value); }
     }
 }

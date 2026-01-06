@@ -5,6 +5,7 @@
         public Guid Id { get; set; }
         public Guid StudentId { get; set; }
         public string Title { get; set; }
+        public int Theme { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
 
