@@ -2,119 +2,135 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
+             xmlns:converters="clr-namespace:YuvaCep.Mobile.Converters"
              x:Class="YuvaCep.Mobile.Views.StudentChartDetailPage"
              x:DataType="viewModels:StudentChartDetailViewModel"
-             Title="{Binding PageTitle}"
-             BackgroundColor="#F5F5F5"
+             Title="Puzzle Zamanı"
+             BackgroundColor="#F0F8FF"
              Shell.NavBarIsVisible="False">
 
-    <Grid RowDefinitions="Auto, *, Auto" Padding="0">
+    <ContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+    </ContentPage.Resources>
 
-        <Grid Grid.Row="0" BackgroundColor="#2C3E50" HeightRequest="60" Padding="15,0">
+    <Grid RowDefinitions="Auto, *, Auto">
+
+        <Grid Grid.Row="0" BackgroundColor="#8B5CF6" HeightRequest="60" Padding="15,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
-            <ImageButton Command="{Binding GoBackCommand}" 
-                         Grid.Column="0"
-                         VerticalOptions="Center"
-                         BackgroundColor="Transparent"
-                         HeightRequest="40"
-                         WidthRequest="40">
+            <ImageButton Command="{Binding GoBackCommand}" BackgroundColor="Transparent" VerticalOptions="Center">
                 <ImageButton.Source>
                     <FontImageSource Glyph="&#x2190;" Color="White" Size="24"/>
                 </ImageButton.Source>
             </ImageButton>
-
-            <Label Text="{Binding PageTitle}" 
-                   Grid.Column="1"
-                   TextColor="White" 
-                   FontSize="18" 
-                   FontAttributes="Bold"
-                   VerticalOptions="Center" 
-                   HorizontalOptions="Center"
-                   Margin="-40,0,0,0"/>
+            <Label Text="{Binding PageTitle}" Grid.Column="1" TextColor="White" FontSize="18" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" Margin="-30,0,0,0"/>
         </Grid>
 
-        <CollectionView Grid.Row="1" 
-                        ItemsSource="{Binding Days}"
-                        Margin="15">
+        <Grid Grid.Row="1" RowDefinitions="Auto, *, Auto" Padding="20" VerticalOptions="Center">
 
-            <CollectionView.Header>
-                <StackLayout Padding="0,0,0,15">
-                    <Label Text="{Binding PageTitle}" 
-                            TextColor="#333" 
-                            FontSize="20" 
-                            FontAttributes="Bold" 
-                            HorizontalOptions="Center"/>
-                    <Label Text="(Takvim Yükleniyor...)" 
-                            IsVisible="{Binding IsBusy}" 
-                            HorizontalOptions="Center" 
-                            TextColor="Gray"/>
-                </StackLayout>
-            </CollectionView.Header>
+            <Border Grid.Row="0"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="2"
+                    Stroke="#4A90E2"
+                    HeightRequest="300"
+                    WidthRequest="300"
+                    HorizontalOptions="Center">
 
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" 
-                                 Span="7" 
-                                 HorizontalItemSpacing="5" 
-                                 VerticalItemSpacing="5"/>
-            </CollectionView.ItemsLayout>
+                <Grid>
+                    <Image Source="{Binding PuzzleImage}" 
+                           Aspect="AspectFill"
+                           HorizontalOptions="Fill"
+                           VerticalOptions="Fill"/>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="viewModels:StudentDayModel">
+                    <Border IsVisible="{Binding IsCompletedToday, Converter={StaticResource InvertedBoolConverter}}"
+                            TranslationX="{Binding HoleX}"
+                            TranslationY="{Binding HoleY}"
+                            BackgroundColor="White"
+                            Opacity="0.9"
+                            HeightRequest="100"
+                            WidthRequest="100"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Start"
+                            Stroke="#CCCCCC"
+                            StrokeThickness="1"
+                            StrokeDashArray="4,4">
+                        <Border.GestureRecognizers>
+                            <DropGestureRecognizer AllowDrop="True" Drop="OnDrop"/>
+                        </Border.GestureRecognizers>
 
-                    <Border StrokeShape="RoundRectangle 8"
-                            HeightRequest="50"
-                            WidthRequest="50"
-                            BackgroundColor="{Binding BoxColor}"
-                            StrokeThickness="0">
-                        <Grid>
-                            <Label Text="{Binding DayNumber}"
-                                   TextColor="{Binding TextColor}"
-                                   FontSize="12"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="End"
-                                   VerticalOptions="Start"
-                                   Margin="0,2,4,0"/>
-
-                            <Label Text="✓"
-                                   IsVisible="{Binding IsCompleted}"
-                                   TextColor="White"
-                                   FontSize="20"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center"/>
-                        </Grid>
+                        <Label Text="?" FontSize="40" TextColor="#CCC" HorizontalOptions="Center" VerticalOptions="Center"/>
                     </Border>
 
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-
-            <CollectionView.EmptyView>
-                <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="Veri Yüklenemedi" TextColor="Gray"/>
-                </StackLayout>
-            </CollectionView.EmptyView>
-        </CollectionView>
-
-        <Button Grid.Row="2"
-                Text="{Binding CompleteButtonText}" 
-                Command="{Binding CompleteTodayCommand}"
-                IsEnabled="{Binding IsCompleteButtonEnabled}"
-                BackgroundColor="{Binding CompleteButtonColor}"
-                TextColor="White"
-                FontAttributes="Bold"
-                CornerRadius="20"
-                HeightRequest="50"
-                Margin="20,10,20,20"/>
-
-        <ActivityIndicator IsRunning="{Binding IsBusy}" 
-                           IsVisible="{Binding IsBusy}"
-                           Color="#2C3E50"
-                           Grid.Row="1"
+                    <Label Text="🎉" 
+                           IsVisible="{Binding IsCompletedToday}"
+                           FontSize="100"
                            HorizontalOptions="Center"
-                           VerticalOptions="Center"/>
+                           VerticalOptions="Center"
+                           Opacity="0.8"/>
+                </Grid>
+            </Border>
+
+            <Label Grid.Row="1" 
+                   Text="{Binding SuccessMessage}" 
+                   TextColor="#27AE60"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+
+            <Border Grid.Row="2"
+                    IsVisible="{Binding IsCompletedToday, Converter={StaticResource InvertedBoolConverter}}"
+                    StrokeShape="RoundRectangle 10"
+                    Stroke="Black"
+                    StrokeThickness="1"
+                    HeightRequest="100"
+                    WidthRequest="100"
+                    HorizontalOptions="Center"
+                    VerticalOptions="End"
+                    Margin="0,20,0,0">
+
+                <Grid IsClippedToBounds="True" 
+                      HorizontalOptions="Fill" 
+                      VerticalOptions="Fill">
+
+                    <Image Source="{Binding PuzzleImage}"
+                           Aspect="AspectFill"
+                           HeightRequest="300"
+                           WidthRequest="300"
+                           TranslationX="{Binding PieceImageX}"
+                           TranslationY="{Binding PieceImageY}"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Start"
+                           InputTransparent="True">
+                    </Image>
+
+                    <Grid.GestureRecognizers>
+                        <DragGestureRecognizer CanDrag="True"/>
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Border>
+
+        </Grid>
+
+        <Border Grid.Row="2" BackgroundColor="White" StrokeShape="RoundRectangle 20 20 0 0" Padding="15" HeightRequest="150">
+            <CollectionView ItemsSource="{Binding Days}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="7" HorizontalItemSpacing="5" VerticalItemSpacing="5"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:StudentDayModel">
+                        <Border StrokeShape="RoundRectangle 5" HeightRequest="35" WidthRequest="35" BackgroundColor="{Binding BoxColor}" StrokeThickness="0">
+                            <Grid>
+                                <Label Text="{Binding DayNumber}" TextColor="{Binding TextColor}" FontSize="9" HorizontalOptions="End" VerticalOptions="Start" Margin="0,2,4,0"/>
+                                <Label Text="✓" IsVisible="{Binding IsCompleted}" TextColor="White" FontSize="14" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+
     </Grid>
 </ContentPage>
