@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
+               x:Class="YuvaCep.Mobile.Views.Popups.CalendarPopup"
+               CanBeDismissedByTappingOutsideOfPopup="True">
+
+    <Border StrokeShape="RoundRectangle 15" 
+            BackgroundColor="White"
+            WidthRequest="320"
+            HeightRequest="420"
+            VerticalOptions="Center"
+            HorizontalOptions="Center"
+            Padding="15">
+
+        <Grid RowDefinitions="Auto, *, Auto" RowSpacing="10">
+
+            <Label x:Name="PopupTitle" 
+                   Text="Öğrenci Takvimi" 
+                   FontSize="18" 
+                   FontAttributes="Bold" 
+                   TextColor="Black" 
+                   HorizontalOptions="Center"/>
+
+            <CollectionView Grid.Row="1" x:Name="CalendarCollection" VerticalOptions="Center">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" 
+                                     Span="7" 
+                                     HorizontalItemSpacing="5" 
+                                     VerticalItemSpacing="5"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:StudentDayModel">
+                        <Border StrokeShape="RoundRectangle 5"
+                                HeightRequest="35"
+                                WidthRequest="35"
+                                BackgroundColor="{Binding BoxColor}"
+                                StrokeThickness="0">
+                            <Grid>
+                                <Label Text="{Binding DayNumber}"
+                                       TextColor="{Binding TextColor}"
+                                       FontSize="10"
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Start"
+                                       Margin="0,2,4,0"/>
+
+                                <Label Text="✓"
+                                       IsVisible="{Binding IsCompleted}"
+                                       TextColor="White"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Button Grid.Row="2" 
+                    Text="Kapat" 
+                    Clicked="OnCloseClicked"
+                    BackgroundColor="#333333" 
+                    TextColor="White" 
+                    CornerRadius="10"
+                    HeightRequest="40"/>
+        </Grid>
+    </Border>
+</toolkit:Popup>

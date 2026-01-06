@@ -35,6 +35,7 @@ namespace YuvaCep.Mobile.ViewModels
             MenuItems.Add(new dashboardItem { Title = "Ders Programı", Icon = "📅", ColorHex = "#FBBF24", Route = "CurriculumPage" });
             MenuItems.Add(new dashboardItem { Title = "Öğrenci Listesi", Icon = "👶", ColorHex = "#A78BFA", Route = "StudentList_Route" });
             MenuItems.Add(new dashboardItem { Title = "Rozet Takibi", Icon = "🏆", ColorHex = "#F59E0B", Route = "BadgeTracking_Route" });
+            MenuItems.Add(new dashboardItem { Title = "Aylık Çizelgeler", Icon = "🧩", ColorHex = "#8B5CF6", Route = "ActivityChartsListPage" });
         }
 
         public void LoadData()

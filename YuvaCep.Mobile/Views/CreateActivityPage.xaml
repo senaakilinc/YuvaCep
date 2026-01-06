@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:YuvaCep.Mobile.ViewModels"
+             x:Class="YuvaCep.Mobile.Views.CreateActivityPage"
+             x:DataType="viewModels:CreateActivityViewModel"
+             Title="Yeni Aktivite"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F5F5F5">
+
+    <Grid RowDefinitions="Auto, *">
+        <Grid Grid.Row="0" BackgroundColor="#4A90E2" Padding="10" ColumnDefinitions="50, *, 50">
+            <ImageButton Grid.Column="0" Command="{Binding GoBackCommand}" HeightRequest="40" WidthRequest="40" BackgroundColor="Transparent" HorizontalOptions="Start">
+                <ImageButton.Source>
+                    <FontImageSource Glyph="&#x2190;" Color="White" Size="28" />
+                </ImageButton.Source>
+            </ImageButton>
+            <Label Grid.Column="1" Text="Yeni Aktivite Çizelgesi" TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+
+        <ScrollView Grid.Row="1" Padding="20">
+            <VerticalStackLayout Spacing="20">
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Çizelge Başlığı" FontAttributes="Bold" TextColor="#333"/>
+                    <Frame Padding="0" CornerRadius="10" BorderColor="Gray">
+                        <Entry Text="{Binding Title}" Placeholder="Örn: Diş Fırçalama Takibi" Margin="10,0"/>
+                    </Frame>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Görsel Tema (Konsept)" FontAttributes="Bold" TextColor="#333"/>
+                    <Frame Padding="0" CornerRadius="10" BorderColor="Gray">
+                        <Picker ItemsSource="{Binding Themes}" 
+                                ItemDisplayBinding="{Binding Name}"
+                                SelectedItem="{Binding SelectedThemeItem}"
+                                Title="Tema Seçiniz"
+                                TextColor="#333"
+                                TitleColor="Gray"
+                                Margin="10,0"/>
+                    </Frame>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Hangi Ay İçin?" FontAttributes="Bold" TextColor="#333"/>
+                    <Frame Padding="0" CornerRadius="10" BorderColor="Gray">
+                        <DatePicker Date="{Binding SelectedDate}" Format="MMMM yyyy" Margin="10,0"/>
+                    </Frame>
+                </VerticalStackLayout>
+
+                <Button Text="💾 Çizelgeyi Oluştur"
+                Command="{Binding CreateActivityCommand}" 
+                BackgroundColor="#4A90E2"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="20"
+                HeightRequest="50"
+                Margin="0,20,0,0">
+                    <Button.Shadow>
+                        <Shadow Brush="Black" Offset="2,2" Opacity="0.2"/>
+                    </Button.Shadow>
+                </Button>
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                                   IsVisible="{Binding IsBusy}" 
+                                   Color="#4A90E2"
+                                   HorizontalOptions="Center"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

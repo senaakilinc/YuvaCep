@@ -3,6 +3,7 @@ using YuvaCep.Mobile.Services;
 using YuvaCep.Mobile.ViewModels;
 using YuvaCep.Mobile.Views;
 using System.Globalization;
+using CommunityToolkit.Maui;
 
 namespace YuvaCep.Mobile
 {
@@ -17,6 +18,7 @@ namespace YuvaCep.Mobile
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -32,7 +34,8 @@ namespace YuvaCep.Mobile
             builder.Services.AddSingleton<ClassService>();
             builder.Services.AddSingleton<FoodListService>();
             builder.Services.AddSingleton<CurriculumService>();
-           
+            builder.Services.AddSingleton<ActivityService>();
+
 
             // --- GİRİŞ & KAYIT EKRANLARI ---
             builder.Services.AddTransient<LoginPage>();
@@ -57,6 +60,12 @@ namespace YuvaCep.Mobile
             builder.Services.AddTransient<DailyReportPage>();
             builder.Services.AddTransient<DailyReportViewModel>();
 
+            builder.Services.AddTransient<StudentChartsListViewModel>();
+            builder.Services.AddTransient<StudentChartsListPage>();
+
+            builder.Services.AddTransient<StudentChartDetailViewModel>();
+            builder.Services.AddTransient<StudentChartDetailPage>();
+
             // --- ÖĞRETMEN EKRANLARI ---
 
             builder.Services.AddTransient<CreateClassPage>();
@@ -79,6 +88,15 @@ namespace YuvaCep.Mobile
 
             builder.Services.AddTransient<CurriculumViewModel>();
             builder.Services.AddTransient<CurriculumPage>();
+
+            builder.Services.AddTransient<CreateActivityViewModel>();
+            builder.Services.AddTransient<CreateActivityPage>();
+
+            builder.Services.AddTransient<ActivityChartsListViewModel>();
+            builder.Services.AddTransient<ActivityChartsListPage>();
+
+            builder.Services.AddTransient<ActivityChartDetailViewModel>();
+            builder.Services.AddTransient<ActivityChartDetailPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

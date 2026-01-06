@@ -6,6 +6,7 @@ using YuvaCep.Mobile.Services;
 namespace YuvaCep.Mobile.ViewModels
 {
     [QueryProperty(nameof(StudentId), "studentId")]
+    [QueryProperty(nameof(StudentName), "name")]
     public partial class StudentCardsViewModel : ObservableObject
     {
         private readonly StudentService _studentService;
@@ -41,49 +42,46 @@ namespace YuvaCep.Mobile.ViewModels
                 if (data != null)
                 {
                     StudentName = string.IsNullOrEmpty(data.Name) ? $"{data.FirstName} {data.LastName}" : data.Name;
-                    ClassName = data.ClassName; 
+                    ClassName = data.ClassName;
                 }
             }
             finally { IsBusy = false; }
         }
 
         [RelayCommand]
-        private async Task GoToTeacherDailyReportAsync()
-        {
-            await Shell.Current.GoToAsync($"TeacherDailyReport_Route?studentId={StudentId}");
-        }
+        private async Task GoToTeacherDailyReportAsync() => await Shell.Current.GoToAsync($"TeacherDailyReport_Route?studentId={StudentId}");
 
         [RelayCommand]
-        private async Task GoToDailyReportAsync()
-        {
-            await Shell.Current.GoToAsync($"DailyReport_Route?studentId={StudentId}");
-        }
+        private async Task GoToDailyReportAsync() => await Shell.Current.GoToAsync($"DailyReport_Route?studentId={StudentId}");
 
         [RelayCommand]
-        private async Task GoToFoodListAsync()
-        {
-            await Shell.Current.GoToAsync($"FoodList_Route?studentId={StudentId}");
-        }
+        private async Task GoToFoodListAsync() => await Shell.Current.GoToAsync($"FoodList_Route?studentId={StudentId}");
 
         [RelayCommand]
         private async Task GoToLessonProgramAsync()
         {
             if (!string.IsNullOrEmpty(StudentId))
-            {
                 await Shell.Current.GoToAsync($"CurriculumPage?studentId={StudentId}");
+        }
+
+        [RelayCommand]
+        private async Task GoToAnnouncementsAsync() => await Shell.Current.GoToAsync($"Announcements_Route?studentId={StudentId}");
+
+        [RelayCommand]
+        private async Task GoToBadgeDetailsAsync() => await Shell.Current.GoToAsync("BadgeDetail_Route");
+
+
+        [RelayCommand]
+        private async Task GoToActivityChartsAsync()
+        {
+            if (!string.IsNullOrEmpty(StudentId))
+            {
+                await Shell.Current.GoToAsync($"StudentChartsListPage?studentId={StudentId}");
             }
-        }
-
-        [RelayCommand]
-        private async Task GoToAnnouncementsAsync()
-        {
-            await Shell.Current.GoToAsync($"Announcements_Route?studentId={StudentId}");
-        }
-
-        [RelayCommand]
-        private async Task GoToBadgeDetailsAsync()
-        {
-            await Shell.Current.GoToAsync("BadgeDetail_Route");
+            else
+            {
+                await Shell.Current.DisplayAlert("Hata", "Öğrenci ID bulunamadı!", "Tamam");
+            }
         }
 
         [RelayCommand]
