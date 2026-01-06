@@ -90,7 +90,7 @@ namespace YuvaCep.Mobile.ViewModels
             {
                 SecureStorage.Remove("auth_token");
                 Preferences.Clear();
-                await Shell.Current.GoToAsync("RoleSelection_Route");
+                Application.Current.MainPage = new AppShell();
             }
         }
     }

@@ -1,9 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Extensions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using YuvaCep.Mobile.Dtos;
-using YuvaCep.Mobile.Services;
 using YuvaCep.Mobile.Enums;
+using YuvaCep.Mobile.Services;
 
 namespace YuvaCep.Mobile.ViewModels
 {
@@ -111,8 +112,6 @@ namespace YuvaCep.Mobile.ViewModels
         // RASTGELE KONUM BELİRLEME
         private void RandomizePuzzlePosition()
         {
-            // Resim: 300x300, Parça: 100x100
-            // Hareket alanı: 0 ile 200 arası (300-100)
             var rnd = new Random();
             double x = rnd.Next(0, 201);
             double y = rnd.Next(0, 201);
@@ -135,11 +134,14 @@ namespace YuvaCep.Mobile.ViewModels
             try
             {
                 var token = Preferences.Get("AuthToken", "");
-                var success = await _activityService.CompleteChartAsync(token, ChartDetail.Id, ChartDetail.StudentId, DateTime.Now);
 
-                if (success)
+                // Servisi çağırır
+                var response = await _activityService.CompleteChartAsync(token, ChartDetail.Id, ChartDetail.StudentId, DateTime.Now);
+
+                if (response.Success) 
                 {
                     IsCompletedToday = true;
+
                     var currentTheme = (ChartTheme)ChartDetail.Theme;
                     SetupPuzzle(currentTheme, true);
 
@@ -150,6 +152,17 @@ namespace YuvaCep.Mobile.ViewModels
                         todayItem.BoxColor = Colors.Green;
                         todayItem.TextColor = Colors.White;
                     }
+
+                    // ROZET KONTROLÜ 
+                    if (response.NewBadge != null)
+                    {
+                        var popup = new Views.Popups.BadgeWonPopup(response.NewBadge);
+                        await Shell.Current.CurrentPage.ShowPopupAsync(popup);
+                    }
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Hata", "Kaydedilemedi: " + response.Message, "Tamam");
                 }
             }
             finally { IsBusy = false; }

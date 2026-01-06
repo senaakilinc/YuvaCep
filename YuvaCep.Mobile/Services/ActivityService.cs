@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using YuvaCep.Mobile.Dtos;
+using YuvaCep.Mobile.ViewModels;
 
 namespace YuvaCep.Mobile.Services
 {
@@ -84,16 +85,26 @@ namespace YuvaCep.Mobile.Services
             catch { return new List<ActivityChartDto>(); }
         }
 
-        public async Task<bool> CompleteChartAsync(string token, Guid chartId, Guid studentId, DateTime date)
+        public async Task<CompleteActivityResponseDto> CompleteChartAsync(string token, Guid chartId, Guid studentId, DateTime date)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
                 var model = new { ActivityChartId = chartId, StudentId = studentId, Date = date };
                 var response = await _httpClient.PostAsJsonAsync("api/ActivityCharts/complete", model);
-                return response.IsSuccessStatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<CompleteActivityResponseDto>();
+                }
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                // Hata logu gelebilir
+            }
+
+            return new CompleteActivityResponseDto { Success = false, Message = "Bağlantı hatası" };
         }
 
         public async Task<bool> DeleteChartAsync(string token, Guid chartId)
@@ -101,6 +112,20 @@ namespace YuvaCep.Mobile.Services
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.DeleteAsync($"/api/ActivityCharts/{chartId}");
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<List<BadgeDisplayItem>> GetStudentBadgesAsync(string token, string studentId)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.GetAsync($"/api/Gamification/student-badges?studentId={studentId}");
+            return response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<List<BadgeDisplayItem>>() : new List<BadgeDisplayItem>();
+        }
+
+        public async Task<List<ClassBadgeStatusItem>> GetClassBadgeStatusAsync(string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.GetAsync("/api/Gamification/class-status");
+            return response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<List<ClassBadgeStatusItem>>() : new List<ClassBadgeStatusItem>();
         }
     }
 }

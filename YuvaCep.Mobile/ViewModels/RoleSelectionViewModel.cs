@@ -8,7 +8,6 @@ namespace YuvaCep.Mobile.ViewModels
         [RelayCommand]
         private async Task SelectRoleAsync(string role)
         {
-            // role parametresi "Teacher" veya "Parent" olarak gelecek.
 
             await Shell.Current.GoToAsync($"LoginPage?role={role}");
         }

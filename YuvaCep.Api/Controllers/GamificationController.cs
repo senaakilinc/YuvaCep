@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using YuvaCep.Domain.Entities;
 using YuvaCep.Persistence.Contexts;
@@ -16,120 +17,125 @@ namespace YuvaCep.Api.Controllers
             _context = context;
         }
 
-        // VELİ: Çocuğun durumunu (Emoji) girer
-        // Sistem o an rozet kontrolü yapar.
-        [HttpPost("submit-mood")]
-        public async Task<IActionResult> SubmitMood([FromForm] Guid studentId, [FromForm] string emoji)
+        [HttpPost("seed-badges")]
+        public async Task<IActionResult> SeedBadges()
         {
-            // 1. Emojiyi Kaydet
-            var mood = new StudentMood
+            if (_context.BadgeDefinitions.Any()) return Ok("Zaten rozetler var.");
+
+            var badges = new List<BadgeDefinition>
             {
-                StudentId = studentId,
-                Emoji = emoji,
-                CreatedAt = DateTime.UtcNow
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Başlangıç Rozeti",
+                    Description = "İlk aktiviteni tamamladın!",
+                    ImageUrl = "badge_start.png",
+                    TargetCount = 1
+                },
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Bronz Kupa",
+                    Description = "5 farklı gün aktivite yaptın!",
+                    ImageUrl = "badge_bronze.png",
+                    TargetCount = 5
+                },
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Gümüş Madalya",
+                    Description = "10 farklı gün aktivite yaptın!",
+                    ImageUrl = "badge_silver.png",
+                    TargetCount = 10
+                },
+                new BadgeDefinition
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Altın Yıldız",
+                    Description = "20 farklı gün aktivite yaptın!",
+                    ImageUrl = "badge_gold.png",
+                    TargetCount = 20
+                }
             };
-            _context.StudentMoods.Add(mood);
+
+            _context.BadgeDefinitions.AddRange(badges);
             await _context.SaveChangesAsync();
 
-            // 2. ARKA PLAN İŞLEMİ: Rozet Kontrolü Yap (Trigger)
-            await CheckAndAwardBadges(studentId);
-
-            return Ok(new { Message = "Ruh hali kaydedildi, rozetler kontrol edildi.", Emoji = emoji });
+            return Ok("Rozetler başarıyla oluşturuldu.");
         }
 
-        // --- ÖZEL METOT: ROZET HESAPLAMA MOTORU ---
-        private async Task CheckAndAwardBadges(Guid studentId)
+        [Authorize]
+        [HttpGet("student-badges")]
+        public async Task<IActionResult> GetStudentBadges([FromQuery] Guid studentId)
         {
-            var now = DateTime.UtcNow;
-
-            // A. BU HAFTANIN VERİLERİ (Son 7 gün)
-            var last7Days = now.AddDays(-7);
-            var weeklyCount = await _context.StudentMoods
-                .Where(m => m.StudentId == studentId && m.CreatedAt >= last7Days)
-                .Select(m => m.CreatedAt.Date) // Sadece tarih kısmını al (Saat/Dakika at)
-                .Distinct() // Tekrar eden günleri ele (Aynı gün 5 kere girdiyse 1 say)
-                .CountAsync();
-
-            // B. BU AYIN VERİLERİ
-            var startOfMonth = new DateTime(now.Year, now.Month, 1).ToUniversalTime();
-            var monthlyCount = await _context.StudentMoods
-                .Where(m => m.StudentId == studentId && m.CreatedAt >= startOfMonth)
-                .Select(m => m.CreatedAt.Date)
-                .Distinct()
-                .CountAsync();
-
-            // --- KURAL 1: HAFTALIK KATILIM (Son 7 günde 3 giriş) ---
-            if (weeklyCount >= 3)
-            {
-                await GiveBadgeIfNotExists(studentId, "WEEKLY", "Haftalık Katılım Rozeti");
-            }
-
-            // --- KURAL 2: GÜMÜŞ ROZET (Ayda 15 giriş) ---
-            if (monthlyCount >= 15)
-            {
-                await GiveBadgeIfNotExists(studentId, "SILVER", "Aylık Gümüş Rozet");
-            }
-
-            // --- KURAL 3: ALTIN ROZET (Ayda 20 giriş) ---
-            if (monthlyCount >= 20)
-            {
-                await GiveBadgeIfNotExists(studentId, "GOLD", "Aylık Altın Rozet");
-            }
-        }
-
-        // Rozeti verirken "Daha önce almış mı?" diye bakar, spam'i önler.
-        private async Task GiveBadgeIfNotExists(Guid studentId, string badgeCode, string badgeName)
-        {
-            // 1. Bu kodlu rozeti veritabanından bul
-            var badgeDefinition = await _context.Badges.FirstOrDefaultAsync(b => b.Code == badgeCode);
-
-            // Eğer rozet sistemde tanımlı değilse, otomatik oluştur (Seed Data yoksa patlamasın diye)
-            if (badgeDefinition == null)
-            {
-                badgeDefinition = new Badge
-                {
-                    Name = badgeName,
-                    Code = badgeCode,
-                    ImagePath = $"/badges/{badgeCode.ToLower()}.png"
-                };
-                _context.Badges.Add(badgeDefinition);
-                await _context.SaveChangesAsync();
-            }
-
-            // 2. Öğrenci bu rozeti bu ay/hafta almış mı?
-            // (Basitlik için: Öğrencinin bu rozeti hiç var mı diye bakıyoruz)
-            bool alreadyHas = await _context.StudentBadges
-                .AnyAsync(sb => sb.StudentId == studentId && sb.BadgeId == badgeDefinition.Id);
-
-            if (!alreadyHas)
-            {
-                var newBadge = new StudentBadge
-                {
-                    StudentId = studentId,
-                    BadgeId = badgeDefinition.Id,
-                    EarnedAt = DateTime.UtcNow
-                };
-                _context.StudentBadges.Add(newBadge);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        // VELİ: Rozetlerimi Göster
-        [HttpGet("my-badges/{studentId}")]
-        public async Task<IActionResult> GetBadges(Guid studentId)
-        {
-            var list = await _context.StudentBadges
+            var allBadges = await _context.BadgeDefinitions.AsNoTracking().OrderBy(b => b.TargetCount).ToListAsync();
+            var earnedBadges = await _context.StudentBadges
+                .AsNoTracking()
                 .Where(sb => sb.StudentId == studentId)
-                .Include(sb => sb.Badge)
-                .Select(sb => new
-                {
-                    BadgeName = sb.Badge.Name,
-                    Image = sb.Badge.ImagePath,
-                    EarnedDate = sb.EarnedAt
-                })
                 .ToListAsync();
 
-            return Ok(list);
+            var result = allBadges.Select(badgeDef =>
+            {
+                var earned = earnedBadges.FirstOrDefault(eb => eb.BadgeDefinitionId == badgeDef.Id);
+                return new
+                {
+                    Name = badgeDef.Name,
+                    Description = badgeDef.Description,
+                    ImageUrl = badgeDef.ImageUrl,
+                    TargetCount = badgeDef.TargetCount,
+                    IsEarned = earned != null,
+                    EarnedDate = earned?.EarnedDate
+                };
+            }).ToList();
+
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Teacher")]
+        [HttpGet("class-status")]
+        public async Task<IActionResult> GetClassBadgeStatus()
+        {
+            var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+
+            // Öğretmenin sınıfını bul
+            var teacherClass = await _context.Classes.FirstOrDefaultAsync(c => c.TeacherId == userId);
+            if (teacherClass == null) return BadRequest("Sınıf bulunamadı.");
+
+            // Sınıftaki öğrencileri çek
+            var students = await _context.Students
+                .AsNoTracking()
+                .Where(s => s.ClassId == teacherClass.Id)
+                .ToListAsync();
+
+            var resultList = new List<object>();
+
+            foreach (var student in students)
+            {
+                // Öğrencinin toplam aktif gün sayısını hesapla
+                var activeDays = await _context.StudentChartEntries
+                    .AsNoTracking()
+                    .Where(e => e.StudentId == student.Id && e.IsCompleted)
+                    .Select(e => e.Date.Date)
+                    .Distinct()
+                    .CountAsync();
+
+                string badgeIcon = "badge_lock.png"; // Varsayılan/Kilitli
+                if (activeDays >= 20) badgeIcon = "badge_gold.png";
+                else if (activeDays >= 10) badgeIcon = "badge_silver.png";
+                else if (activeDays >= 5) badgeIcon = "badge_bronze.png";
+                else if (activeDays >= 1) badgeIcon = "badge_start.png";
+
+                resultList.Add(new
+                {
+                    StudentId = student.Id,
+                    Name = $"{student.Name} {student.Surname}",
+                    CompletedDays = activeDays,
+                    BadgeIcon = badgeIcon,
+                    HasBadge = activeDays >= 1 // En az 1 gün yaptıysa rozeti var sayalım
+                });
+            }
+
+            return Ok(resultList.OrderByDescending(x => ((dynamic)x).CompletedDays));
         }
     }
 }

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="YuvaCep.Mobile.Views.Popups.BadgeWonPopup"
+               BackgroundColor="Transparent"
+               CanBeDismissedByTappingOutsideOfPopup="False">
+
+    <Border StrokeShape="RoundRectangle 20"
+            BackgroundColor="White"
+            WidthRequest="300"
+            HeightRequest="380"
+            Stroke="#FFD700"
+            StrokeThickness="4"
+            Padding="20"
+            VerticalOptions="Center"
+            HorizontalOptions="Center">
+
+        <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="10">
+
+            <Label Text="TEBRİKLER! 🎉" 
+                   TextColor="#FF8C00"
+                   FontSize="24" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center"/>
+
+            <Image Grid.Row="1"
+                   x:Name="BadgeImage"
+                   HeightRequest="150"
+                   WidthRequest="150"
+                   HorizontalOptions="Center"
+                   Aspect="AspectFit"/>
+
+            <VerticalStackLayout Grid.Row="2" Spacing="5">
+                <Label x:Name="BadgeNameLabel"
+                       Text="Bronz Kupa"
+                       TextColor="Black"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"/>
+
+                <Label x:Name="BadgeDescLabel"
+                       Text="5 Günlük seriyi tamamladın!"
+                       TextColor="Gray"
+                       FontSize="14"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+
+            <Button Grid.Row="3"
+                    Text="SÜPER! 😎"
+                    Clicked="OnCloseClicked"
+                    BackgroundColor="#FFD700"
+                    TextColor="Black"
+                    FontAttributes="Bold"
+                    CornerRadius="20"/>
+        </Grid>
+    </Border>
+</toolkit:Popup>
