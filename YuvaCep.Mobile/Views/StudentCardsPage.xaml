@@ -5,104 +5,132 @@
              x:Class="YuvaCep.Mobile.Views.StudentCardsPage"
              x:DataType="viewModels:StudentCardsViewModel"
              Title="Öğrenci Detayı"
-             Shell.NavBarIsVisible="False"
-             BackgroundColor="#F5F5F5">
+             Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto, *">
 
-        <Grid Grid.Row="0" BackgroundColor="#4A90E2" Padding="20,40,20,30" RowDefinitions="Auto, Auto">
-            <Grid ColumnDefinitions="Auto, *" VerticalOptions="Center">
-                <ImageButton Command="{Binding GoBackCommand}" HeightRequest="24" HorizontalOptions="Start" BackgroundColor="Transparent">
-                    <ImageButton.Source>
-                        <FontImageSource Glyph="&#x2190;" Color="White" Size="24" />
-                    </ImageButton.Source>
-                </ImageButton>
+        <Grid Grid.Row="0" HeightRequest="260">
+            <BoxView Color="#FF9F1C" 
+                     CornerRadius="0,0,60,60"
+                     VerticalOptions="Fill"/>
 
-                <Label Text="{Binding ClassName}" 
-                       TextColor="White" FontSize="22" FontAttributes="Bold" 
-                       HorizontalOptions="Center" VerticalOptions="Center" 
-                       Grid.Column="1" Margin="-24,0,0,0"/>
+            <Grid RowDefinitions="Auto, Auto, Auto" Padding="20,50,20,0" VerticalOptions="Start">
+
+                <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
+                    <Frame Padding="0" HeightRequest="40" WidthRequest="40" CornerRadius="12" 
+                           BackgroundColor="#33FFFFFF" HasShadow="False" BorderColor="Transparent"
+                           HorizontalOptions="Start">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Label Text="&#x2190;" TextColor="White" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Frame>
+
+                    <Label Grid.Column="1" Text="Öğrenci Paneli" TextColor="White" FontAttributes="Bold" FontSize="18" 
+                           HorizontalOptions="Center" VerticalOptions="Center" Margin="-40,0,0,0"/>
+                </Grid>
+
+                <VerticalStackLayout Grid.Row="1" Spacing="5" HorizontalOptions="Center" Margin="0,20,0,0">
+                    <Label Text="{Binding ClassName}" 
+                           TextColor="#FFEDD5" 
+                           FontSize="16" 
+                           HorizontalOptions="Center"
+                           FontAttributes="Bold"/>
+
+                    <Label Text="{Binding StudentName}" 
+                           TextColor="White" 
+                           FontSize="28" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
             </Grid>
-
-            <StackLayout Grid.Row="1" Margin="0,20,0,0">
-                <Label Text="{Binding StudentName}" TextColor="White" FontSize="28" FontAttributes="Bold"/>
-            </StackLayout>
         </Grid>
 
-        <ScrollView Grid.Row="1" Padding="20">
-            <VerticalStackLayout Spacing="20">
+        <ScrollView Grid.Row="1" Margin="20,-50,20,0" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="20" Padding="0,0,0,30">
 
-                <Button Text="➕ GÜNLÜK RAPOR EKLE"
+                <Button Text="📝 Günlük Rapor Ekle"
                         Command="{Binding GoToTeacherDailyReportCommand}"
                         IsVisible="{Binding IsTeacher}"
-                        BackgroundColor="#FF7043"
-                        TextColor="White"
+                        BackgroundColor="White"
+                        TextColor="#FF9F1C"
                         FontAttributes="Bold"
                         CornerRadius="15"
-                        HeightRequest="60"
-                        ImageSource="{FontImageSource Glyph='📝', Color=White, Size=20}"
-                        ContentLayout="Right,10"/>
+                        HeightRequest="55"
+                        Shadow="{Shadow Radius=5, Opacity=0.2}"/>
 
                 <Grid ColumnDefinitions="*,*" RowDefinitions="140, 140, 140" ColumnSpacing="15" RowSpacing="15">
 
-                    <Frame Grid.Row="0" Grid.Column="0" CornerRadius="15" HasShadow="True" Padding="0" BorderColor="Transparent">
+                    <Frame Grid.Row="0" Grid.Column="0" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent" BackgroundColor="White">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToDailyReportCommand}"/>
                         </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="📝" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Günlük Rapor" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
+                        <Grid RowDefinitions="Auto, *">
+                            <Frame BackgroundColor="#E0F2FE" CornerRadius="12" HeightRequest="50" WidthRequest="50" Padding="0" HasShadow="False" HorizontalOptions="Start">
+                                <Label Text="📝" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Frame>
+                            <Label Grid.Row="1" Text="Günlük Rapor" FontAttributes="Bold" TextColor="#374151" VerticalOptions="End"/>
+                        </Grid>
                     </Frame>
 
-                    <Frame Grid.Row="0" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0" BorderColor="Transparent">
+                    <Frame Grid.Row="0" Grid.Column="1" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent" BackgroundColor="White">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToAnnouncementsCommand}"/>
                         </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="📢" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Duyurular" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
+                        <Grid RowDefinitions="Auto, *">
+                            <Frame BackgroundColor="#FCE7F3" CornerRadius="12" HeightRequest="50" WidthRequest="50" Padding="0" HasShadow="False" HorizontalOptions="Start">
+                                <Label Text="📢" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Frame>
+                            <Label Grid.Row="1" Text="Duyurular" FontAttributes="Bold" TextColor="#374151" VerticalOptions="End"/>
+                        </Grid>
                     </Frame>
 
-                    <Frame Grid.Row="1" Grid.Column="0" CornerRadius="15" HasShadow="True" Padding="0" BorderColor="Transparent">
+                    <Frame Grid.Row="1" Grid.Column="0" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent" BackgroundColor="White">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToFoodListCommand}"/>
                         </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="🍎" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Yemek Listesi" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
+                        <Grid RowDefinitions="Auto, *">
+                            <Frame BackgroundColor="#DCFCE7" CornerRadius="12" HeightRequest="50" WidthRequest="50" Padding="0" HasShadow="False" HorizontalOptions="Start">
+                                <Label Text="🍎" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Frame>
+                            <Label Grid.Row="1" Text="Yemek Listesi" FontAttributes="Bold" TextColor="#374151" VerticalOptions="End"/>
+                        </Grid>
                     </Frame>
 
-                    <Frame Grid.Row="1" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0" BorderColor="Transparent">
+                    <Frame Grid.Row="1" Grid.Column="1" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent" BackgroundColor="White">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToLessonProgramCommand}"/>
                         </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="📅" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Ders Programı" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
+                        <Grid RowDefinitions="Auto, *">
+                            <Frame BackgroundColor="#FEF3C7" CornerRadius="12" HeightRequest="50" WidthRequest="50" Padding="0" HasShadow="False" HorizontalOptions="Start">
+                                <Label Text="📅" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Frame>
+                            <Label Grid.Row="1" Text="Ders Programı" FontAttributes="Bold" TextColor="#374151" VerticalOptions="End"/>
+                        </Grid>
                     </Frame>
 
-                    <Frame Grid.Row="2" Grid.Column="0" CornerRadius="15" HasShadow="True" Padding="0" BorderColor="Transparent">
+                    <Frame Grid.Row="2" Grid.Column="0" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent" BackgroundColor="White">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToBadgeDetailsCommand}"/>
                         </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="🏆" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Rozetlerim" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
+                        <Grid RowDefinitions="Auto, *">
+                            <Frame BackgroundColor="#FEF9C3" CornerRadius="12" HeightRequest="50" WidthRequest="50" Padding="0" HasShadow="False" HorizontalOptions="Start">
+                                <Label Text="🏆" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Frame>
+                            <Label Grid.Row="1" Text="Rozetlerim" FontAttributes="Bold" TextColor="#374151" VerticalOptions="End"/>
+                        </Grid>
                     </Frame>
 
-                    <Frame Grid.Row="2" Grid.Column="1" CornerRadius="15" HasShadow="True" Padding="0" BorderColor="Transparent">
+                    <Frame Grid.Row="2" Grid.Column="1" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent" BackgroundColor="White">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToActivityChartsCommand}"/>
                         </Frame.GestureRecognizers>
-                        <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                            <Label Text="📊" FontSize="40" HorizontalOptions="Center"/>
-                            <Label Text="Aktiviteler" FontAttributes="Bold" TextColor="#333"/>
-                        </StackLayout>
+                        <Grid RowDefinitions="Auto, *">
+                            <Frame BackgroundColor="#EDE9FE" CornerRadius="12" HeightRequest="50" WidthRequest="50" Padding="0" HasShadow="False" HorizontalOptions="Start">
+                                <Label Text="📊" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Frame>
+                            <Label Grid.Row="1" Text="Aktiviteler" FontAttributes="Bold" TextColor="#374151" VerticalOptions="End"/>
+                        </Grid>
                     </Frame>
 
                 </Grid>

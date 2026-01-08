@@ -2,175 +2,278 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
-             xmlns:enums="clr-namespace:YuvaCep.Mobile.Enums"
              xmlns:converters="clr-namespace:YuvaCep.Mobile.Converters"
+             xmlns:enums="clr-namespace:YuvaCep.Mobile.Enums"
              x:Class="YuvaCep.Mobile.Views.TeacherDailyReportPage"
              Title="Rapor Ekle"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="#F5F5F5">
+             BackgroundColor="{StaticResource PageBackgroundColor}">
 
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:EnumToStringConverter x:Key="EnumConverter"/>
+            <converters:IsNullConverter x:Key="IsNullConverter"/>
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, *">
-        <Grid Grid.Row="0" BackgroundColor="#FF7043" Padding="15" ColumnDefinitions="Auto, *">
-            <ImageButton Command="{Binding GoBackCommand}" HeightRequest="24" HorizontalOptions="Start">
-                <ImageButton.Source>
-                    <FontImageSource Glyph="&#x2190;" Color="White" Size="24" />
-                </ImageButton.Source>
-            </ImageButton>
-            <Label Grid.Column="1" Text="Rapor Oluştur" TextColor="White" FontSize="20" FontAttributes="Bold" 
-                   HorizontalOptions="Center" VerticalOptions="Center" Margin="-24,0,0,0"/>
-        </Grid>
 
-        <ScrollView Grid.Row="1" Padding="20">
-            <VerticalStackLayout Spacing="15">
+        <Grid Grid.Row="0" HeightRequest="180">
+            <BoxView Color="{StaticResource PrimaryColor}" 
+                     CornerRadius="0,0,60,60"
+                     VerticalOptions="Fill"/>
 
-                <Frame Padding="15" CornerRadius="10" BorderColor="#FF7043" BackgroundColor="White">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="👤 Öğrenci Seçin" FontAttributes="Bold" TextColor="#FF7043"/>
-                        <Picker Title="Listeden bir öğrenci seçin..."
-                                ItemsSource="{Binding Students}"
-                                ItemDisplayBinding="{Binding Name}"
-                                SelectedItem="{Binding SelectedStudent}"
-                                TextColor="#333" TitleColor="Gray"/>
-                    </VerticalStackLayout>
+            <Grid ColumnDefinitions="Auto, *" Padding="20,50,20,0" VerticalOptions="Start">
+                <Frame Padding="0" HeightRequest="40" WidthRequest="40" CornerRadius="12" 
+                       BackgroundColor="#33FFFFFF" HasShadow="False" BorderColor="Transparent"
+                       HorizontalOptions="Start">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                    </Frame.GestureRecognizers>
+                    <Label Text="&#x2190;" TextColor="White" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
                 </Frame>
 
-                <VerticalStackLayout Spacing="15" IsVisible="{Binding SelectedStudent, Converter={StaticResource IsNotNullConverter}}">
+                <Label Grid.Column="1" Text="Rapor Oluştur" 
+                       TextColor="White" FontSize="22" FontAttributes="Bold" 
+                       HorizontalOptions="Center" VerticalOptions="Center" Margin="-40,0,0,0"/>
+            </Grid>
+        </Grid>
 
-                    <Frame Padding="15" CornerRadius="10">
+        <ScrollView Grid.Row="1" Margin="0,-60,0,0" Padding="0,0,0,30" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="20">
+
+                <CollectionView ItemsSource="{Binding Students}" 
+                                SelectionMode="None" 
+                                HeightRequest="120"
+                                Margin="20,0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="15"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="0" HasShadow="True" CornerRadius="15" HeightRequest="100" WidthRequest="80">
+                                <Frame.Triggers>
+                                    <DataTrigger TargetType="Frame" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#F3E8FF"/> <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Frame" Binding="{Binding IsSelected}" Value="False">
+                                        <Setter Property="BackgroundColor" Value="White"/>
+                                        <Setter Property="BorderColor" Value="Transparent"/>
+                                    </DataTrigger>
+                                </Frame.Triggers>
+
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TeacherDailyReportViewModel}}, Path=SelectStudentCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                                </Frame.GestureRecognizers>
+
+                                <VerticalStackLayout VerticalOptions="Center" Spacing="5">
+                                    <Frame HeightRequest="50" WidthRequest="50" CornerRadius="25" Padding="0" 
+                                           BackgroundColor="#E0E7FF" HasShadow="False" HorizontalOptions="Center" BorderColor="Transparent">
+                                        <Label Text="👶" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Frame>
+                                    <Label Text="{Binding Name}" FontSize="12" FontAttributes="Bold" 
+                                           TextColor="{StaticResource PrimaryTextColor}" 
+                                           HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="TailTruncation"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <VerticalStackLayout Spacing="20" Padding="20,0" 
+                                     IsVisible="{Binding SelectedStudent, Converter={StaticResource IsNotNullConverter}}">
+
+                    <Frame BackgroundColor="White" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent">
                         <VerticalStackLayout Spacing="15">
-                            <Label Text="😊 Genel Durum" FontAttributes="Bold" TextColor="#FF7043"/>
-
-                            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-
-                                <Frame CornerRadius="10" Padding="10" HasShadow="False" BorderColor="Transparent">
+                            <Label Text="😊 Genel Durum" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource PrimaryColor}"/>
+                            
+                            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="10">
+                                <Frame Grid.Column="0" CornerRadius="12" Padding="5" HasShadow="False">
                                     <Frame.Triggers>
                                         <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Harika}">
-                                            <Setter Property="BackgroundColor" Value="#FFCCBC"/>
-                                            <Setter Property="BorderColor" Value="#FF7043"/>
+                                            <Setter Property="BackgroundColor" Value="#F3E8FF"/> 
+                                            <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Mutlu}"> <Setter Property="BackgroundColor" Value="Transparent"/>
+                                             <Setter Property="BorderColor" Value="Transparent"/>
                                         </DataTrigger>
                                     </Frame.Triggers>
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetMoodCommand}" CommandParameter="{x:Static enums:MoodStatus.Harika}"/>
                                     </Frame.GestureRecognizers>
-                                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                    <VerticalStackLayout>
                                         <Label Text="🤩" FontSize="32" HorizontalOptions="Center"/>
                                         <Label Text="Harika" FontSize="10" HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
                                 </Frame>
 
-                                <Frame CornerRadius="10" Padding="10" HasShadow="False" BorderColor="Transparent">
+                                <Frame Grid.Column="1" CornerRadius="12" Padding="5" HasShadow="False">
                                     <Frame.Triggers>
                                         <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Mutlu}">
-                                            <Setter Property="BackgroundColor" Value="#FFCCBC"/>
-                                            <Setter Property="BorderColor" Value="#FF7043"/>
+                                            <Setter Property="BackgroundColor" Value="#F3E8FF"/> 
+                                            <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Harika}"> <Setter Property="BackgroundColor" Value="Transparent"/>
+                                             <Setter Property="BorderColor" Value="Transparent"/>
                                         </DataTrigger>
                                     </Frame.Triggers>
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetMoodCommand}" CommandParameter="{x:Static enums:MoodStatus.Mutlu}"/>
                                     </Frame.GestureRecognizers>
-                                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                    <VerticalStackLayout>
                                         <Label Text="🙂" FontSize="32" HorizontalOptions="Center"/>
                                         <Label Text="Mutlu" FontSize="10" HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
                                 </Frame>
 
-                                <Frame CornerRadius="10" Padding="10" HasShadow="False" BorderColor="Transparent">
+                                <Frame Grid.Column="2" CornerRadius="12" Padding="5" HasShadow="False">
                                     <Frame.Triggers>
                                         <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Normal}">
-                                            <Setter Property="BackgroundColor" Value="#FFCCBC"/>
-                                            <Setter Property="BorderColor" Value="#FF7043"/>
+                                            <Setter Property="BackgroundColor" Value="#F3E8FF"/> 
+                                            <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Mutlu}"> <Setter Property="BackgroundColor" Value="Transparent"/>
+                                             <Setter Property="BorderColor" Value="Transparent"/>
                                         </DataTrigger>
                                     </Frame.Triggers>
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetMoodCommand}" CommandParameter="{x:Static enums:MoodStatus.Normal}"/>
                                     </Frame.GestureRecognizers>
-                                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                    <VerticalStackLayout>
                                         <Label Text="😐" FontSize="32" HorizontalOptions="Center"/>
                                         <Label Text="Normal" FontSize="10" HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
                                 </Frame>
 
-                                <Frame CornerRadius="10" Padding="10" HasShadow="False" BorderColor="Transparent">
+                                <Frame Grid.Column="3" CornerRadius="12" Padding="5" HasShadow="False">
                                     <Frame.Triggers>
                                         <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Uzgun}">
-                                            <Setter Property="BackgroundColor" Value="#FFCCBC"/>
-                                            <Setter Property="BorderColor" Value="#FF7043"/>
+                                            <Setter Property="BackgroundColor" Value="#F3E8FF"/> 
+                                            <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Mutlu}"> <Setter Property="BackgroundColor" Value="Transparent"/>
+                                             <Setter Property="BorderColor" Value="Transparent"/>
                                         </DataTrigger>
                                     </Frame.Triggers>
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetMoodCommand}" CommandParameter="{x:Static enums:MoodStatus.Uzgun}"/>
                                     </Frame.GestureRecognizers>
-                                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                    <VerticalStackLayout>
                                         <Label Text="☹️" FontSize="32" HorizontalOptions="Center"/>
                                         <Label Text="Üzgün" FontSize="10" HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
                                 </Frame>
 
-                                <Frame CornerRadius="10" Padding="10" HasShadow="False" BorderColor="Transparent">
+                                <Frame Grid.Column="4" CornerRadius="12" Padding="5" HasShadow="False">
                                     <Frame.Triggers>
                                         <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.CokUzgun}">
-                                            <Setter Property="BackgroundColor" Value="#FFCCBC"/>
-                                            <Setter Property="BorderColor" Value="#FF7043"/>
+                                            <Setter Property="BackgroundColor" Value="#F3E8FF"/>
+                                            <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding SelectedMood}" Value="{x:Static enums:MoodStatus.Uzgun}">
+                                            <Setter Property="BackgroundColor" Value="Transparent"/>
+                                            <Setter Property="BorderColor" Value="Transparent"/>
                                         </DataTrigger>
                                     </Frame.Triggers>
                                     <Frame.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SetMoodCommand}" CommandParameter="{x:Static enums:MoodStatus.CokUzgun}"/>
                                     </Frame.GestureRecognizers>
-                                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                                        <Label Text="🤒" FontSize="32" HorizontalOptions="Center"/>
-                                        <Label Text="Halsiz" FontSize="10" HorizontalOptions="Center"/>
+                                    <VerticalStackLayout>
+                                        <Label Text="😭" FontSize="32" HorizontalOptions="Center"/>
+                                        <Label Text="Çok Üzgün" FontSize="10" HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
                                 </Frame>
+                            </Grid>
 
-                            </HorizontalStackLayout>
-
-                            <Entry Placeholder="Mod notu ekle..." Text="{Binding MoodNote}"/>
+                            <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="10,0" HeightRequest="50" HasShadow="False">
+                                <Entry Placeholder="Mod notu ekle..." Text="{Binding MoodNote}" PlaceholderColor="#9CA3AF" TextColor="Black"/>
+                            </Frame>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Padding="15" CornerRadius="10">
+                    <Frame BackgroundColor="White" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent">
                         <VerticalStackLayout Spacing="10">
-                            <Label Text="🍽️ Yemek Durumu" FontAttributes="Bold" TextColor="#FF7043"/>
-                            <Picker Title="Kahvaltı" ItemsSource="{Binding FoodList}" SelectedItem="{Binding SelectedBreakfast}"
-                                    ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"/>
-                            <Picker Title="Öğle Yemeği" ItemsSource="{Binding FoodList}" SelectedItem="{Binding SelectedLunch}"
-                                    ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"/>
-                            <Entry Placeholder="Yemek notu..." Text="{Binding FoodNote}"/>
+                            <Label Text="🍽️ Yemek Durumu" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource PrimaryColor}"/>
+
+                            <Label Text="Kahvaltı" FontSize="12" TextColor="Gray"/>
+                            <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="10,0" HeightRequest="50" HasShadow="False">
+                                <Picker Title="Seçiniz" ItemsSource="{Binding FoodList}" SelectedItem="{Binding SelectedBreakfast}"
+                                        ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"
+                                        TextColor="Black"/>
+                            </Frame>
+
+                            <Label Text="Öğle Yemeği" FontSize="12" TextColor="Gray"/>
+                            <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="10,0" HeightRequest="50" HasShadow="False">
+                                <Picker Title="Seçiniz" ItemsSource="{Binding FoodList}" SelectedItem="{Binding SelectedLunch}"
+                                        ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"
+                                        TextColor="Black"/>
+                            </Frame>
+
+                            <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="10,0" HeightRequest="50" HasShadow="False">
+                                <Entry Placeholder="Yemek notu..." Text="{Binding FoodNote}" PlaceholderColor="#9CA3AF" TextColor="Black"/>
+                            </Frame>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Padding="15" CornerRadius="10">
+                    <Frame BackgroundColor="White" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent">
                         <VerticalStackLayout Spacing="10">
-                            <Label Text="😴 Uyku &amp; Etkinlik" FontAttributes="Bold" TextColor="#FF7043"/>
-                            <Picker Title="Uyku" ItemsSource="{Binding SleepList}" SelectedItem="{Binding SelectedSleep}"
-                                    ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"/>
-                            <Picker Title="Etkinlik" ItemsSource="{Binding ActivityList}" SelectedItem="{Binding SelectedActivity}"
-                                    ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"/>
-                            <Entry Placeholder="Etkinlik notu..." Text="{Binding ActivityNote}"/>
+                            <Label Text="😴 Uyku &amp; Etkinlik" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource PrimaryColor}"/>
+                            
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="Uyku" FontSize="12" TextColor="Gray"/>
+                                    <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="5,0" HeightRequest="50" HasShadow="False">
+                                        <Picker Title="Seç" ItemsSource="{Binding SleepList}" SelectedItem="{Binding SelectedSleep}"
+                                                ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"
+                                                TextColor="Black"/>
+                                    </Frame>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Text="Etkinlik" FontSize="12" TextColor="Gray"/>
+                                    <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="5,0" HeightRequest="50" HasShadow="False">
+                                        <Picker Title="Seç" ItemsSource="{Binding ActivityList}" SelectedItem="{Binding SelectedActivity}"
+                                                ItemDisplayBinding="{Binding ., Converter={StaticResource EnumConverter}}"
+                                                TextColor="Black"/>
+                                    </Frame>
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="10,0" HeightRequest="50" HasShadow="False">
+                                <Entry Placeholder="Etkinlik notu..." Text="{Binding ActivityNote}" PlaceholderColor="#9CA3AF" TextColor="Black"/>
+                            </Frame>
                         </VerticalStackLayout>
                     </Frame>
 
-                    <Frame Padding="15" CornerRadius="10">
+                    <Frame BackgroundColor="White" CornerRadius="20" HasShadow="True" Padding="15" BorderColor="Transparent">
                         <VerticalStackLayout Spacing="10">
-                            <Label Text="📝 Notunuz" FontAttributes="Bold" TextColor="#FF7043"/>
-                            <Editor Placeholder="Veliye iletmek istediğiniz not..." Text="{Binding TeacherNote}" HeightRequest="80"/>
+                            <Label Text="📝 Öğretmen Notu" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource PrimaryColor}"/>
+                            <Frame BackgroundColor="#F9FAFB" BorderColor="#E5E7EB" CornerRadius="12" Padding="10" HeightRequest="100" HasShadow="False">
+                                <Editor Placeholder="Veliye iletmek istediğiniz not..." Text="{Binding TeacherNote}" 
+                                        PlaceholderColor="#9CA3AF" TextColor="Black" AutoSize="TextChanges"/>
+                            </Frame>
                         </VerticalStackLayout>
                     </Frame>
 
                     <Button Text="RAPORU KAYDET" 
                             Command="{Binding SaveReportCommand}"
-                            BackgroundColor="#FF7043" TextColor="White" FontAttributes="Bold" CornerRadius="25" HeightRequest="50" Margin="0,10,0,20"/>
+                            BackgroundColor="{StaticResource PrimaryColor}"
+                            TextColor="White"
+                            CornerRadius="15"
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            HeightRequest="55"
+                            Margin="0,10,0,20"
+                            Shadow="{Shadow Radius=10, Opacity=0.2}"/>
 
                 </VerticalStackLayout>
-
+                
                 <Label Text="Lütfen rapor girmek için yukarıdan bir öğrenci seçiniz." 
-                       TextColor="Gray" HorizontalOptions="Center" IsVisible="{Binding SelectedStudent, Converter={StaticResource IsNullConverter}}"/>
+                       TextColor="Gray" HorizontalOptions="Center" 
+                       IsVisible="{Binding SelectedStudent, Converter={StaticResource IsNullConverter}}"
+                       Margin="0,50,0,0"/>
 
             </VerticalStackLayout>
         </ScrollView>
