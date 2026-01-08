@@ -11,8 +11,9 @@ namespace YuvaCep.Mobile.ViewModels
         private readonly StudentService _studentService;
 
         [ObservableProperty] private string parentName;
-        [ObservableProperty] private string referenceCodeInput; 
+        [ObservableProperty] private string referenceCodeInput;
         [ObservableProperty] private bool isBusy;
+        [ObservableProperty] private bool isAddStudentVisible;
 
         public ObservableCollection<ChildDto> MyChildren { get; } = new();
 
@@ -26,6 +27,16 @@ namespace YuvaCep.Mobile.ViewModels
         {
             ParentName = Preferences.Get("UserName", "Değerli Velimiz");
             await RefreshChildrenAsync();
+        }
+
+        [RelayCommand]
+        private void ToggleAddStudent()
+        {
+            IsAddStudentVisible = !IsAddStudentVisible;
+            if (!IsAddStudentVisible)
+            {
+                ReferenceCodeInput = ""; 
+            }
         }
 
         [RelayCommand]
@@ -67,7 +78,8 @@ namespace YuvaCep.Mobile.ViewModels
             {
                 await Shell.Current.DisplayAlert("Harika!", "Çocuğunuz başarıyla eklendi.", "Tamam");
                 ReferenceCodeInput = "";
-                await RefreshChildrenAsync(); 
+                IsAddStudentVisible = false; 
+                await RefreshChildrenAsync();
             }
             else
             {

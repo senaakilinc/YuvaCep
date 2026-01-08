@@ -16,7 +16,7 @@ namespace YuvaCep.Mobile.ViewModels
         public ObservableCollection<StudentListDto> Students { get; } = new();
 
         [ObservableProperty]
-        private StudentListDto selectedStudent; // Listeden seçilen öğrenci
+        private StudentListDto selectedStudent;
 
         [ObservableProperty]
         private bool isBusy;
@@ -26,26 +26,20 @@ namespace YuvaCep.Mobile.ViewModels
         public List<SleepStatus> SleepList => Enum.GetValues(typeof(SleepStatus)).Cast<SleepStatus>().ToList();
         public List<ActivityStatus> ActivityList => Enum.GetValues(typeof(ActivityStatus)).Cast<ActivityStatus>().ToList();
 
-        // Seçilen Değerler
         [ObservableProperty] private MoodStatus selectedMood = MoodStatus.Mutlu;
         [ObservableProperty] private string moodNote;
-
         [ObservableProperty] private FoodStatus selectedBreakfast = FoodStatus.HepsiniYedi;
         [ObservableProperty] private FoodStatus selectedLunch = FoodStatus.HepsiniYedi;
         [ObservableProperty] private string foodNote;
-
         [ObservableProperty] private SleepStatus selectedSleep = SleepStatus.Uyudu;
         [ObservableProperty] private ActivityStatus selectedActivity = ActivityStatus.Katildi;
         [ObservableProperty] private string activityNote;
-
         [ObservableProperty] private string teacherNote;
 
         public TeacherDailyReportViewModel(DailyReportService reportService, StudentService studentService)
         {
             _reportService = reportService;
             _studentService = studentService;
-
-            // Sayfa açılınca öğrencileri yükle
             LoadStudentsAsync();
         }
 
@@ -56,28 +50,23 @@ namespace YuvaCep.Mobile.ViewModels
             try
             {
                 var token = Preferences.Get("AuthToken", string.Empty);
-
-                // Tüm sınıf listesini çek
                 var allStudents = await _studentService.GetMyStudentsAsync();
-
-                // Bugün raporu girilmiş olanların ID listesini çek
                 var reportedStudentIds = await _reportService.GetReportedStudentIdsAsync(token);
 
                 Students.Clear();
-
                 foreach (var student in allStudents)
                 {
-                    // FİLTRELEME
+
                     if (!reportedStudentIds.Contains(student.Id))
                     {
+                        student.IsSelected = false; // Başlangıçta seçili değil
                         Students.Add(student);
                     }
                 }
 
-                // Eğer herkesin raporu girildiyse ve liste boş kaldıysa:
                 if (Students.Count == 0)
                 {
-                    await Shell.Current.DisplayAlert("Bilgi", "Bugün için tüm öğrencilerin raporu girilmiş! 🎉", "Tamam");
+                    await Shell.Current.DisplayAlert("Bilgi", "Bugün için tüm sınıfın raporu tamamlanmış! 🎉", "Tamam");
                     await Shell.Current.GoToAsync("..");
                 }
             }
@@ -85,22 +74,30 @@ namespace YuvaCep.Mobile.ViewModels
             {
                 await Shell.Current.DisplayAlert("Hata", $"Liste yüklenemedi: {ex.Message}", "Tamam");
             }
-            finally
-            {
-                IsBusy = false;
-            }
+            finally { IsBusy = false; }
         }
 
+        [RelayCommand]
+        private void SelectStudent(StudentListDto student)
+        {
+            if (student == null) return;
+
+            foreach (var s in Students)
+            {
+                s.IsSelected = false;
+            }
+
+            student.IsSelected = true;
+            SelectedStudent = student; 
+        }
+
+        [RelayCommand]
+        private void SetMood(MoodStatus mood) => SelectedMood = mood;
 
         [RelayCommand]
         public async Task SaveReportAsync()
         {
-            if (SelectedStudent == null)
-            {
-                await Shell.Current.DisplayAlert("Uyarı", "Lütfen önce bir öğrenci seçin!", "Tamam");
-                return;
-            }
-
+            if (SelectedStudent == null) return;
             if (IsBusy) return;
             IsBusy = true;
 
@@ -108,7 +105,7 @@ namespace YuvaCep.Mobile.ViewModels
             {
                 var newReport = new DailyReportDto
                 {
-                    Id = SelectedStudent.Id, // Seçilen öğrencinin ID'si
+                    Id = SelectedStudent.Id,
                     Date = DateTime.Now,
                     Mood = SelectedMood,
                     MoodNote = MoodNote ?? "",
@@ -126,9 +123,13 @@ namespace YuvaCep.Mobile.ViewModels
 
                 if (result)
                 {
-                    await Shell.Current.DisplayAlert("Başarılı", $"{SelectedStudent.Name} için rapor kaydedildi.", "Tamam");
-                    Students.Remove(SelectedStudent);
-                    SelectedStudent = null;
+                    await Shell.Current.DisplayAlert("Başarılı", $"{SelectedStudent.Name} raporlandı.", "Tamam");
+
+                    var studentToRemove = SelectedStudent;
+                    SelectedStudent = null; 
+                    Students.Remove(studentToRemove); 
+
+                    ResetForm();
                 }
                 else
                 {
@@ -137,19 +138,22 @@ namespace YuvaCep.Mobile.ViewModels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Hata", $"Bir sorun oluştu: {ex.Message}", "Tamam");
+                await Shell.Current.DisplayAlert("Hata", $"Hata: {ex.Message}", "Tamam");
             }
-            finally
-            {
-                IsBusy = false;
-            }
+            finally { IsBusy = false; }
         }
 
-        [RelayCommand]
-        private void SetMood(MoodStatus mood)
+        private void ResetForm()
         {
-            // Tıklanan modu seçili mod olarak ayarla
-            SelectedMood = mood;
+            MoodNote = "";
+            FoodNote = "";
+            ActivityNote = "";
+            TeacherNote = "";
+            SelectedMood = MoodStatus.Mutlu;
+            SelectedBreakfast = FoodStatus.HepsiniYedi;
+            SelectedLunch = FoodStatus.HepsiniYedi;
+            SelectedSleep = SleepStatus.Uyudu;
+            SelectedActivity = ActivityStatus.Katildi;
         }
 
         [RelayCommand]

@@ -3,34 +3,85 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.RegisterPage"
-             Title="Yeni Kullanıcı Kaydı">
+             BackgroundColor="{StaticResource PageBackgroundColor}"
+             NavigationPage.HasNavigationBar="False"
+             Shell.NavBarIsVisible="False">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
+    <Grid RowDefinitions="Auto, *">
 
-            <Label Text="{Binding PageTitle}" 
-                   FontSize="24" 
-                   FontAttributes="Bold" 
-                   HorizontalOptions="Center"
-                   TextColor="#1F2937"/>
+        <BoxView x:Name="HeaderBackground"
+                 Grid.Row="0"
+                 Color="{StaticResource PrimaryColor}" 
+                 HeightRequest="240"
+                 CornerRadius="0,0,60,60"
+                 VerticalOptions="Start"/>
 
-            <Entry Placeholder="Ad" Text="{Binding Name}" />
-            <Entry Placeholder="Soyad" Text="{Binding Surname}" />
-            <Entry Placeholder="TC Kimlik No" Text="{Binding TcIdNumber}" Keyboard="Numeric" />
-            <Entry Placeholder="Telefon Numarası" Text="{Binding PhoneNumber}" Keyboard="Telephone" />
-            <Entry Placeholder="Şifre Belirle" IsPassword="True" Text="{Binding Password}" />
+        <Image x:Name="RoleImage"
+               Grid.Row="0"
+               Source="img_school.png"
+               HeightRequest="100"
+               VerticalOptions="Center"
+               Margin="0,-40,0,0"/>
 
-            <Button Text="Kayıt Ol ve Devam Et" 
-                    Command="{Binding RegisterCommand}"
-                    BackgroundColor="#2196F3" 
-                    TextColor="White"
-                    Margin="0,20,0,0"/>
+        <ScrollView Grid.Row="0" Grid.RowSpan="2" Margin="0,160,0,0">
+            <VerticalStackLayout Padding="30,0,30,30" Spacing="20">
 
-            <Button Text="Giriş Ekranına Dön" 
-                    Command="{Binding GoBackCommand}"
-                    BackgroundColor="Transparent" 
-                    TextColor="Gray" />
+                <Frame BackgroundColor="White"
+                       CornerRadius="20"
+                       Padding="25"
+                       HasShadow="True"
+                       BorderColor="Transparent">
 
-        </VerticalStackLayout>
-    </ScrollView>
+                    <VerticalStackLayout Spacing="15">
+
+                        <Label x:Name="TitleLabel"
+                               Text="{Binding PageTitle}" 
+                               FontSize="22" 
+                               FontAttributes="Bold" 
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource PrimaryTextColor}"
+                               Margin="0,0,0,10"/>
+
+                        <Frame Style="{StaticResource EntryFrameStyle}" Padding="0" HasShadow="False" BorderColor="{StaticResource Gray200}" CornerRadius="10">
+                            <Entry Placeholder="Ad" Text="{Binding Name}" Margin="10,0" PlaceholderColor="{StaticResource Gray400}" TextColor="{StaticResource PrimaryTextColor}"/>
+                        </Frame>
+
+                        <Frame Style="{StaticResource EntryFrameStyle}" Padding="0" HasShadow="False" BorderColor="{StaticResource Gray200}" CornerRadius="10">
+                            <Entry Placeholder="Soyad" Text="{Binding Surname}" Margin="10,0" PlaceholderColor="{StaticResource Gray400}" TextColor="{StaticResource PrimaryTextColor}"/>
+                        </Frame>
+
+                        <Frame Style="{StaticResource EntryFrameStyle}" Padding="0" HasShadow="False" BorderColor="{StaticResource Gray200}" CornerRadius="10">
+                            <Entry Placeholder="TC Kimlik No" Text="{Binding TcIdNumber}" Keyboard="Numeric" Margin="10,0" PlaceholderColor="{StaticResource Gray400}" TextColor="{StaticResource PrimaryTextColor}"/>
+                        </Frame>
+
+                        <Frame Style="{StaticResource EntryFrameStyle}" Padding="0" HasShadow="False" BorderColor="{StaticResource Gray200}" CornerRadius="10">
+                            <Entry Placeholder="Telefon Numarası" Text="{Binding PhoneNumber}" Keyboard="Telephone" Margin="10,0" PlaceholderColor="{StaticResource Gray400}" TextColor="{StaticResource PrimaryTextColor}"/>
+                        </Frame>
+
+                        <Frame Style="{StaticResource EntryFrameStyle}" Padding="0" HasShadow="False" BorderColor="{StaticResource Gray200}" CornerRadius="10">
+                            <Entry Placeholder="Şifre Belirle" IsPassword="True" Text="{Binding Password}" Margin="10,0" PlaceholderColor="{StaticResource Gray400}" TextColor="{StaticResource PrimaryTextColor}"/>
+                        </Frame>
+
+                        <Button x:Name="RegisterBtn"
+                                Text="KAYIT OL VE DEVAM ET" 
+                                Command="{Binding RegisterCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" 
+                                HeightRequest="50"
+                                Margin="0,10,0,0"/>
+
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Giriş Ekranına Dön" 
+                       HorizontalOptions="Center"
+                       TextColor="{StaticResource SecondaryTextColor}"
+                       TextDecorations="Underline">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

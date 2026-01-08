@@ -25,6 +25,7 @@ namespace YuvaCep.Mobile.Converters
                 {
                     SleepStatus.Uyudu => "Uyudu 😴",
                     SleepStatus.Uyumadi => "Uyumadı 😳",
+                    SleepStatus.AzUyudu => "Az Uyudu 🥱",
                     _ => value.ToString()
                 };
             }
@@ -36,6 +37,19 @@ namespace YuvaCep.Mobile.Converters
                     ActivityStatus.Katildi => "Tam Katılım ✅",
                     ActivityStatus.KismenKatildi => "Kısmen Katıldı ⚠️",
                     ActivityStatus.Katilmadi => "Katılmadı ❌",
+                    _ => value.ToString()
+                };
+            }
+
+            if(value is MoodStatus mood)
+            {
+                return mood switch
+                {
+                    MoodStatus.CokUzgun => "Çok Üzgün",
+                    MoodStatus.Uzgun => "Üzgün",
+                    MoodStatus.Normal => "Normal",
+                    MoodStatus.Mutlu => "Mutlu",
+                    MoodStatus.Harika => "Harika",
                     _ => value.ToString()
                 };
             }

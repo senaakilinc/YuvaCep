@@ -4,71 +4,114 @@
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.TeacherHomePage"
              Title="Öğretmen Paneli"
-             BackgroundColor="#F3F4F6"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
              Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto, *">
 
-        <Frame Grid.Row="0" BackgroundColor="#2563EB" CornerRadius="0" Padding="20,40,20,20" HasShadow="False">
-            <Grid ColumnDefinitions="*, Auto">
-                <VerticalStackLayout Grid.Column="0" Spacing="5">
-                    <Label Text="{Binding TeacherName, StringFormat='Merhaba, {0}'}" 
-                           TextColor="White" Opacity="0.8" FontSize="14"/>
-                    <Label Text="{Binding ClassName}" 
-                           TextColor="White" FontAttributes="Bold" FontSize="24"/>
+        <Grid Grid.Row="0" HeightRequest="230">
+
+            <BoxView Color="{StaticResource PrimaryColor}" 
+                     CornerRadius="0,0,60,60"
+                     VerticalOptions="Fill"/>
+
+            <Grid ColumnDefinitions="*, Auto" Padding="25,50,25,0" VerticalOptions="Start">
+
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
                     <Label Text="{Binding GreetingMessage}"
-                           TextColor="White" FontSize="14" Margin="0,10,0,0"/>
+                           TextColor="#E0E7FF" 
+                           FontSize="14" 
+                           FontAttributes="Italic"/>
+
+                    <Label Text="{Binding TeacherName}" 
+                           TextColor="White" 
+                           FontAttributes="Bold" 
+                           FontSize="22"
+                           LineBreakMode="TailTruncation"/>
+
+                    <Label Text="{Binding ClassName}" 
+                           TextColor="#D1D5DB" 
+                           FontSize="16"
+                           Margin="0,5,0,0"/>
                 </VerticalStackLayout>
 
-                <ImageButton Grid.Column="1"
-                             Source="{FontImage Glyph='🚪', Color='White', Size=30}"
-                             Command="{Binding LogoutCommand}"
-                             VerticalOptions="Start"
-                             HorizontalOptions="End"
-                             BackgroundColor="Transparent"
-                             HeightRequest="40"
-                             WidthRequest="40"/>
+                <Frame Grid.Column="1" 
+                       Padding="0" 
+                       HeightRequest="45" 
+                       WidthRequest="45" 
+                       CornerRadius="12" 
+                       BackgroundColor="#33FFFFFF" 
+                       HasShadow="False"
+                       BorderColor="Transparent"
+                       VerticalOptions="Start">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
+                    </Frame.GestureRecognizers>
+                    <Label Text="🚪" 
+                           FontSize="20" 
+                           HorizontalOptions="Center" 
+                           VerticalOptions="Center"/>
+                </Frame>
             </Grid>
-        </Frame>
+        </Grid>
 
-        <ScrollView Grid.Row="1" Padding="20">
-            <CollectionView ItemsSource="{Binding MenuItems}">
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="15" VerticalItemSpacing="15"/>
-                </CollectionView.ItemsLayout>
+        <CollectionView Grid.Row="1" 
+                        ItemsSource="{Binding MenuItems}"
+                        Margin="20,-50,20,0"
+                        VerticalScrollBarVisibility="Never">
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame BackgroundColor="White" CornerRadius="15" HasShadow="True" BorderColor="Transparent" HeightRequest="140">
-                            <Frame.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TeacherHomeViewModel}}, Path=NavigateCommand}" CommandParameter="{Binding Route}"/>
-                            </Frame.GestureRecognizers>
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="15" VerticalItemSpacing="15"/>
+            </CollectionView.ItemsLayout>
 
-                            <Grid RowDefinitions="*, Auto" Padding="10">
-                                <Frame Grid.Row="0" 
-                                       BackgroundColor="{Binding ColorHex}" 
-                                       CornerRadius="10" 
-                                       Padding="0" 
-                                       HeightRequest="50" 
-                                       WidthRequest="50" 
-                                       HorizontalOptions="Start" 
-                                       VerticalOptions="Start"
-                                       HasShadow="False">
-                                    <Label Text="{Binding Icon}" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                </Frame>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame BackgroundColor="White" 
+                           CornerRadius="20" 
+                           HasShadow="True" 
+                           BorderColor="Transparent" 
+                           HeightRequest="130"
+                           Padding="15">
 
-                                <Label Grid.Row="1" 
-                                       Text="{Binding Title}" 
-                                       FontSize="16" 
-                                       FontAttributes="Bold" 
-                                       TextColor="#374151" 
-                                       VerticalOptions="End"/>
-                            </Grid>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </ScrollView>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TeacherHomeViewModel}}, Path=NavigateCommand}" 
+                                                  CommandParameter="{Binding Route}"/>
+                        </Frame.GestureRecognizers>
+
+                        <Grid RowDefinitions="Auto, *">
+                            <Frame Grid.Row="0" 
+                                   BackgroundColor="{Binding ColorHex}" 
+                                   CornerRadius="12" 
+                                   Padding="0" 
+                                   HeightRequest="45" 
+                                   WidthRequest="45" 
+                                   HorizontalOptions="Start" 
+                                   VerticalOptions="Start"
+                                   HasShadow="False"
+                                   BorderColor="Transparent">
+                                <Label Text="{Binding Icon}" 
+                                       FontSize="22" 
+                                       HorizontalOptions="Center" 
+                                       VerticalOptions="Center"/>
+                            </Frame>
+
+                            <Label Grid.Row="1" 
+                                   Text="{Binding Title}" 
+                                   FontSize="15" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{StaticResource PrimaryTextColor}" 
+                                   VerticalOptions="End"
+                                   LineBreakMode="WordWrap"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.Footer>
+                <BoxView HeightRequest="20" Color="Transparent"/>
+            </CollectionView.Footer>
+
+        </CollectionView>
 
     </Grid>
 </ContentPage>
