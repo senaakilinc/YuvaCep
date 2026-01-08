@@ -35,6 +35,7 @@ namespace YuvaCep.Mobile
             builder.Services.AddSingleton<FoodListService>();
             builder.Services.AddSingleton<CurriculumService>();
             builder.Services.AddSingleton<ActivityService>();
+            builder.Services.AddSingleton<ParentService>();
 
 
             // --- GİRİŞ & KAYIT EKRANLARI ---
@@ -65,6 +66,9 @@ namespace YuvaCep.Mobile
 
             builder.Services.AddTransient<StudentChartDetailViewModel>();
             builder.Services.AddTransient<StudentChartDetailPage>();
+
+            builder.Services.AddTransient<ParentProfileViewModel>();
+            builder.Services.AddTransient<ParentProfilePage>();
 
             // --- ÖĞRETMEN EKRANLARI ---
 

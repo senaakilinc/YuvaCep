@@ -3,115 +3,109 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.TeacherHomePage"
+             x:DataType="vm:TeacherHomeViewModel"
              Title="Öğretmen Paneli"
              BackgroundColor="{StaticResource PageBackgroundColor}"
              Shell.NavBarIsVisible="False">
 
-    <Grid RowDefinitions="Auto, *">
+    <Grid>
+        <Grid RowDefinitions="Auto, *">
 
-        <Grid Grid.Row="0" HeightRequest="230">
+            <Grid Grid.Row="0" HeightRequest="230">
+                <BoxView Color="{StaticResource PrimaryColor}" 
+                         CornerRadius="0,0,60,60"
+                         VerticalOptions="Fill"/>
 
-            <BoxView Color="{StaticResource PrimaryColor}" 
-                     CornerRadius="0,0,60,60"
-                     VerticalOptions="Fill"/>
+                <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10" Padding="25,50,25,0" VerticalOptions="Start">
 
-            <Grid ColumnDefinitions="*, Auto" Padding="25,50,25,0" VerticalOptions="Start">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="{Binding GreetingMessage}" TextColor="#E0E7FF" FontSize="14" FontAttributes="Italic"/>
+                        <Label Text="{Binding TeacherName}" TextColor="White" FontAttributes="Bold" FontSize="22" LineBreakMode="TailTruncation"/>
+                        <Label Text="{Binding ClassName}" TextColor="#D1D5DB" FontSize="16" Margin="0,5,0,0"/>
+                    </VerticalStackLayout>
 
-                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                    <Label Text="{Binding GreetingMessage}"
-                           TextColor="#E0E7FF" 
-                           FontSize="14" 
-                           FontAttributes="Italic"/>
+                    <Frame Grid.Column="1" Padding="0" HeightRequest="45" WidthRequest="45" CornerRadius="12" 
+                           BackgroundColor="#33FFFFFF" HasShadow="False" BorderColor="Transparent" VerticalOptions="Start">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleQuickMenuCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Label Text="⚙️" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center" TextColor="White"/>
+                    </Frame>
 
-                    <Label Text="{Binding TeacherName}" 
-                           TextColor="White" 
-                           FontAttributes="Bold" 
-                           FontSize="22"
-                           LineBreakMode="TailTruncation"/>
-
-                    <Label Text="{Binding ClassName}" 
-                           TextColor="#D1D5DB" 
-                           FontSize="16"
-                           Margin="0,5,0,0"/>
-                </VerticalStackLayout>
-
-                <Frame Grid.Column="1" 
-                       Padding="0" 
-                       HeightRequest="45" 
-                       WidthRequest="45" 
-                       CornerRadius="12" 
-                       BackgroundColor="#33FFFFFF" 
-                       HasShadow="False"
-                       BorderColor="Transparent"
-                       VerticalOptions="Start">
-                    <Frame.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
-                    </Frame.GestureRecognizers>
-                    <Label Text="🚪" 
-                           FontSize="20" 
-                           HorizontalOptions="Center" 
-                           VerticalOptions="Center"/>
-                </Frame>
+                    <Frame Grid.Column="2" Padding="0" HeightRequest="45" WidthRequest="45" CornerRadius="12" 
+                           BackgroundColor="#33FFFFFF" HasShadow="False" BorderColor="Transparent" VerticalOptions="Start">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Label Text="🚪" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Frame>
+                </Grid>
             </Grid>
+
+            <CollectionView Grid.Row="1" 
+                            ItemsSource="{Binding MenuItems}"
+                            Margin="20,-50,20,0"
+                            VerticalScrollBarVisibility="Never">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="15" VerticalItemSpacing="15"/>
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:dashboardItem">
+                        <Frame BackgroundColor="White" CornerRadius="20" HasShadow="True" BorderColor="Transparent" HeightRequest="130" Padding="15">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TeacherHomeViewModel}}, Path=NavigateCommand}" CommandParameter="{Binding Route}"/>
+                            </Frame.GestureRecognizers>
+
+                            <Grid RowDefinitions="Auto, *">
+                                <Frame Grid.Row="0" BackgroundColor="{Binding ColorHex}" CornerRadius="12" Padding="0" HeightRequest="45" WidthRequest="45" HorizontalOptions="Start" VerticalOptions="Start" HasShadow="False" BorderColor="Transparent">
+                                    <Label Text="{Binding Icon}" FontSize="22" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Frame>
+                                <Label Grid.Row="1" Text="{Binding Title}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" VerticalOptions="End" LineBreakMode="WordWrap"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.Footer>
+                    <BoxView HeightRequest="20" Color="Transparent"/>
+                </CollectionView.Footer>
+            </CollectionView>
+
         </Grid>
 
-        <CollectionView Grid.Row="1" 
-                        ItemsSource="{Binding MenuItems}"
-                        Margin="20,-50,20,0"
-                        VerticalScrollBarVisibility="Never">
+        <Grid IsVisible="{Binding IsQuickMenuVisible}" BackgroundColor="#CC000000" ZIndex="100">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleQuickMenuCommand}"/>
+            </Grid.GestureRecognizers>
 
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="15" VerticalItemSpacing="15"/>
-            </CollectionView.ItemsLayout>
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
+                <Label Text="Hızlı İşlemler" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame BackgroundColor="White" 
-                           CornerRadius="20" 
-                           HasShadow="True" 
-                           BorderColor="Transparent" 
-                           HeightRequest="130"
-                           Padding="15">
+                <HorizontalStackLayout Spacing="20">
 
+                    <Frame HeightRequest="140" WidthRequest="130" CornerRadius="20" BackgroundColor="White" HasShadow="False" Padding="10">
                         <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TeacherHomeViewModel}}, Path=NavigateCommand}" 
-                                                  CommandParameter="{Binding Route}"/>
+                            <TapGestureRecognizer Command="{Binding GoToMyAccountCommand}"/>
                         </Frame.GestureRecognizers>
-
-                        <Grid RowDefinitions="Auto, *">
-                            <Frame Grid.Row="0" 
-                                   BackgroundColor="{Binding ColorHex}" 
-                                   CornerRadius="12" 
-                                   Padding="0" 
-                                   HeightRequest="45" 
-                                   WidthRequest="45" 
-                                   HorizontalOptions="Start" 
-                                   VerticalOptions="Start"
-                                   HasShadow="False"
-                                   BorderColor="Transparent">
-                                <Label Text="{Binding Icon}" 
-                                       FontSize="22" 
-                                       HorizontalOptions="Center" 
-                                       VerticalOptions="Center"/>
-                            </Frame>
-
-                            <Label Grid.Row="1" 
-                                   Text="{Binding Title}" 
-                                   FontSize="15" 
-                                   FontAttributes="Bold" 
-                                   TextColor="{StaticResource PrimaryTextColor}" 
-                                   VerticalOptions="End"
-                                   LineBreakMode="WordWrap"/>
-                        </Grid>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                            <Label Text="👤" FontSize="40" HorizontalOptions="Center"/>
+                            <Label Text="Hesap Bilgilerim" TextColor="#374151" FontAttributes="Bold" FontSize="13" HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                        </VerticalStackLayout>
                     </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
 
-            <CollectionView.Footer>
-                <BoxView HeightRequest="20" Color="Transparent"/>
-            </CollectionView.Footer>
+                    <Frame HeightRequest="140" WidthRequest="130" CornerRadius="20" BackgroundColor="White" HasShadow="False" Padding="10">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToClassOptionsCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                            <Label Text="🏫" FontSize="40" HorizontalOptions="Center"/>
+                            <Label Text="Sınıf Seçenekleri" TextColor="#374151" FontAttributes="Bold" FontSize="13" HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Frame>
 
-        </CollectionView>
-
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

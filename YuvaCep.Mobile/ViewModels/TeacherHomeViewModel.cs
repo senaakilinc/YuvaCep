@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using YuvaCep.Mobile.Views;
 
 namespace YuvaCep.Mobile.ViewModels
 {
@@ -22,6 +23,10 @@ namespace YuvaCep.Mobile.ViewModels
 
         [ObservableProperty]
         private string greetingMessage;
+
+        [ObservableProperty] 
+        private bool isQuickMenuVisible;
+
 
         public ObservableCollection<dashboardItem> MenuItems { get; } = new();
 
@@ -60,6 +65,27 @@ namespace YuvaCep.Mobile.ViewModels
         }
 
         [RelayCommand]
+        private void ToggleQuickMenu()
+        {
+            IsQuickMenuVisible = !IsQuickMenuVisible;
+        }
+
+        [RelayCommand]
+        private async Task GoToMyAccount()
+        {
+            IsQuickMenuVisible = false;
+            await Shell.Current.GoToAsync(nameof(ParentProfilePage));
+        }
+
+        [RelayCommand]
+        private async Task GoToClassOptions()
+        {
+            IsQuickMenuVisible = false;
+            await Shell.Current.DisplayAlert("Bilgi", "Sınıf Seçenekleri Sayfası Yakında...", "Tamam");
+        }
+
+
+        [RelayCommand]
         private async Task NavigateAsync(string route)
         {
             if (string.IsNullOrEmpty(route))
@@ -85,7 +111,7 @@ namespace YuvaCep.Mobile.ViewModels
         }
 
         [RelayCommand]
-        private async Task LogoutAsync()
+        private async Task LogoutAsync()    
         {
             bool answer = await Shell.Current.DisplayAlert("Çıkış", "Hesabınızdan çıkış yapmak istiyor musunuz?", "Evet", "Hayır");
 

@@ -93,6 +93,9 @@
 		<MauiXaml Update="Views\ParentHomePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\ParentProfilePage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Views\Popups\BadgeWonPopup.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

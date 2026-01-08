@@ -119,7 +119,6 @@ namespace YuvaCep.Mobile.Services
             }
         }
 
-        // --- İYİLEŞTİRİLMİŞ DETAY METODU ---
         public async Task<StudentDetailDto> GetStudentDetailAsync(Guid id)
         {
             await AddAuthorizationHeaderAsync();
@@ -133,10 +132,7 @@ namespace YuvaCep.Mobile.Services
                 {
                     var jsonString = await response.Content.ReadAsStringAsync();
 
-                    // BU SATIR ÇOK ÖNEMLİ: Output penceresinde gelen veriyi göreceksin
-                    System.Diagnostics.Debug.WriteLine($"--------------------------------------------------");
                     System.Diagnostics.Debug.WriteLine($"DETAY JSON CEVABI: {jsonString}");
-                    System.Diagnostics.Debug.WriteLine($"--------------------------------------------------");
 
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     return JsonSerializer.Deserialize<StudentDetailDto>(jsonString, options);
@@ -153,13 +149,11 @@ namespace YuvaCep.Mobile.Services
             return null;
         }
 
-        // --- İYİLEŞTİRİLMİŞ GÜNCELLEME METODU ---
         public async Task<bool> UpdateStudentAsync(StudentUpdateDto model)
         {
             await AddAuthorizationHeaderAsync();
             try
             {
-                // Ne gönderdiğimizi görelim
                 System.Diagnostics.Debug.WriteLine($"GÜNCELLEME ID: {model.Id} | İSİM: {model.FirstName} {model.LastName}");
 
                 var response = await _httpClient.PutAsJsonAsync($"api/students/{model.Id}", model);
