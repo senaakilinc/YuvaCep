@@ -17,7 +17,8 @@
                          CornerRadius="0,0,60,60"
                          VerticalOptions="Fill"/>
 
-                <Grid ColumnDefinitions="*, Auto" Padding="25,50,25,0" VerticalOptions="Start">
+                <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="10" Padding="25,50,25,0" VerticalOptions="Start">
+
                     <VerticalStackLayout Grid.Column="0" Spacing="2">
                         <Label Text="Hoş Geldiniz," TextColor="#FFF7ED" FontSize="14" FontAttributes="Italic"/>
                         <Label Text="{Binding ParentName}" TextColor="White" FontAttributes="Bold" FontSize="22"/>
@@ -25,6 +26,14 @@
                     </VerticalStackLayout>
 
                     <Frame Grid.Column="1" Padding="0" HeightRequest="45" WidthRequest="45" CornerRadius="12" 
+                           BackgroundColor="#33FFFFFF" HasShadow="False" BorderColor="Transparent" VerticalOptions="Start">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleQuickMenuCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <Label Text="⚙️" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center" TextColor="White"/>
+                    </Frame>
+
+                    <Frame Grid.Column="2" Padding="0" HeightRequest="45" WidthRequest="45" CornerRadius="12" 
                            BackgroundColor="#33FFFFFF" HasShadow="False" BorderColor="Transparent" VerticalOptions="Start">
                         <Frame.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
@@ -89,6 +98,56 @@
 
         </Grid>
 
+        <Grid IsVisible="{Binding IsQuickMenuVisible}"
+              BackgroundColor="#CC000000"
+              ZIndex="100">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleQuickMenuCommand}"/>
+            </Grid.GestureRecognizers>
+
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
+
+                <Label Text="Hızlı İşlemler" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+
+                <HorizontalStackLayout Spacing="20">
+
+                    <Frame HeightRequest="140" WidthRequest="130" CornerRadius="20" BackgroundColor="White" HasShadow="False" Padding="10">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToMyAccountCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                            <Label Text="👤" FontSize="40" HorizontalOptions="Center"/>
+                            <Label Text="Hesap Bilgilerim"
+                                   TextColor="#374151"
+                                   FontAttributes="Bold"
+                                   FontSize="13"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame HeightRequest="140" WidthRequest="130" CornerRadius="20" BackgroundColor="White" HasShadow="False" Padding="10">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToChildInfoCommand}"/>
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                            <Label Text="📋" FontSize="40" HorizontalOptions="Center"/>
+                            <Label Text="Çocuğumun Bilgileri"
+                                   TextColor="#374151"
+                                   FontAttributes="Bold"
+                                   FontSize="13"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   LineBreakMode="WordWrap"
+                                   MaxLines="2"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+
         <Grid IsVisible="{Binding IsAddStudentVisible}" 
               BackgroundColor="#80000000" 
               ZIndex="99">
@@ -145,6 +204,6 @@
 
         <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" 
                            Color="#FF9F1C" HorizontalOptions="Center" VerticalOptions="Center"
-                           ZIndex="100"/>
+                           ZIndex="101"/>
     </Grid>
 </ContentPage>

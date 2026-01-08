@@ -8,6 +8,7 @@
         public string Gender { get; set; }
         public string TCIDNumber { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public string? PhotoBase64 { get; set; } 
+        public string? PhotoBase64 { get; set; }
+        public string? HealthNotes { get; set; }
     }
 }

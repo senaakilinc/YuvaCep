@@ -33,7 +33,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("ActivityChartDetailPage", typeof(ActivityChartDetailPage));
         Routing.RegisterRoute("StudentChartsListPage", typeof(StudentChartsListPage));
         Routing.RegisterRoute("StudentChartDetailPage", typeof(StudentChartDetailPage));
-
+        Routing.RegisterRoute(nameof(ParentProfilePage), typeof(ParentProfilePage));
 
     }
 }

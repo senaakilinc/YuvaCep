@@ -132,7 +132,6 @@ namespace YuvaCep.Mobile.Services
 
                 if (result == null) return new LoginResponse { IsSuccess = false, Message = "Sunucudan boş cevap döndü." };
 
-                // Kayıt başarılıysa otomatik giriş yapılmış gibi verileri kaydet
                 if (!string.IsNullOrEmpty(result.Token))
                 {
                     await SecureStorage.SetAsync("auth_token", result.Token);

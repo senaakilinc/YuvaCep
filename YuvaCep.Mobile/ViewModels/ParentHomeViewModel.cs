@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using YuvaCep.Mobile.Dtos;
 using YuvaCep.Mobile.Services;
+using YuvaCep.Mobile.Views;
 
 namespace YuvaCep.Mobile.ViewModels
 {
@@ -12,8 +13,12 @@ namespace YuvaCep.Mobile.ViewModels
 
         [ObservableProperty] private string parentName;
         [ObservableProperty] private string referenceCodeInput;
+
         [ObservableProperty] private bool isBusy;
+
         [ObservableProperty] private bool isAddStudentVisible;
+
+        [ObservableProperty] private bool isQuickMenuVisible;
 
         public ObservableCollection<ChildDto> MyChildren { get; } = new();
 
@@ -29,15 +34,60 @@ namespace YuvaCep.Mobile.ViewModels
             await RefreshChildrenAsync();
         }
 
+        // --- MEVCUT KODLAR ---
+        [ObservableProperty] private bool isRefreshing;
+
         [RelayCommand]
         private void ToggleAddStudent()
         {
             IsAddStudentVisible = !IsAddStudentVisible;
-            if (!IsAddStudentVisible)
+            if (!IsAddStudentVisible) ReferenceCodeInput = "";
+            if (IsAddStudentVisible) IsQuickMenuVisible = false;
+        }
+
+        [RelayCommand]
+        private void ToggleQuickMenu()
+        {
+            IsQuickMenuVisible = !IsQuickMenuVisible;
+            if (IsQuickMenuVisible) IsAddStudentVisible = false;
+        }
+
+        [RelayCommand]
+        private async Task GoToMyAccount()
+        {
+            IsQuickMenuVisible = false; 
+            await Shell.Current.GoToAsync(nameof(ParentProfilePage));
+        }
+
+        [RelayCommand]
+        private async Task GoToChildInfo()
+        {
+            IsQuickMenuVisible = false; 
+
+            if (MyChildren.Count == 0)
             {
-                ReferenceCodeInput = ""; 
+                await Shell.Current.DisplayAlert("Bilgi", "Henüz ekli bir öğrenci yok.", "Tamam");
+                return;
+            }
+
+            if (MyChildren.Count == 1)
+            {
+                var child = MyChildren.First();
+                await Shell.Current.GoToAsync($"StudentDetail_Route?id={child.Id}");
+            }
+            else
+            {
+                var childNames = MyChildren.Select(c => c.Name).ToArray();
+                string action = await Shell.Current.DisplayActionSheet("Hangi öğrencinin bilgileri?", "İptal", null, childNames);
+
+                var selectedChild = MyChildren.FirstOrDefault(c => c.Name == action);
+                if (selectedChild != null)
+                {
+                    await Shell.Current.GoToAsync($"StudentDetail_Route?id={selectedChild.Id}");
+                }
             }
         }
+
 
         [RelayCommand]
         private async Task RefreshChildrenAsync()
@@ -57,7 +107,6 @@ namespace YuvaCep.Mobile.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"Hata: {ex.Message}");
             }
-
             finally { IsBusy = false; }
         }
 
@@ -78,7 +127,7 @@ namespace YuvaCep.Mobile.ViewModels
             {
                 await Shell.Current.DisplayAlert("Harika!", "Çocuğunuz başarıyla eklendi.", "Tamam");
                 ReferenceCodeInput = "";
-                IsAddStudentVisible = false; 
+                IsAddStudentVisible = false;
                 await RefreshChildrenAsync();
             }
             else

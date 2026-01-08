@@ -258,24 +258,35 @@ namespace YuvaCep.Api.Controllers
             return Ok(dto);
         }
 
-        [Authorize(Roles = "Teacher")]
+        // HEM ÖĞRETMEN HEM VELİ GİREBİLİR
+        [Authorize(Roles = "Teacher,Parent")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] StudentUpdateDto model)
         {
             var student = await _context.Students.FindAsync(id);
             if (student == null) return NotFound();
 
-            student.Name = model.FirstName;
-            student.Surname = model.LastName;
-            student.Gender = model.Gender;
-            student.TCIDNumber = model.TCIDNumber;
-            student.DateOfBirth = model.DateOfBirth;
+            // Kullanıcının rolünü bulur
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            if (!string.IsNullOrEmpty(model.PhotoBase64))
+            if (role == "Teacher")
             {
-                // Burada Base64'ü dosyaya çevirip kaydetme kodu olmalı
-                // Şimdilik DB'ye string olarak veya URL olarak bastığını varsayıyorum
-                // student.PhotoUrl = SaveImage(model.PhotoBase64); 
+                // ÖĞRETMEN: İsim, Soyisim, Cinsiyet, Fotoğraf güncelleyebilir
+                student.Name = model.FirstName;
+                student.Surname = model.LastName;
+                student.Gender = model.Gender;
+
+                if (!string.IsNullOrEmpty(model.PhotoBase64))
+                {
+                    // student.ProfileImage = model.PhotoBase64; 
+                }
+            }
+            else if (role == "Parent")
+            {
+                // PARENT: TC, Doğum Tarihi, Sağlık Notlarını güncelleyebilir
+                student.TCIDNumber = model.TCIDNumber;
+                student.DateOfBirth = model.DateOfBirth;
+                student.HealthNotes = model.HealthNotes;
             }
 
             await _context.SaveChangesAsync();

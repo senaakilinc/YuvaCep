@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:YuvaCep.Mobile.ViewModels"
              x:Class="YuvaCep.Mobile.Views.StudentDetailPage"
+             x:DataType="vm:StudentDetailViewModel"
              Title="Öğrenci Detayı"
              BackgroundColor="#F3F4F6">
 
@@ -17,7 +19,9 @@
                         </Image.GestureRecognizers>
                     </Image>
                 </Frame>
-                <Label Text="Fotoğrafı değiştirmek için dokunun" FontSize="10" TextColor="Gray" HorizontalOptions="Center"/>
+                <Label Text="Fotoğrafı değiştirmek için dokunun" FontSize="10" 
+                       TextColor="Gray" HorizontalOptions="Center"
+                       IsVisible="{Binding IsTeacher}"/>
             </VerticalStackLayout>
 
             <Grid ColumnDefinitions="*, Auto" HorizontalOptions="Center">
@@ -42,7 +46,8 @@
                              HeightRequest="25" WidthRequest="25" Margin="10,0,0,0"
                              Command="{Binding ToggleNameEditCommand}"
                              VerticalOptions="Center"
-                             BackgroundColor="Transparent"/>
+                             BackgroundColor="Transparent"
+                             IsVisible="{Binding IsTeacher}"/>
             </Grid>
 
             <Label Text="{Binding ParentName, StringFormat='Veli: {0}'}" 
@@ -54,7 +59,7 @@
 
                     <VerticalStackLayout>
                         <Label Text="Cinsiyet" FontSize="12" TextColor="Gray"/>
-                        <Picker SelectedItem="{Binding Gender}" Title="Seçiniz">
+                        <Picker SelectedItem="{Binding Gender}" Title="Seçiniz" IsEnabled="{Binding IsTeacher}">
                             <Picker.ItemsSource>
                                 <x:Array Type="{x:Type x:String}">
                                     <x:String>Erkek</x:String>
@@ -68,22 +73,30 @@
 
                     <VerticalStackLayout>
                         <Label Text="TC Kimlik Numarası" FontSize="12" TextColor="Gray"/>
-                        <Entry Text="{Binding TCIDNumber}" Keyboard="Numeric" Placeholder="TC Giriniz"/>
+                        <Entry Text="{Binding TCIDNumber}" 
+                               Keyboard="Numeric" 
+                               Placeholder="TC Giriniz"
+                               IsEnabled="{Binding IsParent}"
+                               TextColor="#1F2937"/>
                     </VerticalStackLayout>
 
                     <BoxView HeightRequest="1" Color="#F0F0F0"/>
 
                     <VerticalStackLayout>
                         <Label Text="Doğum Tarihi" FontSize="12" TextColor="Gray"/>
-                        <DatePicker Date="{Binding DateOfBirth}"/>
+                        <DatePicker Date="{Binding DateOfBirth}"
+                                    IsEnabled="{Binding IsParent}"
+                                    TextColor="#1F2937"/>
                     </VerticalStackLayout>
 
                     <BoxView HeightRequest="1" Color="#F0F0F0"/>
 
                     <VerticalStackLayout>
                         <Label Text="Sağlık Notları" FontSize="12" TextColor="#A78BFA" FontAttributes="Bold"/>
-                        <Editor Text="{Binding DisplayHealthNotes}" 
-                                IsReadOnly="True" 
+
+                        <Editor Text="{Binding HealthNotes}" 
+                                Placeholder="{Binding HealthNotesPlaceholder}"
+                                IsEnabled="{Binding IsParent}"
                                 AutoSize="TextChanges" 
                                 BackgroundColor="#F9F9F9" 
                                 TextColor="#1F2937"/>

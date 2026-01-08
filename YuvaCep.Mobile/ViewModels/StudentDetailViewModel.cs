@@ -10,6 +10,9 @@ namespace YuvaCep.Mobile.ViewModels
         private readonly StudentService _service;
         private Guid _realStudentId;
 
+        public bool IsTeacher => Preferences.Get("UserRole", "") == "Teacher";
+        public bool IsParent => !IsTeacher;
+
         [ObservableProperty] string firstName;
         [ObservableProperty] string lastName;
         [ObservableProperty] string parentName;
@@ -17,9 +20,10 @@ namespace YuvaCep.Mobile.ViewModels
         [ObservableProperty] string tCIDNumber;
         [ObservableProperty] DateTime dateOfBirth = DateTime.Now;
         [ObservableProperty] string healthNotes;
-        [ObservableProperty] string displayHealthNotes;
-        [ObservableProperty] string photoUrl;
+
         [ObservableProperty] ImageSource profileImage;
+        [ObservableProperty] string _base64Photo;
+        [ObservableProperty] string healthNotesPlaceholder;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotNameEditing))]
@@ -68,15 +72,20 @@ namespace YuvaCep.Mobile.ViewModels
                     ParentName = data.ParentName;
                     TCIDNumber = data.TCIDNumber;
                     DateOfBirth = data.DateOfBirth ?? DateTime.Now;
-
                     HealthNotes = data.HealthNotes;
-                    DisplayHealthNotes = string.IsNullOrEmpty(HealthNotes) ? "Not bulunmuyor." : HealthNotes;
+
+                    if (IsTeacher)
+                    {
+                        HealthNotesPlaceholder = string.IsNullOrEmpty(data.HealthNotes)
+                            ? "Henüz eklenen sağlık notu yok."
+                            : "";
+                    }
+                    else
+                    {
+                        HealthNotesPlaceholder = "Alerji, ilaç kullanımı vb. durumları giriniz...";
+                    }
 
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Hata: {ex.Message}");
             }
             finally
             {
@@ -85,11 +94,18 @@ namespace YuvaCep.Mobile.ViewModels
         }
 
         [RelayCommand]
-        void ToggleNameEdit() => IsNameEditing = !IsNameEditing;
+        void ToggleNameEdit()
+        {
+            // Sadece öğretmen isme tıklayınca edit modunu açabilir
+            if (IsTeacher) IsNameEditing = !IsNameEditing;
+        }
 
         [RelayCommand]
         async Task ChangePhoto()
         {
+            // Sadece öğretmen fotoğraf değiştirebilir
+            if (!IsTeacher) return;
+
             try
             {
                 var photo = await MediaPicker.PickPhotoAsync();
@@ -97,6 +113,11 @@ namespace YuvaCep.Mobile.ViewModels
                 {
                     var stream = await photo.OpenReadAsync();
                     ProfileImage = ImageSource.FromStream(() => stream);
+
+                    using var memoryStream = new MemoryStream();
+                    using var fileStream = await photo.OpenReadAsync();
+                    await fileStream.CopyToAsync(memoryStream);
+                    _base64Photo = Convert.ToBase64String(memoryStream.ToArray());
                 }
             }
             catch { }
@@ -116,6 +137,8 @@ namespace YuvaCep.Mobile.ViewModels
                 Gender = Gender,
                 TCIDNumber = TCIDNumber,
                 DateOfBirth = DateOfBirth,
+                HealthNotes = HealthNotes,
+                PhotoBase64 = _base64Photo
             };
 
             bool success = await _service.UpdateStudentAsync(updateModel);
